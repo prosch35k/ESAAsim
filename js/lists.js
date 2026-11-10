@@ -130,13 +130,7 @@ const ACT={
  'HS':{L:p=>{p.hold=!p.hold;log(p.cs+(p.hold?' hold short':' continue'))}}};
 function dsqMove(p,d){const t=planes.filter(q=>q.kind==='DEP'&&q.sts==='TXO').sort((a,b)=>a.txoT-b.txoT),i=t.indexOf(p),q=t[i+d];if(!q)return;const x=p.txoT;p.txoT=q.txoT;q.txoT=x}
 function nm(a,b){const r=Math.PI/180,dl=(b[1]-a[1])*r*Math.cos((a[0]+b[0])/2*r),dp=(b[0]-a[0])*r;return Math.hypot(dl,dp)*3440.065}
-function fplRows(p){const rows=[],GGp=[57.6628,12.2798];
- if(p.kind!=='DEP'||!p.sid){return[[p.adep,'DCT','',p.ades,'']]}
- const ev=/^\d{4}$/.test(p.eobt||'')?(+p.eobt.slice(0,2))*3600+(+p.eobt.slice(2))*60:T0+T;let t=ev+600;
- const fx=(SIDF[p.rwy]||{})[p.sid]||[];let prev=['ESGG',GGp];const tas=Math.max(200,+p.tas||440);
- const add=(to,pos,aw,spd,cm)=>{t+=nm(prev[1],pos)/spd*3600;rows.push([prev[0],aw,cm,to,hhmm(t).replace(/(..)(..)/,'$1:$2')]);prev=[to,pos]};
- fx.forEach(f=>{if(FXP[f])add(f,FXP[f],p.sid,230,'ok')});
- const ap=APP[p.ades];if(ap)add(p.ades,ap,'DCT',tas,'');else rows.push([prev[0],'DCT','',p.ades,'']);return rows}
+function fplRows(p,route){return expandRoute({kind:p.kind,rwy:p.rwy,route:route!=null?route:(p.route_||genRoute(p)),adep:p.adep,ades:p.ades,sid:p.kind==='DEP'?p.sid:'',eobt:p.eobt,tas:p.tas})}
 function genRoute(p){return p.kind==='DEP'?(p.copx?p.copx+' DCT ':'DCT ')+p.ades:p.adep+' DCT ESGG'}
 function fplRoute(p){return p.kind==='DEP'?(p.sid?['ESGG',p.sid,p.copx,p.ades]:['ESGG','DCT',p.ades]):[p.adep,'DCT','ESGG']}
 function openFpl(p){if(!p)return;if(fplEl)fplEl.remove();const e=document.createElement('div');e.className='fpl';fplEl=e;e.od=p.ades;
@@ -153,9 +147,11 @@ function openFpl(p){if(!p)return;if(fplEl)fplEl.remove();const e=document.create
  <div class="bt"><button id="f_ok">OK</button><button id="f_c">Cancel</button></div></div>`;
  $('map').appendChild(e);e.style.zIndex=++zTop+50;
  const th=e.querySelector('.th');let dr=null;th.onpointerdown=ev=>{if(ev.target.closest('span')||ev.button!==2)return;th.setPointerCapture(ev.pointerId);dr=[ev.clientX-e.offsetLeft,ev.clientY-e.offsetTop]};th.onpointermove=ev=>{if(dr){e.style.left=Math.max(0,ev.clientX-dr[0])+'px';e.style.top=Math.max(0,ev.clientY-dr[1])+'px'}};th.onpointerup=()=>{dr=null};
+ const tb=e.querySelector('.wp tbody'),rr=()=>fplRows({kind:p.kind,rwy:p.rwy,adep:$('f_o').value.trim().toUpperCase(),ades:$('f_d').value.trim().toUpperCase(),sid:p.kind==='DEP'?(sidFromFirst(p.rwy,$('f_r').value,'ESGG')||{})[0]||p.sid:'',eobt:p.eobt,tas:$('f_t').value},$('f_r').value);
+ $('f_r').oninput=$('f_o').oninput=$('f_d').oninput=$('f_t').oninput=()=>{tb.innerHTML=rr().map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join('')};
  const close=()=>{e.remove();fplEl=null};$('fx').onclick=close;$('f_c').onclick=close;
  $('f_ok').onclick=()=>{p.cs=$('f_cs').value.trim().toUpperCase()||p.cs;p.adep=$('f_o').value.trim().toUpperCase();p.ades=$('f_d').value.trim().toUpperCase();p.alt_=$('f_a').value.trim().toUpperCase();p.tas=$('f_t').value;p.sq=$('f_sq').value||p.sq;const od=e.od,rt=$('f_r').value;
-  if(p.kind==='DEP'){if(rt===p.route_&&od!==p.ades){const s_=bestSid(p.rwy,p.ades,p.type);if(s_){p.sid=s_[0];p.copx=s_[1]}p.route_=genRoute(p)}else{p.route_=rt;const s_=sidFromRoute(p.rwy,rt);if(s_){p.sid=s_[0];p.copx=s_[1]}}}else p.route_=rt;
+  if(p.kind==='DEP'){if(rt===p.route_&&od!==p.ades){const s_=bestSid(p.rwy,p.ades,p.type);if(s_){p.sid=s_[0];p.copx=s_[1]}p.route_=genRoute(p)}else{p.route_=rt;const s_=sidFromFirst(p.rwy,rt,'ESGG')||sidFromRoute(p.rwy,rt);if(s_){p.sid=s_[0];p.copx=s_[1]}}}else p.route_=rt;
   p.remarks=$('f_rm').value;
   if(p.kind==='DEP'){const a=parseInt($('f_al').value);if(a)p.xfl=a<=5000?'A'+String(Math.round(a/100)).padStart(2,'0'):String(Math.round(a/100)).padStart(3,'0')}close();list()}}
 let lastSel=null;
