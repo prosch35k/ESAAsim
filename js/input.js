@@ -4,7 +4,7 @@ let drag=null;
 cv.onpointerdown=e=>{if(e.button!==0&&e.button!==2)return;cv.setPointerCapture(e.pointerId);const lp=pickLabel(e.offsetX,e.offsetY);drag={b:e.button,x:e.offsetX,y:e.offsetY,px:e.offsetX,py:e.offsetY,cx:cam.x,cy:cam.y,m:false,lp,lo:lp?[...lp.lo]:null}};
 cv.onpointermove=e=>{if(!drag){hovP=pickLabel(e.offsetX,e.offsetY);return}hovP=drag.lp||null;const dx=e.offsetX-drag.x,dy=e.offsetY-drag.y;if(Math.hypot(dx,dy)>4){if(drag.lp?drag.b===0:drag.b===2)drag.m=true;else drag.mv=true}if(drag.m&&drag.lp){drag.lp.lo=[drag.lo[0]+dx,drag.lo[1]+dy];if(sel!==drag.lp){sel=drag.lp;list()}}else if(drag.m){const ux=e.offsetX-drag.px,uy=e.offsetY-drag.py,w=inv(W/2-ux,H/2-uy);cam.x=w[0];cam.y=w[1]}drag.px=e.offsetX;drag.py=e.offsetY};
 cv.onpointerup=e=>{if(drag&&drag.b===0&&!drag.mv&&!drag.m){const p=drag.lp||pick(e.offsetX,e.offsetY),w=inv(e.offsetX,e.offsetY);
- if(p){sel=p;if(drag.lp){const r=p._lr,ls=labelLines(p),k=Math.floor((e.offsetY-r[1]-4)/15),ci=ls.findIndex(t=>t.includes(p.cs));if(k===ci)assumeMenu(p,e)}}else if(mode==2){const n=mkPlane('DEP',w[0],w[1],rh,0,'');log(n.cs+' placed')}else if(mode==1&&sel)addTo(sel,w);list()}drag=null};
+ if(p){sel=p;if(drag.lp){const hit=r=>r&&e.offsetX>=r[0]&&e.offsetX<=r[0]+r[2]&&e.offsetY>=r[1]&&e.offsetY<=r[1]+r[3];if(hit(p._cs))assumeMenu(p,e);else if(hit(p._sp)&&!p.owner)editRmk(p)}}else if(mode==2){const n=mkPlane('DEP',w[0],w[1],rh,0,'');log(n.cs+' placed')}else if(mode==1&&sel)addTo(sel,w);list()}drag=null};
 cv.oncontextmenu=e=>e.preventDefault();addEventListener('contextmenu',e=>{if(!/INPUT|TEXTAREA/.test((e.target||{}).tagName||''))e.preventDefault()});
 $('side').addEventListener('click',e=>{const b=e.target.closest('button,select');if(b&&sel&&sel.owner&&['stb','clrnc','taxi','tostd','hold','cont','clr','to','del'].some(i=>b.id===i||b.parentElement.id===i)){e.stopPropagation();e.preventDefault();log(sel.cs+' is controlled by '+sel.owner)}},true);
 cv.onpointerleave=()=>{hovP=null};
@@ -45,3 +45,9 @@ $('spar').onclick=()=>{const th=rwyArr=='03'?[rw[0],rw[1]]:[rw[2],rw[3]],h=rwyAr
  const p=mkPlane('ARR',th[0]-Math.sin(r_)*5500,th[1]-Math.cos(r_)*5500,h,135,rnd(D.stands)[0]);p.th=th;p.app=true;log(p.cs+' on final RWY '+rwyArr);list()};
 $('stsel').innerHTML=D.stands.map((s,i)=>`<option value="${i}">Stand ${s[0]}</option>`).join('');
 $('dest').innerHTML=D.dest.map((d,i)=>`<option value="${i}">${d[0]}</option>`).join('');
+
+function editRmk(p){if(p.edRmk)return;const r=p._sp;if(!r)return;p.edRmk=true;const i=document.createElement('input');i.id='rmkin';i.value=p.rmk||'';i.maxLength=12;
+ i.style.cssText=`position:absolute;z-index:9;left:${r[0]-2}px;top:${r[1]-1}px;width:${Math.max(86,r[2]+12)}px;height:${r[3]}px;box-sizing:border-box;font:500 14px "SMR ESGG","DejaVu Sans Mono",Menlo,Consolas,monospace;padding:0 2px;background:rgb(108,108,111);color:#fff;border:1px solid #000;border-radius:0;outline:none;text-transform:uppercase`;
+ $('map').appendChild(i);i.focus();i.select();let done=false;
+ const fin=ok=>{if(done)return;done=true;if(ok){p.rmk=i.value.trim().toUpperCase().slice(0,12);if(sel===p)$('rmk').value=p.rmk;renderLists()}p.edRmk=false;i.remove()};
+ i.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')fin(true);else if(e.key==='Escape')fin(false)};i.onkeyup=e=>e.stopPropagation();i.onblur=()=>fin(true);i.onpointerdown=e=>e.stopPropagation()}
