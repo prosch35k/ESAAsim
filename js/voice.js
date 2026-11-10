@@ -54,6 +54,7 @@ function parseLocal(text){let s=norm(text);const f=findCs(s);s=f.s;const p=f.p||
  else if(c.sq)c.act='squawk';
  else if(/hold (position|short)|\bstop\b/.test(b))c.act='hold';
  else if(/continue|resume|proceed/.test(b))c.act='continue';
+ const dm=/\b(north|south)\b/.exec(b);if(dm)c.dir=dm[1];if(p&&p.pbAsk&&!c.act&&c.dir)c.act='pushback';
  return c}
 function pickHP(p,c){const r=c.rwy||p.rwy||rwyDep;let L=D.dest.filter(d=>d[3]==1&&d[0].split(' ')[1]===c.hp);if(!L.length)return null;
  const ok=d=>{const n=d[0].replace(/\s/g,'');return n.includes('RWY'+r)||n.includes('RWY03-21')};let R=L.filter(ok);if(!R.length)R=L;
@@ -66,8 +67,11 @@ function exec(c){const p=c.p;
  const cs=p.cs,rn=a=>a&&a.length?' via '+a.join(' '):'';let t=null;const air=p.air||p.app||p.land;
  switch(c.act){
  case'startup':if(p.kind!=='DEP'||air){t='Unable, '+cs;break}t='Startup approved, '+cs;break;
- case'pushback':if(p.kind!=='DEP'||air){t='Unable, '+cs;break}t='Pushback approved, '+cs;break;
- case'taxi':{if(air||p.to){t='Unable, we are not on the ground taxiing, '+cs;break}
+ case'pushback':if(p.kind!=='DEP'||air||p.route.length||p.spd>0||p.pb){t='Unable, '+cs;break}
+  if(p.pushed){t='Negative, we have already pushed back, '+cs;break}
+  if(!c.dir){p.pbAsk=true;t='Which direction do we face, '+cs+'?';break}
+  startPush(p,c.dir);t='Pushback and start up approved, facing '+c.dir+', '+cs;break;
+ case'taxi':{if(p.pb){t='Unable, we are being pushed back, '+cs;break}if(air||p.to){t='Unable, we are not on the ground taxiing, '+cs;break}
   let d=null,what='';if(c.stand){d=D.dest.find(x=>x[3]==0&&x[0]==='Stand '+c.stand);what='stand '+c.stand;}
   else if(c.hp){d=pickHP(p,c);if(d)what='holding point '+(c.hpDef?'':c.hp+(/CAT3/.test(d[0])?' CAT 3':'')+' ')+'runway '+(d[0].match(/RWY ?(\d\d(?:-\d\d)?)/)||[])[1]}
   if(!d){t='Say again destination, '+cs;break}

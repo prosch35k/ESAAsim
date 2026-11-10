@@ -6,7 +6,7 @@ const mk=a=>a.map(v=>v/10);
 const regs=D.r.map(([c,f])=>{const p=new Path2D(),a=mk(f);p.moveTo(a[0],a[1]);for(let i=2;i<a.length;i+=2)p.lineTo(a[i],a[i+1]);p.closePath();return[c,p]});
 const lns=Object.entries(D.l).map(([c,ch])=>{const p=new Path2D();ch.forEach(f=>{const a=mk(f);p.moveTo(a[0],a[1]);for(let i=2;i<a.length;i+=2)p.lineTo(a[i],a[i+1])});return[c,p]});
 const rw=D.rw,rdx=rw[2]-rw[0],rdy=rw[3]-rw[1],rl=Math.hypot(rdx,rdy),rh=Math.atan2(rdx,rdy)*180/Math.PI;
-const cam={x:0,y:0,s:.2};let W=0,H=0,mode=0,sim=1,sel=null,T=0,planes=[],nid=1,rwyDep='21',rwyArr='21',apAct={dep:true,arr:true};
+const cam={x:0,y:0,s:.2};let W=0,H=0,mode=0,sim=0,sel=null,T=0,planes=[],nid=1,rwyDep='21',rwyArr='21',apAct={dep:true,arr:true};
 const T0=12*3600;
 function fit(){const b=cv.parentElement.getBoundingClientRect(),d=devicePixelRatio||1;W=b.width;H=b.height;cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0)}
 function tr(x,y){x-=cam.x;y-=cam.y;return[W/2+cam.s*(cr*x+sr*y),H/2+cam.s*(sr*x-cr*y)]}

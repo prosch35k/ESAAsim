@@ -10,7 +10,8 @@ $('side').addEventListener('click',e=>{const b=e.target.closest('button,select')
 cv.onpointerleave=()=>{hovP=null};
 cv.onwheel=e=>{e.preventDefault();cam.s*=e.deltaY<0?1.15:1/1.15};
 $('modes').onclick=e=>{if(e.target.dataset.m){mode=+e.target.dataset.m;[...e.currentTarget.children].forEach(b=>b.classList.toggle('on',b===e.target))}};
-$('spd').onclick=e=>{if(e.target.dataset.s!=null){sim=+e.target.dataset.s;[...e.currentTarget.children].forEach(b=>b.classList.toggle('on',b===e.target))}};
+function setSim(s){sim=s;document.querySelectorAll('#spd button,#sbs button').forEach(b=>b.classList.toggle('on',+b.dataset.s===s));list()}
+$('spd').onclick=$('sbs').onclick=e=>{if(e.target.dataset.s!=null)setSim(+e.target.dataset.s)};
 $('lsw').onclick=e=>{const n=e.target.dataset.l;if(n){WIN[n].vis=!WIN[n].vis;WIN[n].el.style.display=WIN[n].vis?'':'none';e.target.classList.toggle('on',WIN[n].vis)}};
 const STATES=[['','none'],['FRQ','FRQ'],['S/U','S/U'],['S/P','S/P'],['TXO','TXO'],['xLU','xLU'],['xTO','xTO'],['TXI','TXI'],['PRK','PRK']];
 $('stb').innerHTML=STATES.map(s=>`<button data-st="${s[0]}">${s[1]}</button>`).join('');

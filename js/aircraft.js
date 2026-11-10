@@ -31,6 +31,7 @@ function pickExit(p){const nm=p.rwy==='03'?'EXIT 03 E':(Math.random()<.5?'EXIT 2
 function alongTh(p){const h=p.hdg*Math.PI/180;return(p.x-p.th[0])*Math.sin(h)+(p.y-p.th[1])*Math.cos(h)}
 function drop(p){planes=planes.filter(q=>q!==p);if(sel===p)sel=null}
 function step(dt){for(const p of planes.slice()){if(p.xfer){p.xt-=dt;if(p.xt<=0){const c=CTRL.find(c_=>c_.id===p.nx);p.xfer=false;if(c&&c.on){p.own=false;p.owner=c.id;p.accT=T;p.nx='';p.nxm='';log(c.cs+' accepted '+p.cs)}else{p.nx='';log('handoff of '+p.cs+' failed')}}}let tg=0;
+ if(p.pb){pushStep(p,dt);continue}
  if(p.air){p.spd=Math.min(165,p.spd+3*dt);p.airT+=dt;mv(p,dt);if(p.airT>90)drop(p);continue}
  if(p.to){p.spd+=4*dt;mv(p,dt);if(p.spd>=140){p.to=false;p.air=true;p.airT=0;log(p.cs+' airborne')}continue}
  if(p.app){p.spd+=Math.max(-2*dt,Math.min(2*dt,135-p.spd));mv(p,dt);if(alongTh(p)>=0){p.app=false;p.land=true;p.vx=pickExit(p);p.da=0;log(p.cs+' touchdown')}continue}
@@ -42,3 +43,16 @@ function step(dt){for(const p of planes.slice()){if(p.xfer){p.xt-=dt;if(p.xt<=0)
  p.spd+=Math.max(-(p.land?(p.da||5):3)*dt,Math.min(2*dt,tg-p.spd));if(p.spd<0)p.spd=0;
  if(!p.route.length&&p.pend&&!p.land&&p.spd<3){p.pend=null}
  mv(p,dt)}}
+
+/* ---------- pushback: reverse at 5 kt up to the apron centreline (AP/* edges), then turn to face north/south (screen right/left) ---------- */
+const SCR_RIGHT=(Math.atan2(cr,sr)*180/Math.PI+360)%360;
+function startPush(p,dir){const h=p.hdg*Math.PI/180,rx=-Math.sin(h),ry=-Math.cos(h);let best=null;
+ NE.forEach(e=>{if(!/^AP\//.test(e.n||''))return;for(let k=1;k<e.pts.length;k++){const P=e.pts[k-1],Q=e.pts[k],ex=Q[0]-P[0],ey=Q[1]-P[1],den=rx*ey-ry*ex;if(Math.abs(den)<1e-6)continue;
+  const t=((P[0]-p.x)*ey-(P[1]-p.y)*ex)/den,u=((P[0]-p.x)*ry-(P[1]-p.y)*rx)/den;if(t>3&&t<250&&u>=0&&u<=1&&(!best||t<best.t))best={t,ex,ey}}});
+ let tx,ty,eh;if(best){tx=p.x+rx*best.t;ty=p.y+ry*best.t;eh=Math.atan2(best.ex,best.ey)*180/Math.PI}else{tx=p.x+rx*60;ty=p.y+ry*60;eh=SCR_RIGHT}
+ const north=nrm(eh-SCR_RIGHT),face=Math.abs(north)<=90?(eh+360)%360:(eh+180)%360,fh=dir==='north'?face:(face+180)%360;
+ p.pb={tx,ty,fh,ph:0};p.route=[];p.last=null;p.pend=null;p.hold=false;p.vhold=false;p.pbAsk=false;p.pushed=true}
+function pushStep(p,dt){const b=p.pb;
+ if(b.ph===0){const m=5*.5144*dt,dx=b.tx-p.x,dy=b.ty-p.y,d=Math.hypot(dx,dy);p.spd=5;
+  if(d<=m){p.x=b.tx;p.y=b.ty;b.ph=1;p.spd=0}else{const h=p.hdg*Math.PI/180;p.x-=Math.sin(h)*m;p.y-=Math.cos(h)*m}}
+ else{const df=nrm(b.fh-p.hdg),st=8*dt;if(Math.abs(df)<=st){p.hdg=b.fh;p.pb=null;p.spd=0;log(p.cs+' pushback complete')}else p.hdg=(p.hdg+Math.sign(df)*st+360)%360}}
