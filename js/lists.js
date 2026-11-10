@@ -165,3 +165,20 @@ function list(){$('ac').innerHTML=planes.map(p=>`<div data-id="${p.id}" class="$
  $('clrnc').classList.toggle('on',!!(sel&&sel.clr));[...$('stb').children].forEach(b=>b.disabled=!!sel&&(sel.kind==='DEP'?(b.dataset.st==='TXI'||b.dataset.st==='PRK'):(sel.app||!(b.dataset.st==='TXI'||b.dataset.st==='PRK'))));
  if(sel!==lastSel){lastSel=sel;$('rmk').value=sel?sel.rmk:''}}
 $('ac').onclick=e=>{const id=e.target.dataset.id;if(id){sel=planes.find(p=>p.id==id);list()}};
+
+/* ---------- radar tag callsign menu (EuroScope-style, dark green) ---------- */
+function tagMenu(p,e){closeAp();closeMenu();const m=document.createElement('div');m.className='tm';apEl=m;
+ const lock=!!p.owner,nx=p.xfer?p.nx:nextOf(p),on=CTRL.filter(c=>c.on),mine=p.own&&!p.xfer,box=boxAt(e);
+ const items=[['assume','Assume',!lock&&(p.xfer||!p.own)],['trans','Trans '+(p.own&&nx?nx:'---'),!lock&&mine&&!!nx],['man','Man Trf',!lock&&mine&&on.length>0],['free','Free',!lock&&mine],['fpl','FPL',!lock],['stand','Stand',!lock&&p.kind==='ARR']];
+ m.innerHTML=`<div class="tt">${p.cs}</div><div class="tsb${lock?' dis':''}" data-a="sts"><span>${p.sts||'---'}</span><i>\u25be</i></div><div class="tsep">- - - - - - - - - - - -</div>`+items.map(([a,l,en])=>`<div class="ti${en?'':' dis'}" data-a="${a}">${l}</div>`).join('');
+ m.onclick=ev=>{const t=ev.target.closest('[data-a]');if(!t||t.classList.contains('dis'))return;const a=t.dataset.a;
+  if(a==='sts'){const it=STSL.filter(([l])=>p.kind==='ARR'?(!p.app&&(l==='TXI'||l==='PRK')):(l!=='TXI'&&l!=='PRK')).map(([l,v])=>[l,v]);if(p.kind==='ARR'&&p.app)return;apList(box,'STS',it,p.sts||'',v=>{setSts(p,v);list()},true);return}
+  closeAp();
+  if(a==='assume'){if(p.xfer){p.xfer=false;p.nx='';log(p.cs+' transfer cancelled')}else assume(p)}
+  else if(a==='trans')startXfer(p,nx);
+  else if(a==='man')apList(box,'Transfer to',on.map(c=>[`<span>${c.id}</span><span>${c.cs}</span>`,c.id]),null,t2=>{startXfer(p,t2);list()},true,null,'cm');
+  else if(a==='free')assume(p);
+  else if(a==='fpl')openFpl(p);
+  else if(a==='stand')stdMenu(p,e);
+  list()};
+ placeAt(m,e.clientX+4,e.clientY)}
