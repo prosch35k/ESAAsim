@@ -62,12 +62,13 @@ let clEl=null,apEl=null;
 function closeAp(){if(apEl){apEl.remove();apEl=null}}
 addEventListener('pointerdown',e=>{if(apEl&&!apEl.contains(e.target))closeAp()},true);
 function placeAt(el,x,y){document.body.appendChild(el);const r=el.getBoundingClientRect();el.style.left=Math.max(0,Math.min(x,innerWidth-r.width-4))+'px';el.style.top=Math.max(0,Math.min(y,innerHeight-r.height-4))+'px'}
+function liveBox(b){if(b&&b.isConnected===false&&b.dataset&&b.dataset.c){const tr=b._tr,t=tr&&document.querySelector(`.win tr[data-id="${tr}"] td[data-c="${b.dataset.c}"]`);if(t)return t}return b}
 function apList(box,title,items,cur,cb,grey,focus,cls){closeAp();const m=document.createElement('div');m.className='ap'+(grey?' gr':'')+(cls?' '+cls:'');apEl=m;m.innerHTML=`<div class="at">${title}</div><div class="al">${items.map(([lb,v])=>`<div class="ai${v===cur?' cur':''}" data-v="${v}">${lb}</div>`).join('')}</div>`;
- m.onclick=e=>{const it=e.target.closest('.ai');if(it){closeAp();cb(it.dataset.v)}};const r=box.getBoundingClientRect();placeAt(m,r.left+4,r.top);const c=m.querySelector('.cur')||(focus&&[...m.querySelectorAll('.ai')].find(x=>x.dataset.v===focus));if(c)c.scrollIntoView({block:'center'})}
+ m.onclick=e=>{const it=e.target.closest('.ai');if(it){closeAp();cb(it.dataset.v)}};const r=liveBox(box).getBoundingClientRect();placeAt(m,r.left+4,r.top);const c=m.querySelector('.cur')||(focus&&[...m.querySelectorAll('.ai')].find(x=>x.dataset.v===focus));if(c)c.scrollIntoView({block:'center'})}
 function apKeypad(box,p,val,cb,gen){closeAp();const m=document.createElement('div');m.className='ap kp';apEl=m;let v=val||'';
  const draw=()=>{m.innerHTML=`<div class="at">${p.cs}</div><div class="ab" id="k_s">SSR</div><div class="ab" id="k_g">Get SSR</div><div class="kd">${v}</div><div class="kg">${[1,2,3,4,5,6,7,8,9,'C',0,'Ok'].map(k=>`<div class="kb${(k===8||k===9)?' dis':''}" data-k="${k}">${k}</div>`).join('')}</div>`;
   m.querySelector('#k_g').onclick=()=>{v=gen();draw()};m.querySelectorAll('.kb').forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(k==='C')v='';else if(k==='Ok'){closeAp();cb(v)}else if(!b.classList.contains('dis')&&v.length<4)v+=k;draw()})};
- draw();const r=box.getBoundingClientRect();placeAt(m,r.left-40,r.top-30)}
+ draw();const r=liveBox(box).getBoundingClientRect();placeAt(m,r.left-40,r.top-30)}
 const CFLOPT=['080','070','060','050','045','040','035','030','025','020'];
 const XFLOPT=[];for(let f=400;f>=100;f-=10)XFLOPT.push(String(f));['090','080','070','060','050','045','040','035','030','025','020'].forEach(v=>XFLOPT.push(v));
 const optAlt=a=>a.map(v=>[fmtAlt(v),v]);
@@ -105,7 +106,7 @@ function setSid(p,s_){p.sid=s_[0];p.copx=s_[1];p.ahdg='';if(p.route_)p.route_=ge
 function sidForFix(p,fix){const L=sidList(p),J=L.filter(s_=>s_[1]===fix&&(PROP.includes(p.type)||/[MJ]$/.test(s_[0])));return J[0]||L.find(s_=>s_[1]===fix)}
 function setRwy(p,r){if(p.rwy===r)return;if(p.kind==='ARR'&&(p.app||p.land||p.sts)){log(p.cs+': cannot change runway now');return}p.rwy=r;if(p.kind==='DEP'){const s_=bestSid(r,p.ades,p.type);if(s_)setSid(p,s_)}else{const t=r=='03'?[rw[0],rw[1]]:[rw[2],rw[3]];p.th=t}log(p.cs+' runway '+r)}
 function cellClick(e,n,btn){const td=e.target.closest('td[data-c]'),tr_=e.target.closest('tr[data-id]');if(!tr_)return;const p=planes.find(q=>q.id==tr_.dataset.id);if(!p)return;sel=p;list();if(!td||p.owner)return;
- const c=td.dataset.c,A=ACT[c];if(!A||!A[btn])return;A[btn](p,e,n)}
+ td._tr=tr_.dataset.id;const c=td.dataset.c,A=ACT[c];if(!A||!A[btn])return;A[btn](p,e,n)}
 const ACT={
  'STS':{L:(p,e)=>p.kind==='ARR'&&p.app?null:popup(e,'Ground state',STSL.filter(([l])=>p.kind==='ARR'?(!p.app&&(l==='TXI'||l==='PRK')):(l!=='TXI'&&l!=='PRK')).map(([l,v])=>[l,()=>{setSts(p,v);if(v==='TXO'&&!p.route.length)log(p.cs+' state TXO')}]),p.sts||'(none)')},
  'C/S':{L:(p,e)=>assumeMenu(p,e),R:(p,e)=>popup(e,p.cs,[[p.xfer?'Assume':p.own?'Free':'Assume',()=>{if(p.xfer){p.xfer=false;p.nx='';log(p.cs+' transfer cancelled')}else assume(p)}],...(p.own&&nextOf(p)&&!p.xfer?[['Transfer',()=>startXfer(p,nextOf(p))]]:[]),['Flight plan…',()=>openFpl(p)],[p.hold?'Continue':'Hold short',()=>{p.hold=!p.hold;log(p.cs+(p.hold?' hold short':' continue'))}],['Taxi to assigned stand',()=>{const d=p.std&&D.dest.find(x=>x[3]==0&&x[0]==='Stand '+p.std);if(d)go(p,d)}],['Delete aircraft',()=>drop(p)]])},
