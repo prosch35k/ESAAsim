@@ -39,6 +39,10 @@ function autoStand(p,avoidCurrent){const dm=ACDIM[p.type]||{ws:36,len:40,wtc:p.w
   }
   const top=C.filter(d=>d.pri===pris[0]);return pick(top)}
  return avoidCurrent?p.std:''}
-function stdMenu(p,e){if(p.kind!=='ARR'||p.owner)return;
- popup(e,'Stand '+(p.std||''),[['Auto',()=>{const s=autoStand(p,true);if(s){p.std=s;log(p.cs+' stand '+s+' (auto)')}else log(p.cs+': no stand available')}],
-  ['Manual',()=>popup(e,'Stand',D.stands.map(s_=>[s_[0],()=>{p.std=s_[0];log(p.cs+' stand '+s_[0])}]),p.std)]])}
+function stdMenu(p,e){if(p.kind!=='ARR'||p.owner)return;closeAp();closeMenu();const m=document.createElement('div');m.className='tm';apEl=m;const box=boxAt(e);
+ m.innerHTML=`<div class="tt">${p.cs} ${p.std||''}</div><div class="ti" data-a="auto">Auto</div><div class="ti" data-a="manual">Manual</div>`;
+ m.onclick=ev=>{const t=ev.target.closest('[data-a]');if(!t)return;closeAp();
+  if(t.dataset.a==='auto'){const s=autoStand(p,true);if(s){p.std=s;log(p.cs+' stand '+s+' (auto)')}else log(p.cs+': no stand available')}
+  else apList(box,'Stand',D.stands.map(s_=>[s_[0],s_[0]]),p.std,v=>{p.std=v;log(p.cs+' stand '+v);list()},true);
+  list()};
+ placeAt(m,e.clientX-m.offsetWidth/2,e.clientY-18)}
