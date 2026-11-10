@@ -80,8 +80,12 @@ function openClr(p,e){if(clEl){clEl.remove();clEl=null}closeAp();const d=documen
  const o0={rwy:p.rwy,sid:p.sid};let st={rwy:p.rwy,sid:p.sid,ahdg:p.ahdg||'',cfl:p.cfl||initCfl(p,p.sid),sq:p.sq||newSq()};
  d.innerHTML=`<div class="ct">DEP CLEARANCE</div><div id="cb"></div>`;const ct=d.querySelector('.ct');let dr=null;
  ct.onpointerdown=ev=>{if(ev.button!==2)return;ct.setPointerCapture(ev.pointerId);dr=[ev.clientX-d.offsetLeft,ev.clientY-d.offsetTop]};ct.onpointermove=ev=>{if(dr){d.style.left=Math.max(0,ev.clientX-dr[0])+'px';d.style.top=Math.max(0,ev.clientY-dr[1])+'px'}};ct.onpointerup=()=>{dr=null};
- const sync=()=>{const oc=fmtAlt(p.cfl);if(!p.xfl||p.xfl===oc)p.xfl=fmtAlt(st.cfl);p.cfl=st.cfl;p.sq=st.sq;list()};
- const draw=()=>{sync();$('cb').innerHTML=`<div class="cc">${p.cs}</div>
+ const apply=()=>{const oc=fmtAlt(p.cfl);if(!p.xfl||p.xfl===oc)p.xfl=fmtAlt(st.cfl);p.cfl=st.cfl;p.sq=st.sq;
+  if(st.rwy!==p.rwy||st.sid!==p.sid){p.rwy=st.rwy;const s_=(D.sids[st.rwy]||[]).find(x=>x[0]===st.sid);if(s_)forceSid(p,s_)}
+  const h=parseInt(st.ahdg);p.ahdg=h>=1&&h<=360?String(h).padStart(3,'0'):''};
+ const pull=()=>{st={rwy:p.rwy,sid:p.sid,ahdg:p.ahdg||'',cfl:p.cfl||st.cfl,sq:p.sq||st.sq};render()};d._pull=pull;
+ const draw=()=>{apply();list()};
+ const render=()=>{$('cb').innerHTML=`<div class="cc">${p.cs}</div>
   <div class="cr"><span>RWY</span><div class="fl" id="c_r">${st.rwy}</div></div><div class="cr"><span>SID</span><div class="fl" id="c_s">${st.sid||''}</div></div>
   <div class="cr"><span>AHDG</span><div class="fl" id="c_h">${st.ahdg}</div></div><div class="cr"><span>CFL</span><div class="fl" id="c_c">${fmtAlt(st.cfl)}</div></div>
   <div class="cr"><span>ASSR</span><div class="fl" id="c_q">${st.sq}</div></div><button id="c_ok">Ok</button><button id="c_x">Cancel</button>`;
@@ -91,7 +95,7 @@ function openClr(p,e){if(clEl){clEl.remove();clEl=null}closeAp();const d=documen
   $('c_c').onclick=()=>apList($('c_c'),p.cs,optAlt(CFLOPT),st.cfl,v=>{st.cfl=v;draw()},true);
   $('c_q').onclick=()=>apKeypad($('c_q'),p,st.sq,v=>{if(/^[0-7]{4}$/.test(v))st.sq=v;draw()},newSq);
   $('c_x').onclick=()=>{closeAp();p.clr=false;d.remove();clEl=null;list()};
-  $('c_ok').onclick=()=>{closeAp();const h=parseInt(st.ahdg);p.rwy=st.rwy;const s_=(D.sids[p.rwy]||[]).find(x=>x[0]===st.sid);if(s_){if(st.rwy!==o0.rwy||st.sid!==o0.sid)forceSid(p,s_)}p.ahdg=h>=1&&h<=360?String(h).padStart(3,'0'):'';p.cfl=st.cfl;if(!p.xfl)p.xfl=fmtAlt(p.cfl);p.sq=st.sq;p.clr=true;log(p.cs+' cleared '+(p.sid||'')+' '+fmtAlt(p.cfl)+' '+p.sq);d.remove();clEl=null;list()}};
+  $('c_ok').onclick=()=>{closeAp();apply();p.clr=true;log(p.cs+' cleared '+(p.sid||'')+' '+fmtAlt(p.cfl)+' '+p.sq);d.remove();clEl=null;list()}};
  placeAt(d,e.clientX,e.clientY);draw()}
 function assumeMenu(p,e){if(p.owner)return;const box=boxAt(e),on=CTRL.filter(c=>c.on),it=[];
  if(p.xfer)it.push(['assume','c']);else if(!p.own)it.push(['assume','a']);else{it.push(['free','f']);if(nextOf(p)&&!p.xfer)it.push(['transfer','t']);if(on.length&&!p.xfer)it.push(['manual transfer','m'])}
@@ -156,7 +160,7 @@ function openFpl(p){if(!p)return;if(fplEl)fplEl.remove();const e=document.create
   p.remarks=$('f_rm').value;
   if(p.kind==='DEP'){const a=parseInt($('f_al').value);if(a)p.xfl=a<=5000?'A'+String(Math.round(a/100)).padStart(2,'0'):String(Math.round(a/100)).padStart(3,'0')}close();list()}}
 let lastSel=null;
-function list(){$('ac').innerHTML=planes.map(p=>`<div data-id="${p.id}" class="${p===sel?'s':''}">${p.cs} ${p.kind} ${p.sts||'---'} ${Math.round(p.spd)}kt</div>`).join('')||'<span style="color:var(--mu)">No aircraft</span>';
+function list(){if(clEl&&clEl._pull&&document.body.contains(clEl))clEl._pull();$('ac').innerHTML=planes.map(p=>`<div data-id="${p.id}" class="${p===sel?'s':''}">${p.cs} ${p.kind} ${p.sts||'---'} ${Math.round(p.spd)}kt</div>`).join('')||'<span style="color:var(--mu)">No aircraft</span>';
  $('clk').textContent=clockStr(T0+T);updateAlerts();renderLists();
  [...$('stb').children].forEach(b=>b.classList.toggle('on',!!sel&&sel.sts===b.dataset.st));
  $('clrnc').classList.toggle('on',!!(sel&&sel.clr));[...$('stb').children].forEach(b=>b.disabled=!!sel&&(sel.kind==='DEP'?(b.dataset.st==='TXI'||b.dataset.st==='PRK'):(sel.app||!(b.dataset.st==='TXI'||b.dataset.st==='PRK'))));
