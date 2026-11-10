@@ -143,7 +143,7 @@ function openFpl(p){if(!p)return;if(fplEl)fplEl.remove();const e=document.create
  const v=x=>(x==null?'':String(x)).replace(/"/g,'&quot;'),alt=p.kind==='DEP'&&p.xfl?String(parseInt(p.xfl.replace(/\D/g,''))*100):'',tas=p.tas||(p.w==='H'?480:p.w==='L'?260:440);
  const wp=fplRoute(p),route=p.route_=p.route_||genRoute(p),eta0=T0+T;
  e.innerHTML=`<div class="th"><b>Flight plan setting dialog</b><span id="fx">✕</span></div><div class="bd">
- <label>Callsign</label><input id="f_cs" value="${v(p.cs)}"><span class="full" style="grid-column:3/5;text-align:center"><label style="margin-right:8px"><input type="radio" name="frul" checked style="width:auto"> IFR</label><label><input type="radio" name="frul" style="width:auto"> VFR</label></span><label>AP data</label><input value="${v(p.type)}/${v(p.w)}-S/C">
+ <label>Callsign</label><input id="f_cs" value="${v(p.cs)}"><span class="full" style="grid-column:3/5;text-align:center"><label style="margin-right:8px"><input type="radio" name="frul" ${p.rules==='V'?'':'checked'} style="width:auto"> IFR</label><label><input type="radio" name="frul" ${p.rules==='V'?'checked':''} style="width:auto"> VFR</label></span><label>AP data</label><input value="${v(p.type)}/${v(p.w)}-S/C">
  <label>Origin</label><input id="f_o" value="${v(p.adep)}"><label>Destination</label><input id="f_d" value="${v(p.ades)}"><label>Alternate</label><input id="f_a" value="${v(p.alt_||'')}">
  <label>TAS</label><input id="f_t" value="${tas}"><label>Altitude</label><input id="f_al" value="${alt}"><label>Squawk</label><input id="f_sq" value="${v(p.sq)}">
  <label>Dep. EST</label><input value="${v(p.eobt||'')}"><label>Actual</label><input value=""><label>Temp alt</label><input>
