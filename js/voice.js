@@ -11,9 +11,11 @@ const PHON={alpha:'a',alfa:'a',bravo:'b',charlie:'c',delta:'d',echo:'e',foxtrot:
 const PHN={A:'Alfa',B:'Bravo',C:'Charlie',D:'Delta',E:'Echo',F:'Foxtrot',G:'Golf',H:'Hotel',J:'Juliett',K:'Kilo',L:'Lima',M:'Mike',N:'November',O:'Oscar',P:'Papa',Q:'Quebec',R:'Romeo',S:'Sierra',T:'Tango',U:'Uniform',V:'Victor',W:'Whiskey',X:'X-ray',Y:'Yankee',Z:'Zulu'};
 const DW=['zero','one','two','three','four','five','six','seven','eight','niner'];
 const spD=s=>String(s).split('').map(c=>DW[+c]??c).join(' ');
+const CITY={ESSA:'Arlanda',ENGM:'Oslo',EKCH:'Copenhagen',EFHK:'Helsinki',EGLL:'Heathrow',EHAM:'Amsterdam',EDDF:'Frankfurt',LFPG:'Paris',LEMD:'Madrid',LOWW:'Vienna',EPWA:'Warsaw',LSZH:'Zurich',EHRD:'Rotterdam',ESKN:'Skavsta',ENTO:'Torp',EGSS:'Stansted',EDDM:'Munich',LEMG:'Malaga',ESGG:'Landvetter',ESSB:'Bromma',ESMS:'Malmo',ESGP:'Save',EDDN:'Nuremberg',ESTA:'Angelholm',EKDK:'Copenhagen'};
 function speechOf(p,t){const m=(p.cs.match(/^[A-Z]+/)||[''])[0],num=p.cs.slice(m.length);
  t=t.split(p.cs).join((TELE[m]||m)+' '+spD(num));
  t=t.replace(/(squawk )(\d{4})/gi,(a,b,c)=>b+spD(c)).replace(/\b(\d)000\b/g,(a,b)=>DW[b]+' thousand').replace(/\b(\d{2})000\b/g,(a,b)=>b+' thousand').replace(/\b0\d\b/g,a=>spD(a)).replace(/\b\d+\b/g,a=>spD(a));
+ t=t.replace(/\b[A-Z]{4}\b/g,m=>CITY[m]||m.split('').map(c=>PHN[c]).join(' ')).replace(/\b(\d+)([A-Z])\b/g,(a,n,l)=>spD(n)+' '+PHN[l]);
  return t.replace(/\b[A-Z]\b/g,c=>PHN[c]||c).replace(/\bRWY\b/g,'runway')}
 const hashN=s=>[...s].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
 const VOICES=['buttery','airy','glassy','rounded'];
@@ -25,8 +27,8 @@ async function pump(){if(sqRun)return;sqRun=true;
  while(SQ.length&&TTS){const it=SQ.shift();for(let k=0;k<8&&TTS;k++){try{await TTS.speak(speechOf(it.p,it.t),{voice:voiceOf(it.p),rate:rateOf(it.p),language:'en'});break}catch(e){if(e&&(e.code==='busy'||e.code==='rate_limited')){await sleep(600);continue}if(e&&e.code==='not_granted'){TTS=null;SQ.length=0}break}}}
  sqRun=false}
 function rlog(cls,who,t){const d=document.createElement('div');d.className=cls;d.textContent=clockStr(T0+T)+' '+who+': '+t;const b=$('rl');b.prepend(d);while(b.children.length>40)b.lastChild.remove()}
-function pilot(p,t){setTimeout(()=>{rlog('rp',p.cs,t);if(TTS&&$('pv').checked){SQ.push({p,t});pump()}},700+Math.random()*500)}
-const SVW=[[/hållpunkt(en)?|hållplats(en)?|väntplats(en)?|väntpunkt(en)?/g,'holding point'],[/klarerad för start|startklarering|start klar/g,'cleared for takeoff'],[/klarerad för landning|klarerad att landa/g,'cleared to land'],[/ställ upp|ställ dig upp|gå in på banan/g,'line up'],[/vänta/g,'wait'],[/taxa|taxi/g,'taxi'],[/pushback|backa ut|skjut ut/g,'pushback'],[/starta motorerna|starta motorer|motorstart|starttillstånd/g,'start up'],[/stå kvar|stanna|håll position/g,'hold position'],[/fortsätt/g,'continue'],[/kontakta/g,'contact'],[/frekvens/g,'frequency'],[/bana/g,'runway'],[/\b(plats|gate|stand)\b/g,'stand'],[/norr/g,'north'],[/söder|syd/g,'south'],[/\bnoll\b/g,'zero'],[/\bett\b/g,'one'],[/(?<![a-zåäö])två(?![a-zåäö])/g,'two'],[/\btre\b/g,'three'],[/\bfyra\b/g,'four'],[/\bfem\b/g,'five'],[/\bsex\b/g,'six'],[/\bsju\b/g,'seven'],[/(?<![a-zåäö])åtta(?![a-zåäö])/g,'eight'],[/\bnio\b/g,'nine'],[/\bdecimal\b|\bkomma\b/g,'decimal'],[/\bsvara\b/g,'']];
+function pilot(p,t){if(!t)return;setTimeout(()=>{rlog('rp',p.cs,t);if(TTS&&$('pv').checked){SQ.push({p,t});pump()}},700+Math.random()*500)}
+const SVW=[[/hållpunkt(en)?|hållplats(en)?|väntplats(en)?|väntpunkt(en)?/g,'holding point'],[/klarerad för start|startklarering|start klar/g,'cleared for takeoff'],[/klarerad för landning|klarerad att landa/g,'cleared to land'],[/ställ upp|ställ dig upp|gå in på banan/g,'line up'],[/vänta/g,'wait'],[/taxa|taxi/g,'taxi'],[/pushback|backa ut|skjut ut/g,'pushback'],[/starta motorerna|starta motorer|motorstart|starttillstånd/g,'start up'],[/stå kvar|stanna|håll position/g,'hold position'],[/fortsätt/g,'continue'],[/kontakta/g,'contact'],[/frekvens/g,'frequency'],[/bana/g,'runway'],[/\b(plats|gate|stand)\b/g,'stand'],[/norr/g,'north'],[/söder|syd/g,'south'],[/\bnoll\b/g,'zero'],[/\bett\b/g,'one'],[/(?<![a-zåäö])två(?![a-zåäö])/g,'two'],[/\btre\b/g,'three'],[/\bfyra\b/g,'four'],[/\bfem\b/g,'five'],[/\bsex\b/g,'six'],[/\bsju\b/g,'seven'],[/(?<![a-zåäö])åtta(?![a-zåäö])/g,'eight'],[/\bnio\b/g,'nine'],[/\bdecimal\b|\bkomma\b/g,'decimal'],[/\bsvara\b/g,''],[/(återläsning|återläsningen|readback) (stämmer|är korrekt|korrekt|rätt)/g,'readback correct']];
 function norm(s){let t=s.toLowerCase();for(const[r,w]of SVW)t=t.replace(r,w);t=t.replace(/[.,;:!?"]/g,' ').replace(/(\d)\s*(?:decimal|point)\s*(\d)/g,'$1.$2').replace(/-/g,' ').replace(/\s+/g,' ').trim();
  t=t.split(' ').map(w=>NUMW[w]??w).join(' ');t=t.replace(/(\d)\s+(?=\d)/g,'$1').replace(/(\d)\s*thousand/g,'$1000');return t}
 function findCs(s){let best=null,bs=0,span=null;const ns=s.replace(/\s/g,'');
@@ -40,7 +42,8 @@ function parseLocal(text){let s=norm(text);const f=findCs(s);s=f.s;const p=f.p||
  const rwm=/runway\s*(\d{1,2})/.exec(b);if(rwm)c.rwy=rwm[1].padStart(2,'0');
  const vi=tk.indexOf('via');if(vi>=0){c.via=[];for(let i=vi+1;i<tk.length;i++){if(/^[a-z]$/.test(tk[i]))c.via.push(tk[i].toUpperCase());else if(!['and','then','thereafter','after','that','to','continue'].includes(tk[i]))break}}
  const sqm=/squawk\s*([0-7]{4})/.exec(b);if(sqm)c.sq=sqm[1];
- if(/(cleared|clear) (for )?take ?off/.test(b))c.act='takeoff';
+ if(/read ?back (is )?correct/.test(b))c.act='rbok';
+ else if(/(cleared|clear) (for )?take ?off/.test(b))c.act='takeoff';
  else if(/(cleared|clear) (to )?land/.test(b))c.act='land';
  else if(/line ?up/.test(b)){c.act='lineup';c.wait=/wait/.test(b)}
  else if(/taxi|continue|resume|proceed/.test(b)){c.act=/continue|resume|proceed/.test(b)&&!/to (stand|holding|hp)/.test(b)?'continue':'taxi';const st=/stand\s*(\d+)\s*([a-z])?(?![a-z])/.exec(b);
@@ -71,14 +74,14 @@ function exec(c){const p=c.p;
  case'pushback':if(p.kind!=='DEP'||air||p.route.length||p.spd>0||p.pb){t='Unable, '+cs;break}
   if(p.pushed){t='Negative, we have already pushed back, '+cs;break}
   if(!c.dir){p.pbAsk=true;t='Which direction do we face, '+cs+'?';break}
-  startPush(p,c.dir);t='Pushback and start up approved, facing '+c.dir+', '+cs;break;
+  startPush(p,c.dir);p.wt=T+10+Math.random()*10;t='Pushback and start up approved, facing '+c.dir+', '+cs;break;
  case'taxi':{if(p.pb){t='Unable, we are being pushed back, '+cs;break}if(air||p.to){t='Unable, we are not on the ground taxiing, '+cs;break}
   let d=null,what='';if(c.stand){d=D.dest.find(x=>x[3]==0&&x[0]==='Stand '+c.stand);what='stand '+c.stand;}
   else if(c.hp){d=pickHP(p,c);if(d)what='holding point '+(c.hpDef?'':c.hp+(/CAT3/.test(d[0])?' CAT 3':'')+' ')+'runway '+(d[0].match(/RWY ?(\d\d(?:-\d\d)?)/)||[])[1]}
   if(!d){t='Say again destination, '+cs;break}
   if(c.stand&&p.kind==='DEP'){t='Unable, '+cs;break}
-  VIAL=c.via&&c.via.length?c.via:null;NOSTS=true;go(p,d);NOSTS=false;VIAL=null;p.pend=null;p.vhold=false;
-  if(!p.route.length){t='Unable, no route, '+cs;break}
+  const was0=p.spd<1&&!p.route.length;VIAL=c.via&&c.via.length?c.via:null;NOSTS=true;go(p,d);NOSTS=false;VIAL=null;p.pend=null;p.vhold=false;
+  if(!p.route.length){t='Unable, no route, '+cs;break}if(was0)p.wt=T+10+Math.random()*10;
   t='Taxi to '+what+rn(c.via)+', '+cs;break}
  case'lineup':{if(p.kind!=='DEP'||air){t='Unable, '+cs;break}const r=c.rwy||p.rwy||rwyDep;let L=D.dest.filter(d=>d[3]==2&&d[0].includes('RWY '+r));if(!L.length){t='Say again runway, '+cs;break}
   const v=c.via&&c.via[0];let d=(v&&L.find(x=>x[0].endsWith(' via '+v)))||L.map(x=>[x,Math.hypot(x[1]-p.x,x[2]-p.y)]).sort((a,b)=>a[1]-b[1])[0][0];
@@ -87,13 +90,14 @@ function exec(c){const p=c.p;
   if(c.rwy&&c.rwy!==on){t='Negative, we are lined up runway '+on+', '+cs;break}
   const e=doTakeoff(p,true);t=e?'Negative, we are not lined up, '+cs:'Cleared for takeoff runway '+r+', '+cs;break}
  case'land':if(p.kind==='ARR'&&(p.app||p.air)){t='Cleared to land runway '+(c.rwy||p.rwy)+', '+cs}else t='Unable, '+cs;break;
+ case'rbok':if(p.awaitRb){p.awaitRb=false;p.pushReqAt=T+60}return;
  case'hold':p.vhold=true;t='Holding position, '+cs;break;
  case'continue':p.vhold=false;t='Continuing taxi, '+cs;break;
  case'squawk':t=c.sq?'Squawk '+c.sq+', '+cs:'Say again squawk, '+cs;break;
  case'contact':{const n=nextOf(p),ct=CTRL.find(x=>x.id===n),nm=/approach|departure/.test(c.raw||'')||(ct&&ct.cs==='ESGG_E_APP')?'approach':'tower';t='Contact '+nm+(c.freq?' '+c.freq:'')+', '+cs;break}
  case'clearance':{if(p.kind!=='DEP'||air){t='Unable, '+cs;break}
   const sid=c.sid||p.sid,al=c.alt||p.cfl||initCfl(p,sid),n=parseInt(al),sq=c.sq||p.sq;
-  t='Cleared to '+p.ades+(sid?' via '+sid:'')+', climb '+(n<=50?n*100+' feet':'flight level '+n)+(sq?', squawk '+sq:'')+', '+cs;break}
+  p.awaitRb=true;p.vclr=true;t='Cleared to '+p.ades+(sid?' via '+sid+' departure':'')+(c.alt?', climb '+(n<=50?n*100+' feet':'flight level '+n):'')+(sq?', squawk '+sq:'')+', '+cs;break}
  default:t='Say again, '+cs}
  list();pilot(p,t)}
 async function viaClaude(text){if(!SMP)return null;
@@ -127,4 +131,8 @@ addEventListener('blur',pttStop);
 
 
 /* pilot calls 60 s (sim time) after pushback is complete */
-function pilotCalls(){for(const p of planes)if(p.pbT!=null&&!p.reqTaxi&&T-p.pbT>=60){p.reqTaxi=true;if(!p.route.length&&!p.pb&&!p.owner&&p.spd<1)pilot(p,p.cs+', request taxi')}}
+function pilotCalls(){for(const p of planes){if(p.owner||p.air||p.app||p.land)continue;
+ if(p.pbT!=null&&!p.reqTaxi&&T-p.pbT>=60){p.reqTaxi=true;if(!p.route.length&&!p.pb&&p.spd<1)pilot(p,p.cs+', request taxi')}
+ if(p.kind==='DEP'&&p.reqClrAt!=null&&!p.clrAsked&&T>=p.reqClrAt&&!p.pushed&&p.spd<1){p.clrAsked=true;
+  if(p.rules==='V'){p.pushReqAt=T}else pilot(p,'Landvetter Ground, '+p.cs+', stand '+(p.std||'')+', type '+p.type+', information '+ATIS.l+', QNH '+ATIS.q+', request clearance to '+p.ades+'.')}
+ if(p.pushReqAt!=null&&!p.pushAsked&&T>=p.pushReqAt&&!p.pushed&&p.spd<1){p.pushAsked=true;pilot(p,p.cs+', stand '+(p.std||'')+', request pushback and start-up.')}}}

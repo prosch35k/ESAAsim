@@ -17,7 +17,7 @@ function mkPlane(kind,x,y,hdg,spd,std){
  const cs=$('cs').value.trim().toUpperCase();$('cs').value='';
  p.cs=cs||rnd(AIRL)+(100+Math.random()*899|0);p.type=$('ty').value;p.w=WTC[p.type]||'M';p.rwy=p.kind==='ARR'?rwyArr:rwyDep;
  p.sq='';
- if(kind==='DEP'){p.adep='ESGG';p.ades=rnd(OTHER.filter(a=>a!=='ESGG'));const s=bestSid(rwyDep,p.ades,p.type)||rnd(D.sids[rwyDep]);p.sid=s[0];p.copx=s[1];p.cfl='';p.xfl='';p.eobt=hhmm(T0+T+Math.random()*600)}
+ if(kind==='DEP'){p.adep='ESGG';p.ades=rnd(OTHER.filter(a=>a!=='ESGG'));const s=bestSid(rwyDep,p.ades,p.type)||rnd(D.sids[rwyDep]);p.sid=s[0];p.copx=s[1];p.cfl='';p.xfl='';p.eobt=hhmm(T0+T+Math.random()*600);p.reqClrAt=T+30+Math.random()*15}
  else{p.sq=newSq();p.adep=rnd(OTHER);p.ades='ESGG';p.sid='';p.copx='';p.cfl='';p.xfl='';p.eobt=''}
  planes.push(p);sel=p;return p}
 let NOSTS=false;function setSts(p,s){if(NOSTS)return;if(p.kind==='DEP'&&(s==='TXI'||s==='PRK'))return;if(p.kind==='ARR'&&(s!=='TXI'&&s!=='PRK'||p.app||p.air))return;p.sts=s;if(s==='TXO')p.txoT=T}
@@ -31,6 +31,7 @@ function pickExit(p){const nm=p.rwy==='03'?'EXIT 03 E':(Math.random()<.5?'EXIT 2
 function alongTh(p){const h=p.hdg*Math.PI/180;return(p.x-p.th[0])*Math.sin(h)+(p.y-p.th[1])*Math.cos(h)}
 function drop(p){planes=planes.filter(q=>q!==p);if(sel===p)sel=null}
 function step(dt){for(const p of planes.slice()){if(p.xfer){p.xt-=dt;if(p.xt<=0){const c=CTRL.find(c_=>c_.id===p.nx);p.xfer=false;if(c&&c.on){p.own=false;p.owner=c.id;p.accT=T;p.nx='';p.nxm='';log(c.cs+' accepted '+p.cs)}else{p.nx='';log('handoff of '+p.cs+' failed')}}}let tg=0;
+ if(p.wt!=null){if(T<p.wt)continue;p.wt=null}
  if(p.pb){pushStep(p,dt);continue}
  if(p.air){p.spd=Math.min(165,p.spd+3*dt);p.airT+=dt;mv(p,dt);if(p.airT>90)drop(p);continue}
  if(p.to){p.spd+=4*dt;mv(p,dt);if(p.spd>=140){p.to=false;p.air=true;p.airT=0;log(p.cs+' airborne')}continue}

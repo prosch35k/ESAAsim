@@ -17,3 +17,4 @@ const clockStr=s=>{s=Math.floor(s)%86400;return p2(Math.floor(s/3600))+':'+p2(Ma
 function log(t){const l=$('log');l.innerHTML=`${clockStr(T0+T)} ${t}<br>`+l.innerHTML.split('<br>').slice(0,5).join('<br>')}
 const nrm=a=>((a+540)%360)-180;
 const rnd=a=>a[Math.random()*a.length|0];
+const ATIS={l:String.fromCharCode(65+Math.floor(Math.random()*26)),q:990+Math.floor(Math.random()*51)};
