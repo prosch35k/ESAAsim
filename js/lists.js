@@ -1,5 +1,5 @@
 /* ---------- lists ---------- */
-const LS=D.lists,order=Object.keys(LS);for(const n of order){const c=LS[n].cols,i=c.findIndex(x=>x[0]==='C/S');if(i>=0&&!c.some(x=>x[0]==='SI'))c.splice(i+1,0,['SI',4,0])}
+const LS=D.lists,order=Object.keys(LS);for(const n of order){const c=LS[n].cols,i=c.findIndex(x=>x[0]==='C/S');if(i>=0&&!c.some(x=>x[0]==='SI'))c.splice(i+1,0,['SI',4,0]);c.forEach(x=>{if(x[0]==='RMK')x[1]=8})}
 const SECT='GGG';
 const CTRL=[{id:'GG',cs:'ESGG_TWR',on:false},{id:'GE',cs:'ESGG_E_APP',on:false}];
 const autoNx=()=>{const t=CTRL.find(c=>c.cs==='ESGG_TWR'&&c.on),a=CTRL.find(c=>c.cs==='ESGG_E_APP'&&c.on);return t?t.id:a?a.id:''};
@@ -49,6 +49,10 @@ addEventListener('pointerdown',e=>{if(pmEl&&!pmEl.contains(e.target))closeMenu()
 function popup(ev,title,items,cur){closeMenu();const m=document.createElement('div');m.id='pm';pmEl=m;m.innerHTML=`<div class="pt">${title}</div>`;
  items.forEach(([lb,fn])=>{const d=document.createElement('div');d.className='mi'+(lb===cur?' cur':'');d.textContent=lb||'(none)';d.onclick=()=>{closeMenu();fn();list()};m.appendChild(d)});
  document.body.appendChild(m);const r=m.getBoundingClientRect();m.style.left=Math.max(0,Math.min(ev.clientX,innerWidth-r.width-4))+'px';m.style.top=Math.max(0,Math.min(ev.clientY,innerHeight-r.height-4))+'px'}
+function editCell(ev,val,max,fn){closeMenu();const td=ev.target.closest('td');if(!td)return;document.getElementById('cellin')?.remove();const r=td.getBoundingClientRect(),i=document.createElement('input');i.id='cellin';i.value=val||'';i.maxLength=max;
+ i.style.cssText=`position:fixed;z-index:60;left:${r.left}px;top:${r.top}px;width:${Math.max(r.width,max*8+10)}px;height:${r.height}px;box-sizing:border-box;font:inherit;font-size:13px;padding:0 4px;margin:0;background:rgb(108,108,111);color:#fff;border:1px solid #000;border-radius:0;outline:none;text-transform:uppercase`;
+ document.body.appendChild(i);i.focus();i.select();let done=false;const fin=ok=>{if(done)return;done=true;if(ok)fn(i.value.trim());i.remove();list()};
+ i.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')fin(true);else if(e.key==='Escape')fin(false)};i.onkeyup=e=>e.stopPropagation();i.onblur=()=>fin(true);i.onpointerdown=e=>e.stopPropagation()}
 function ask(ev,title,val,fn){closeMenu();const m=document.createElement('div');m.id='pm';pmEl=m;m.innerHTML=`<div class="pt">${title}</div><div class="pi"><input value="${(val||'').toString().replace(/"/g,'&quot;')}"><button>OK</button></div>`;
  document.body.appendChild(m);const r=m.getBoundingClientRect();m.style.left=Math.max(0,Math.min(ev.clientX,innerWidth-r.width-4))+'px';m.style.top=Math.max(0,Math.min(ev.clientY,innerHeight-r.height-4))+'px';
  const i=m.querySelector('input');i.focus();i.select();const ok=()=>{const v=i.value.trim().toUpperCase();closeMenu();fn(v);list()};m.querySelector('button').onclick=ok;i.onkeydown=k=>{if(k.key==='Enter')ok()}}
@@ -118,8 +122,8 @@ const ACT={
          R:p=>{p.leg=!p.leg}},
  'ASSR':{L:(p,e)=>apKeypad(e.target.closest('td'),p,p.sq,v=>{if(/^[0-7]{4}$/.test(v))p.sq=v;list()},newSq)},
  'CLR':{L:(p,e)=>{if(p.kind==='DEP')openClr(p,e)}},
- 'RMK':{L:(p,e)=>ask(e,'Scratch pad',p.rmk,v=>{p.rmk=v;$('rmk').value=v})},
- 'EOBT':{L:(p,e)=>ask(e,'EOBT (HHMM)',p.eobt,v=>{if(/^([01]\d|2[0-3])[0-5]\d$/.test(v))p.eobt=v})},
+ 'RMK':{L:(p,e)=>editCell(e,p.rmk,12,v=>{p.rmk=v.toUpperCase();if(sel===p)$('rmk').value=p.rmk})},
+ 'EOBT':{L:(p,e)=>editCell(e,p.eobt,4,v=>{if(/^([01]\d|2[0-3])[0-5]\d$/.test(v))p.eobt=v})},
  'SI':{L:(p,e)=>{if(p.owner||p.xfer)return;const on=CTRL.filter(c=>c.on);apList(e.target.closest('td'),p.cs,[['(none)','-']].concat(on.map(c=>[`<span>${c.id}</span><span>${c.cs}</span>`,c.id])),nextOf(p)||null,v=>{p.nxm=v;list()},true)},
   R:p=>{startXfer(p,nextOf(p))}},
  'DSQ':{L:p=>dsqMove(p,1),R:p=>dsqMove(p,-1)},
