@@ -110,7 +110,7 @@ const ACT={
  'STS':{L:(p,e)=>p.kind==='ARR'&&p.app?null:popup(e,'Ground state',STSL.filter(([l])=>p.kind==='ARR'?(!p.app&&(l==='TXI'||l==='PRK')):(l!=='TXI'&&l!=='PRK')).map(([l,v])=>[l,()=>{setSts(p,v);if(v==='TXO'&&!p.route.length)log(p.cs+' state TXO')}]),p.sts||'(none)')},
  'C/S':{L:(p,e)=>assumeMenu(p,e),R:(p,e)=>popup(e,p.cs,[[p.xfer?'Assume':p.own?'Free':'Assume',()=>{if(p.xfer){p.xfer=false;p.nx='';log(p.cs+' transfer cancelled')}else assume(p)}],...(p.own&&nextOf(p)&&!p.xfer?[['Transfer',()=>startXfer(p,nextOf(p))]]:[]),['Flight plan…',()=>openFpl(p)],[p.hold?'Continue':'Hold short',()=>{p.hold=!p.hold;log(p.cs+(p.hold?' hold short':' continue'))}],['Taxi to assigned stand',()=>{const d=p.std&&D.dest.find(x=>x[3]==0&&x[0]==='Stand '+p.std);if(d)go(p,d)}],['Delete aircraft',()=>drop(p)]])},
  'W':{L:p=>{p.hideW=!p.hideW}},
- 'STD':{L:(p,e)=>p.kind==='ARR'&&popup(e,'Stand',D.stands.map(s_=>[s_[0],()=>{p.std=s_[0];log(p.cs+' stand '+s_[0])}]),p.std)},
+ 'STD':{L:(p,e)=>stdMenu(p,e)},
  'ADES':{L:p=>openFpl(p)},
  'DRWY':{L:(p,e)=>apList(e.target.closest('td'),'Assign',rwOpts(),p.rwy,v=>{setRwy(p,v);list()})},
  'ARWY':{L:(p,e)=>popup(e,'Arrival runway',['03','21'].map(r=>[r,()=>setRwy(p,r)]),p.rwy)},
