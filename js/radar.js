@@ -18,10 +18,10 @@ function draw(){g.setTransform(1,0,0,1,0,0);g.fillStyle=C.COLOR_Terrain1;g.fillR
  for(const p of planes.slice().sort((a,b)=>(a===sel)-(b===sel))){if(p.rx===undefined){p.rx=p.x;p.ry=p.y;p.rh=p.hdg}const q=tr(p.rx,p.ry),on=p===sel;
   if(p.route.length){g.strokeStyle=C.COLOR_Taxiway;g.setLineDash([4,4]);g.beginPath();g.moveTo(...q);p.route.forEach(r=>g.lineTo(...tr(r[0],r[1])));g.stroke();g.setLineDash([])}
   g.save();g.translate(q[0],q[1]);g.rotate((p.rh+D.rot)*Math.PI/180);g.fillStyle=p.hold?C.COLOR_Stopbar:C.COLOR_OtherMarking;g.beginPath();g.moveTo(0,-8);g.lineTo(5,6);g.lineTo(0,3);g.lineTo(-5,6);g.fill();g.restore();
-  const hv=hovP===p,L_=labelLines(p,hv);p.lo=p.lo||[16,-52];g.font=LFONT;let mw=0;for(const s of L_)mw=Math.max(mw,g.measureText(s).width);if(p.kind==='DEP')mw=Math.max(mw,g.measureText(p.cs+' RMK').width);
+  const hv=hovP===p,L_=labelLines(p,hv);p.lo=p.lo||[26,7];g.font=LFONT;let mw=0;for(const s of L_)mw=Math.max(mw,g.measureText(s).width);if(p.kind==='DEP')mw=Math.max(mw,g.measureText(p.cs+' RMK').width);
   const lh=15,pad=4,bw=mw+2*pad,bh=L_.length*lh+2*pad-1,bx=q[0]+p.lo[0],by=q[1]+p.lo[1];p._lr=[bx,by,bw,bh];{const ci=L_.findIndex(t=>t.includes(p.cs)),y0=by+pad+ci*lh,csw=g.measureText(p.cs).width;p._cs=[bx+pad,y0,csw,lh];p._sp=p.kind==='DEP'?[bx+pad+g.measureText(p.cs+' ').width,y0,Math.max(g.measureText('RMK').width,g.measureText(p.edRmk?'':p.rmk||'').width),lh]
 :null;p._std=p.kind==='ARR'&&p.std?[bx+pad+g.measureText(p.cs+' ').width,y0,g.measureText(p.std).width,lh]:null}
-  const tc=hv?'#fff':(p.adep==='ESGG'?'rgb(64,255,255)':p.ades==='ESGG'?'rgb(255,255,0)':'#fff');g.strokeStyle=tc;g.lineWidth=1;g.beginPath();g.moveTo(q[0],q[1]);g.lineTo(Math.max(bx,Math.min(q[0],bx+bw)),Math.max(by,Math.min(q[1],by+bh)));g.stroke();
+  const tc=hv?'#fff':(p.adep==='ESGG'?'rgb(64,255,255)':p.ades==='ESGG'?'rgb(255,255,0)':'#fff');g.strokeStyle=tc;g.lineWidth=1;g.beginPath();g.moveTo(q[0],q[1]);g.lineTo(q[0]<bx+bw/2?bx:bx+bw,by+pad+lh);g.stroke();
   if(hv){g.fillStyle='rgba(108,108,111,0.8)';g.fillRect(bx,by,bw,bh);g.strokeStyle='rgba(0,0,0,.9)';g.lineWidth=1;g.strokeRect(bx+.5,by+.5,bw-1,bh-1)}
   
   L_.forEach((s,i)=>{g.fillStyle=(p.alert&&s.startsWith('!!')?C.COLOR_Stopbar:tc);g.fillText(s,bx+pad,by+pad+11+i*lh)})
