@@ -15,7 +15,7 @@ const FIL={
  STUP:p=>p.kind==='DEP'&&['','FRQ','S/U','S/P'].includes(p.sts),
  TAXIOUT:p=>p.kind==='DEP'&&p.sts==='TXO',
  TAKEOFF:p=>p.kind==='DEP'&&!p.air&&(p.sts==='xLU'||p.sts==='xTO'),
- ADCS:p=>(p.kind==='ARR'&&(p.app||p.land||!p.sts))||p.air,
+ ADCS:p=>(p.kind==='ARR'&&!p.sts)||p.air,
  TAXIIN:p=>p.kind==='ARR'&&p.sts==='TXI'};
 const SRT={STUP:(a,b)=>a.eobt<b.eobt?-1:1,TAXIOUT:(a,b)=>a.txoT-b.txoT,TAKEOFF:(a,b)=>a.sts<b.sts?-1:a.sts>b.sts?1:0,ADCS:(a,b)=>etaSec(a)-etaSec(b),TAXIIN:(a,b)=>a.cs<b.cs?-1:1};
 const WIN={};let zTop=6;
@@ -103,7 +103,7 @@ function setRwy(p,r){if(p.rwy===r)return;if(p.kind==='ARR'&&(p.app||p.land||p.st
 function cellClick(e,n,btn){const td=e.target.closest('td[data-c]'),tr_=e.target.closest('tr[data-id]');if(!tr_)return;const p=planes.find(q=>q.id==tr_.dataset.id);if(!p)return;sel=p;list();if(!td||p.owner)return;
  const c=td.dataset.c,A=ACT[c];if(!A||!A[btn])return;A[btn](p,e,n)}
 const ACT={
- 'STS':{L:(p,e)=>popup(e,'Ground state',STSL.filter(([l])=>p.kind==='ARR'?(l==='TXI'||l==='PRK'):(l!=='TXI'&&l!=='PRK')).map(([l,v])=>[l,()=>{setSts(p,v);if(v==='TXO'&&!p.route.length)log(p.cs+' state TXO')}]),p.sts||'(none)')},
+ 'STS':{L:(p,e)=>p.kind==='ARR'&&p.app?null:popup(e,'Ground state',STSL.filter(([l])=>p.kind==='ARR'?(!p.app&&(l==='TXI'||l==='PRK')):(l!=='TXI'&&l!=='PRK')).map(([l,v])=>[l,()=>{setSts(p,v);if(v==='TXO'&&!p.route.length)log(p.cs+' state TXO')}]),p.sts||'(none)')},
  'C/S':{L:(p,e)=>assumeMenu(p,e),R:(p,e)=>popup(e,p.cs,[[p.xfer?'Assume':p.own?'Free':'Assume',()=>{if(p.xfer){p.xfer=false;p.nx='';log(p.cs+' transfer cancelled')}else assume(p)}],...(p.own&&nextOf(p)&&!p.xfer?[['Transfer',()=>startXfer(p,nextOf(p))]]:[]),['Flight plan…',()=>openFpl(p)],[p.hold?'Continue':'Hold short',()=>{p.hold=!p.hold;log(p.cs+(p.hold?' hold short':' continue'))}],['Taxi to assigned stand',()=>{const d=p.std&&D.dest.find(x=>x[3]==0&&x[0]==='Stand '+p.std);if(d)go(p,d)}],['Delete aircraft',()=>drop(p)]])},
  'W':{L:p=>{p.hideW=!p.hideW}},
  'STD':{L:(p,e)=>p.kind==='ARR'&&popup(e,'Stand',D.stands.map(s_=>[s_[0],()=>{p.std=s_[0];log(p.cs+' stand '+s_[0])}]),p.std)},
@@ -158,6 +158,6 @@ let lastSel=null;
 function list(){$('ac').innerHTML=planes.map(p=>`<div data-id="${p.id}" class="${p===sel?'s':''}">${p.cs} ${p.kind} ${p.sts||'---'} ${Math.round(p.spd)}kt</div>`).join('')||'<span style="color:var(--mu)">No aircraft</span>';
  $('clk').textContent=clockStr(T0+T);updateAlerts();renderLists();
  [...$('stb').children].forEach(b=>b.classList.toggle('on',!!sel&&sel.sts===b.dataset.st));
- $('clrnc').classList.toggle('on',!!(sel&&sel.clr));[...$('stb').children].forEach(b=>b.disabled=!!sel&&(sel.kind==='DEP'?(b.dataset.st==='TXI'||b.dataset.st==='PRK'):!(b.dataset.st==='TXI'||b.dataset.st==='PRK')));
+ $('clrnc').classList.toggle('on',!!(sel&&sel.clr));[...$('stb').children].forEach(b=>b.disabled=!!sel&&(sel.kind==='DEP'?(b.dataset.st==='TXI'||b.dataset.st==='PRK'):(sel.app||!(b.dataset.st==='TXI'||b.dataset.st==='PRK'))));
  if(sel!==lastSel){lastSel=sel;$('rmk').value=sel?sel.rmk:''}}
 $('ac').onclick=e=>{const id=e.target.dataset.id;if(id){sel=planes.find(p=>p.id==id);list()}};

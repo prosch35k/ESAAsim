@@ -20,7 +20,7 @@ function mkPlane(kind,x,y,hdg,spd,std){
  if(kind==='DEP'){p.adep='ESGG';p.ades=rnd(OTHER.filter(a=>a!=='ESGG'));const s=bestSid(rwyDep,p.ades,p.type)||rnd(D.sids[rwyDep]);p.sid=s[0];p.copx=s[1];p.cfl='';p.xfl='';p.eobt=hhmm(T0+T+Math.random()*600)}
  else{p.sq=newSq();p.adep=rnd(OTHER);p.ades='ESGG';p.sid='';p.copx='';p.cfl='';p.xfl='';p.eobt=''}
  planes.push(p);sel=p;return p}
-let NOSTS=false;function setSts(p,s){if(NOSTS)return;if(p.kind==='DEP'&&(s==='TXI'||s==='PRK'))return;if(p.kind==='ARR'&&s!=='TXI'&&s!=='PRK')return;p.sts=s;if(s==='TXO')p.txoT=T}
+let NOSTS=false;function setSts(p,s){if(NOSTS)return;if(p.kind==='DEP'&&(s==='TXI'||s==='PRK'))return;if(p.kind==='ARR'&&(s!=='TXI'&&s!=='PRK'||p.app||p.air))return;p.sts=s;if(s==='TXO')p.txoT=T}
 function autoTaxi(p){}
 function addTo(p,w,sn){const B=sn||snap(w[0],w[1]);if(!B||B.d>80){log('Click closer to a taxiway');return false}const A=p.last||snap(p.x,p.y),r=findRoute(A,B);if(!r){log(p.cs+': no route');return false}p.route.push(...r);p.last=B;autoTaxi(p);return true}
 function go(p,d){p.route=[];p.last=null;p.hold=false;p.pend=null;if(!addTo(p,null,snap(d[1],d[2])))return;if(d[3]==2)p.pend='xLU';else if(d[3]==0&&p.kind==='ARR')p.pend='PRK';log(p.cs+' taxi to '+d[0])}

@@ -1,4 +1,4 @@
-# PreSim
+# ESAAsim
 
 Browser-based ground-control training simulator for Gothenburg Landvetter (ESGG), styled after EuroScope
 (ESAA profile, sector files, Ground Radar / TopSky / CDM plugin settings).
@@ -26,7 +26,7 @@ provided by Claude artifact capabilities (`dictation`, `tts`, `sample`). Outside
     js/input.js         mouse/keyboard input, side panel, runway selector, other controllers
     js/voice.js         ATC phraseology parser, pilot readbacks (TTS), push-to-talk
     js/main.js          startup and main loop
-    tools/build_single.py   bundle everything into one self-contained HTML file (dist/presim.html)
+    tools/build_single.py   bundle everything into one self-contained HTML file (dist/esaasim.html)
     backend/            reserved for a future server (multi-user, persistence)
 
 Scripts are classic (non-module) scripts that share one global scope, so load order in `index.html` matters.
