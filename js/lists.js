@@ -8,7 +8,7 @@ function startXfer(p,t){if(!p.own||p.xfer||!t)return;p.nx=t;p.xfer=true;p.xt=8+M
 function boxAt(e){return{getBoundingClientRect:()=>({left:e.clientX,top:e.clientY})}}
 const etaSec=p=>p.app?-alongTh(p)/(Math.max(p.spd,30)*.5144):1e9;
 const GET={
- 'STS':(p,n)=>n==='ADCS'?(p.kind==='ARR'?'ARR':'DEP'):p.sts,'C/S':p=>p.cs,'R':()=>'I','ATYP':p=>p.type,'W':p=>p.w,'STD':p=>p.kind==='DEP'?parkedStand(p):p.std,'ADEP':p=>p.adep,'ADES':p=>p.ades,
+ 'STS':(p,n)=>n==='ADCS'?(p.kind==='ARR'?'ARR':'DEP'):p.sts,'C/S':p=>p.cs,'R':p=>p.rules==='V'?'V':'','ATYP':p=>p.type,'W':p=>p.w,'STD':p=>p.kind==='DEP'?parkedStand(p):p.std,'ADEP':p=>p.adep,'ADES':p=>p.ades,
  'DRWY':p=>p.kind==='DEP'?p.rwy:'','ARWY':p=>p.kind==='ARR'?p.rwy:'','RTE/AHD':p=>p.ahdg?'H'+p.ahdg:p.sid,'CFL':p=>fmtAlt(p.cfl),'XFL':p=>p.xfl,'COPX':p=>p.copx,'ASSR':p=>p.sq,
  'CLR':p=>p.clr?'OK':'','SI':p=>p.xfer?p.nx:p.owner?p.owner:nextOf(p),'RMK':p=>p.rmk,'EOBT':p=>p.eobt,'ETA':p=>p.app?hhmm(T0+T+etaSec(p)):'','HS':p=>p.hold?'HS':'','DSQ':p=>p.dsq||''};
 const FIL={
@@ -157,7 +157,7 @@ function openFpl(p){if(!p)return;if(fplEl)fplEl.remove();const e=document.create
  const close=()=>{e.remove();fplEl=null};$('fx').onclick=close;$('f_c').onclick=close;
  $('f_ok').onclick=()=>{p.cs=$('f_cs').value.trim().toUpperCase()||p.cs;p.adep=$('f_o').value.trim().toUpperCase();p.ades=$('f_d').value.trim().toUpperCase();p.alt_=$('f_a').value.trim().toUpperCase();p.tas=$('f_t').value;p.sq=$('f_sq').value||p.sq;const od=e.od,rt=$('f_r').value;
   if(p.kind==='DEP'){if(rt===p.route_&&od!==p.ades){const s_=bestSid(p.rwy,p.ades,p.type);if(s_){p.sid=s_[0];p.copx=s_[1]}p.route_=genRoute(p);applyRoute(p)}else{p.route_=rt}applyRoute(p)}else p.route_=rt;
-  p.remarks=$('f_rm').value;
+  p.remarks=$('f_rm').value;p.rules=e.querySelectorAll('input[name=frul]')[1].checked?'V':'I';
   if(p.kind==='DEP'){const a=parseInt($('f_al').value);if(a)p.xfl=a<=5000?'A'+String(Math.round(a/100)).padStart(2,'0'):String(Math.round(a/100)).padStart(3,'0')}close();list()}}
 let lastSel=null;
 function list(){if(clEl&&clEl._pull&&document.body.contains(clEl))clEl._pull();$('ac').innerHTML=planes.map(p=>`<div data-id="${p.id}" class="${p===sel?'s':''}">${p.cs} ${p.kind} ${p.sts||'---'} ${Math.round(p.spd)}kt</div>`).join('')||'<span style="color:var(--mu)">No aircraft</span>';

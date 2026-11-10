@@ -121,3 +121,6 @@ addEventListener('blur',pttStop);
  if(DIC){DIC.onPartial(({text})=>{$('rtx').value=text});DIC.onFinal(({text})=>{$('rtx').value='';tx(text)});DIC.onState(({state})=>{listening=state==='listening';setMic();if(!listening)$('rtx').value=''})}
  if(TTS)TTS.onState(()=>{})})();
 
+
+/* pilot calls 60 s (sim time) after pushback is complete */
+function pilotCalls(){for(const p of planes)if(p.pbT!=null&&!p.reqTaxi&&T-p.pbT>=60){p.reqTaxi=true;if(!p.route.length&&!p.pb&&!p.owner&&p.spd<1)pilot(p,p.cs+', request taxi')}}
