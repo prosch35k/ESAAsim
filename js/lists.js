@@ -104,7 +104,7 @@ const CFLS=['020','030','040','050','060','070','080','090','100'],XFLS=[];for(l
 const sidList=p=>(D.sids[p.rwy]||[]);
 function setSid(p,s_){p.sid=s_[0];p.copx=s_[1];p.ahdg='';if(p.route_)p.route_=genRoute(p)}
 function sidForFix(p,fix){const L=sidList(p),J=L.filter(s_=>s_[1]===fix&&(PROP.includes(p.type)||/[MJ]$/.test(s_[0])));return J[0]||L.find(s_=>s_[1]===fix)}
-function setRwy(p,r){if(p.rwy===r)return;if(p.kind==='ARR'&&(p.app||p.land||p.sts)){log(p.cs+': cannot change runway now');return}p.rwy=r;if(p.kind==='DEP'){p.force=false;const s_=bestSid(r,p.ades,p.type);if(s_)setSid(p,s_)}else{const t=r=='03'?[rw[0],rw[1]]:[rw[2],rw[3]];p.th=t}log(p.cs+' runway '+r)}
+function setRwy(p,r){if(p.rwy===r)return;if(p.kind==='ARR'&&(p.app||p.land||p.sts)){log(p.cs+': cannot change runway now');return}p.rwy=r;if(p.kind==='DEP'){forceRwy(p,r)}else{const t=r=='03'?[rw[0],rw[1]]:[rw[2],rw[3]];p.th=t}log(p.cs+' runway '+r)}
 function cellClick(e,n,btn){const td=e.target.closest('td[data-c]'),tr_=e.target.closest('tr[data-id]');if(!tr_)return;const p=planes.find(q=>q.id==tr_.dataset.id);if(!p)return;sel=p;list();if(!td||p.owner)return;
  td._tr=tr_.dataset.id;const c=td.dataset.c,A=ACT[c];if(!A||!A[btn])return;A[btn](p,e,n)}
 const ACT={
@@ -115,7 +115,7 @@ const ACT={
  'ADES':{L:p=>openFpl(p)},
  'DRWY':{L:(p,e)=>apList(e.target.closest('td'),'Assign',rwOpts(),p.rwy,v=>{setRwy(p,v);list()})},
  'ARWY':{L:(p,e)=>popup(e,'Arrival runway',['03','21'].map(r=>[r,()=>setRwy(p,r)]),p.rwy)},
- 'RTE/AHD':{L:(p,e)=>apList(e.target.closest('td'),'Assign SID',sidOpts(p,p.rwy),p.sid,v=>{const s_=(D.sids[p.rwy]||[]).find(x=>x[0]===v);if(s_)setSid(p,s_);list()}),
+ 'RTE/AHD':{L:(p,e)=>apList(e.target.closest('td'),'Assign SID',sidOpts(p,p.rwy),p.sid,v=>{const s_=(D.sids[p.rwy]||[]).find(x=>x[0]===v);if(s_)forceSid(p,s_);list()}),
             R:(p,e)=>apList(e.target.closest('td'),p.cs,ahdgOpts(),p.ahdg||null,v=>{p.ahdg=v;list()},true,rwFocus(p.rwy))},
  'CFL':{L:(p,e)=>apList(e.target.closest('td'),p.cs,optAlt(CFLOPT),p.cfl,v=>{p.cfl=v;if(!p.xfl)p.xfl=fmtAlt(v);list()},true)},
  'XFL':{L:(p,e)=>apList(e.target.closest('td'),p.cs,optAlt(XFLOPT),/^A/.test(p.xfl||'')?'0'+p.xfl.slice(1):p.xfl,v=>{p.xfl=fmtAlt(v);list()},true,/^A/.test(p.xfl||'')?'0'+p.xfl.slice(1):(p.xfl||'330'))},

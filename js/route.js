@@ -39,9 +39,18 @@ function expandRoute(o){const{kind,rwy,route,adep,ades,sid,eobt,tas}=o,rows=[],G
    - otherwise: first point with a SID in the active departure runway -> that SID; else the bare point is shown as RTE */
 function applyRoute(p){if(p.kind!=='DEP')return;
  const tk=(p.route_||'').toUpperCase().split(/\s+/).filter(t=>t&&!isLvl(t)&&t!=='DCT'&&t!=='ESGG');if(!tk.length)return;
+ let rF=null;const m0=tk[0].match(/^ESGG\/(\d\d)/);if(m0){rF=m0[1];tk.shift();if(!tk.length){p.rwy=rF;p.force=true;return}}
  const[nmz,sfx]=tk[0].split('/'),rs=/^\d\d[LRC]?$/.test(sfx||'')?sfx.slice(0,2):null;
  for(const r of rs?[rs,'03','21']:['03','21']){const s=(D.sids[r]||[]).find(x=>x[0]===nmz);
   if(s){p.rwy=r;p.sid=s[0];p.copx=s[1];p.force=true;p.ahdg='';return}}
- p.force=false;p.rwy=rwyDep;let L=(D.sids[rwyDep]||[]).filter(x=>x[1]===nmz&&!/^VFR/.test(x[0]));
+ const R=rF||rwyDep;p.force=!!rF;p.rwy=R;let L=(D.sids[R]||[]).filter(x=>x[1]===nmz&&!/^VFR/.test(x[0]));
  if(!PROP.includes(p.type)){const J=L.filter(x=>/[MJ]$/.test(x[0]));if(J.length)L=J}
  if(L.length){p.sid=L[0][0];p.copx=L[0][1]}else{p.sid=nmz;p.copx=nmz}p.ahdg=''}
+/* route text editing for forced SID / runway */
+function routeHead(p){const t=(p.route_||genRoute(p)).toUpperCase().split(/\s+/).filter(Boolean),lead=[];let was=null;while(t.length&&isLvl(t[0].split('/')[0]))lead.push(t.shift());
+ if(t.length&&/^ESGG(\/\d\d)?$/.test(t[0]))t.shift();
+ if(t.length){const n=t[0].split('/')[0],s=['03','21'].map(r=>(D.sids[r]||[]).find(x=>x[0]===n)).find(Boolean);if(s){was=s;t.shift()}}
+ return{t,was,lead}}
+function forceSid(p,s_){const{t,was,lead}=routeHead(p);if(was&&t[0]===was[1])t.shift();if(t[0]===s_[1])t.shift();
+ p.route_=[...lead,s_[0]+'/'+p.rwy,...t].join(' ');applyRoute(p)}
+function forceRwy(p,r){const{t,was,lead}=routeHead(p);if(was)t.unshift(was[1]);p.route_=[...lead,'ESGG/'+r,...t].join(' ');applyRoute(p)}
