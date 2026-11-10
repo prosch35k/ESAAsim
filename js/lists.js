@@ -50,7 +50,7 @@ function popup(ev,title,items,cur){closeMenu();const m=document.createElement('d
  items.forEach(([lb,fn])=>{const d=document.createElement('div');d.className='mi'+(lb===cur?' cur':'');d.textContent=lb||'(none)';d.onclick=()=>{closeMenu();fn();list()};m.appendChild(d)});
  document.body.appendChild(m);const r=m.getBoundingClientRect();m.style.left=Math.max(0,Math.min(ev.clientX,innerWidth-r.width-4))+'px';m.style.top=Math.max(0,Math.min(ev.clientY,innerHeight-r.height-4))+'px'}
 function editCell(ev,val,max,fn){closeMenu();const td0=ev.target.closest('td'),tr0=ev.target.closest('tr');if(!td0||!tr0)return;document.getElementById('cellin')?.remove();const td=document.querySelector(`.win tr[data-id="${tr0.dataset.id}"] td[data-c="${td0.dataset.c}"]`)||td0,r=td.getBoundingClientRect(),i=document.createElement('input');i.id='cellin';i.value=val||'';i.maxLength=max;
- i.style.cssText=`position:fixed;z-index:60;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;box-sizing:border-box;font:inherit;font-size:13px;padding:0 4px;margin:0;background:#fff;color:#000;border:1px solid #888;border-radius:0;outline:none`;
+ i.style.cssText=`position:fixed;z-index:60;left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px;box-sizing:border-box;font:inherit;font-size:13px;padding:0 4px;margin:0;background:#fff;color:#000;border:1px solid #888;border-radius:0;outline:none;text-transform:uppercase`;
  document.body.appendChild(i);i.focus();i.select();let done=false;const fin=ok=>{if(done)return;done=true;if(ok)fn(i.value.trim());i.remove();list()};
  i.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')fin(true);else if(e.key==='Escape')fin(false)};i.onkeyup=e=>e.stopPropagation();i.onblur=()=>fin(true);i.onpointerdown=e=>e.stopPropagation()}
 function ask(ev,title,val,fn){closeMenu();const m=document.createElement('div');m.id='pm';pmEl=m;m.innerHTML=`<div class="pt">${title}</div><div class="pi"><input value="${(val||'').toString().replace(/"/g,'&quot;')}"><button>OK</button></div>`;
@@ -122,7 +122,7 @@ const ACT={
          R:p=>{p.leg=!p.leg}},
  'ASSR':{L:(p,e)=>apKeypad(e.target.closest('td'),p,p.sq,v=>{if(/^[0-7]{4}$/.test(v))p.sq=v;list()},newSq)},
  'CLR':{L:(p,e)=>{if(p.kind==='DEP')openClr(p,e)}},
- 'RMK':{L:(p,e)=>editCell(e,p.rmk,12,v=>{p.rmk=v;if(sel===p)$('rmk').value=p.rmk})},
+ 'RMK':{L:(p,e)=>editCell(e,p.rmk,12,v=>{p.rmk=v.toUpperCase();if(sel===p)$('rmk').value=p.rmk})},
  'EOBT':{L:(p,e)=>editCell(e,p.eobt,4,v=>{if(/^([01]\d|2[0-3])[0-5]\d$/.test(v))p.eobt=v})},
  'SI':{L:(p,e)=>{if(p.owner||p.xfer)return;const on=CTRL.filter(c=>c.on);apList(e.target.closest('td'),p.cs,[['(none)','-']].concat(on.map(c=>[`<span>${c.id}</span><span>${c.cs}</span>`,c.id])),nextOf(p)||null,v=>{p.nxm=v;list()},true)},
   R:p=>{startXfer(p,nextOf(p))}},

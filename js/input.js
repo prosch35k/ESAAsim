@@ -16,7 +16,7 @@ const STATES=[['','none'],['FRQ','FRQ'],['S/U','S/U'],['S/P','S/P'],['TXO','TXO'
 $('stb').innerHTML=STATES.map(s=>`<button data-st="${s[0]}">${s[1]}</button>`).join('');
 $('stb').onclick=e=>{if(e.target.dataset.st!=null&&sel){setSts(sel,e.target.dataset.st);list()}};
 $('clrnc').onclick=e=>{if(sel&&sel.kind==='DEP')openClr(sel,e)};
-$('rmk').oninput=()=>{if(sel){sel.rmk=$('rmk').value.slice(0,12);renderLists()}};
+$('rmk').oninput=()=>{if(sel){sel.rmk=$('rmk').value.toUpperCase().slice(0,12);$('rmk').value=sel.rmk;renderLists()}};
 function rwLabel(){return 'ESGG RWY '+(rwyDep===rwyArr?rwyDep:rwyDep+'/'+rwyArr)}
 $('ocb').onclick=()=>{if(ocEl){ocEl.remove();ocEl=null;return}const e=document.createElement('div');e.className='fpl';ocEl=e;e.style.width='300px';e.style.left='320px';e.style.top='40px';
  const draw=()=>{e.innerHTML=`<div class="th"><b>Other controllers</b><span id="ocx">✕</span></div><div class="bd"><div class="rt" style="height:auto"><table><thead><tr><th>Online</th><th>Callsign</th><th>SI</th></tr></thead><tbody>${CTRL.map((c,i)=>`<tr><td><input type="checkbox" data-i="${i}" ${c.on?'checked':''}></td><td>${c.cs}</td><td>${c.id}</td></tr>`).join('')}</tbody></table></div></div>`;
