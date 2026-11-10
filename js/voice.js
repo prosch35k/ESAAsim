@@ -17,7 +17,7 @@ function speechOf(p,t){const m=(p.cs.match(/^[A-Z]+/)||[''])[0],num=p.cs.slice(m
  return t.replace(/\b[A-Z]\b/g,c=>PHN[c]||c).replace(/\bRWY\b/g,'runway')}
 const hashN=s=>[...s].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
 const VOICES=['buttery','airy','glassy','rounded'];
-const voiceOf=p=>VOICES[hashN(p.cs)%4],rateOf=p=>1.08+(hashN(p.cs+'r')%25)/100;
+const voiceOf=p=>VOICES[hashN(p.cs)%4],rateOf=p=>1.2+(hashN(p.cs+'r')%25)/100;
 let DIC=null,TTS=null,SMP=null,listening=false;
 const SQ=[];let sqRun=false;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -106,9 +106,9 @@ async function tx(text){text=text.trim();if(!text)return;rlog('tx','ATC',text);l
  if(!c.act)c.act='?';exec(c)}
 $('rsend').onclick=()=>{const i=$('rtx');const v=i.value;i.value='';tx(v)};
 $('rtx').onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')$('rsend').onclick()};$('rtx').onkeyup=e=>e.stopPropagation();
-function setMic(){const b=$('mic');b.classList.toggle('on',listening);b.textContent=listening?'● Listening…':'🎙 Hold to talk (Left Ctrl)'}
+function setMic(){const b=$('mic');b.classList.toggle('on',listening&&!!sim);b.classList.toggle('pz',!sim);b.textContent=!sim?'UNPAUSE SIM FOR PTT':listening?'● Listening…':'PTT (LCtrl)'}
 let pttDown=false;
-function pttStart(){if(!DIC||pttDown)return;pttDown=true;if(TTS)TTS.stop();DIC.start().catch(e=>{pttDown=false;if(e&&e.code==='not_granted'){DIC=null;$('mic').style.display='none'}})}
+function pttStart(){if(!DIC||pttDown||!sim)return;pttDown=true;if(TTS)TTS.stop();DIC.start().catch(e=>{pttDown=false;if(e&&e.code==='not_granted'){DIC=null;$('mic').style.display='none'}})}
 function pttStop(){if(!pttDown)return;pttDown=false;if(DIC)DIC.stop().catch(()=>{})}
 $('mic').onpointerdown=e=>{e.preventDefault();pttStart()};$('mic').onpointerup=pttStop;$('mic').onpointerleave=pttStop;
 addEventListener('keydown',e=>{if(e.code==='ControlLeft'&&!e.repeat)pttStart()});
@@ -117,7 +117,7 @@ addEventListener('blur',pttStop);
 (async()=>{if(!(window.claude&&claude.use))return;
  try{DIC=await claude.use('dictation')}catch(e){}try{TTS=await claude.use('tts')}catch(e){}try{SMP=await claude.use('sample')}catch(e){}
  $('mic').style.display=DIC?'':'none';$('pvl').style.display=TTS?'':'none';
- $('rhint').textContent=DIC?'Hold Left Ctrl (or the 🎙 button) while you speak, e.g. “Scandinavian 123, taxi to holding point runway two one via Yankee”. Voice calls only move the aircraft and get a readback; strips, status and tags are never changed.':'Voice input is not available here — type the call below.';
+ $('rhint').textContent=DIC?'Hold Left Ctrl (or the PTT button) while you speak, e.g. “Scandinavian 123, taxi to holding point runway two one via Yankee”. Voice calls only move the aircraft and get a readback; strips, status and tags are never changed.':'Voice input is not available here — type the call below.';
  if(DIC){DIC.onPartial(({text})=>{$('rtx').value=text});DIC.onFinal(({text})=>{$('rtx').value='';tx(text)});DIC.onState(({state})=>{listening=state==='listening';setMic();if(!listening)$('rtx').value=''})}
  if(TTS)TTS.onState(()=>{})})();
 
