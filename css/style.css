@@ -48,8 +48,8 @@ button{cursor:pointer}button.on{background:var(--ac);color:#fff;border-color:var
 #sb{position:fixed;right:8px;top:8px;z-index:40;width:34px;height:34px;padding:0;display:flex;align-items:center;justify-content:center;background:rgba(36,36,40,.93);border:1px solid #5a5a60;border-radius:4px;color:#e6e6e2}#sb.on{background:var(--ac)}
 #side{position:fixed;right:0;top:0;bottom:0;z-index:35;padding-top:52px;display:none;box-shadow:-4px 0 12px rgba(0,0,0,.4)}#side.open{display:block}
 
-.tm{position:fixed;z-index:230;width:128px;background:#1e4d41;border:1px solid #0b2a23;box-shadow:2px 2px 8px rgba(0,0,0,.5);font:600 13px "Segoe UI","Lucida Sans Unicode",sans-serif;color:#fff;user-select:none;padding:1px}
-.tm .tt{background:#103a31;color:#d6efe8;text-align:center;font-size:11px;font-weight:400;padding:1px 4px;border:1px solid #2f6b5c}
-.tm .tsb{display:flex;justify-content:space-between;align-items:center;margin:3px 2px;padding:1px 6px;background:#2b6a5b;border:1px solid #7fb5a7;cursor:pointer}.tm .tsb i{font-style:normal;font-size:10px}.tm .tsb.dis{color:#8fb0a7;cursor:default}
-.tm .tsep{text-align:center;color:#8fb8ac;font-size:11px;letter-spacing:1px;overflow:hidden;white-space:nowrap;line-height:13px;font-weight:400}
-.tm .ti{text-align:center;padding:1px 6px;cursor:pointer}.tm .ti:not(.dis):hover{background:#2b6a5b}.tm .ti.dis{color:#78988f;cursor:default}
+.tm{position:fixed;z-index:230;width:84px;background:#a4a4a4;border:1px solid #e0e0e0;border-color:#e0e0e0 #555 #555 #e0e0e0;box-shadow:2px 2px 6px rgba(0,0,0,.45);font:600 11px "Lucida Sans Unicode","Segoe UI",sans-serif;color:#000;user-select:none;padding:1px}
+.tm .tt{background:#8c8c8c;color:#2f2f2f;text-align:center;font-size:10px;font-weight:400;padding:0 4px;margin-bottom:1px}
+.tm .tsb{display:flex;justify-content:center;align-items:center;margin:1px;padding:0 4px;background:#b8b8b8;border:1px solid #8a8a8a;cursor:pointer;line-height:14px}.tm .tsb:hover{background:#fff}.tm .tsb.dis{color:#6f6f6f;cursor:default}.tm .tsb.dis:hover{background:#b8b8b8}
+.tm .tsep{text-align:center;color:#6a6a6a;font-size:9px;letter-spacing:1px;overflow:hidden;white-space:nowrap;line-height:9px;font-weight:400}
+.tm .ti{text-align:center;padding:0 4px;line-height:14px;cursor:pointer}.tm .ti:not(.dis):hover{background:#fff}.tm .ti.dis{color:#707070;cursor:default}

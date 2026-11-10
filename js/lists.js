@@ -170,7 +170,7 @@ $('ac').onclick=e=>{const id=e.target.dataset.id;if(id){sel=planes.find(p=>p.id=
 function tagMenu(p,e){closeAp();closeMenu();const m=document.createElement('div');m.className='tm';apEl=m;
  const lock=!!p.owner,nx=p.xfer?p.nx:nextOf(p),on=CTRL.filter(c=>c.on),mine=p.own&&!p.xfer,box=boxAt(e);
  const items=[['assume','Assume',!lock&&(p.xfer||!p.own)],['trans','Trans '+(p.own&&nx?nx:'---'),!lock&&mine&&!!nx],['man','Man Trf',!lock&&mine&&on.length>0],['free','Free',!lock&&mine],['fpl','FPL',!lock],['stand','Stand',!lock&&p.kind==='ARR']];
- m.innerHTML=`<div class="tt">${p.cs}</div><div class="tsb${lock?' dis':''}" data-a="sts"><span>${p.sts||'---'}</span><i>\u25be</i></div><div class="tsep">- - - - - - - - - - - -</div>`+items.map(([a,l,en])=>`<div class="ti${en?'':' dis'}" data-a="${a}">${l}</div>`).join('');
+ m.innerHTML=`<div class="tt">${p.cs}</div><div class="tsb${lock?' dis':''}" data-a="sts">${p.sts||'---'}</div><div class="tsep">- - - - - - - - - - - -</div>`+items.map(([a,l,en])=>`<div class="ti${en?'':' dis'}" data-a="${a}">${l}</div>`).join('');
  m.onclick=ev=>{const t=ev.target.closest('[data-a]');if(!t||t.classList.contains('dis'))return;const a=t.dataset.a;
   if(a==='sts'){const it=STSL.filter(([l])=>p.kind==='ARR'?(!p.app&&(l==='TXI'||l==='PRK')):(l!=='TXI'&&l!=='PRK')).map(([l,v])=>[l,v]);if(p.kind==='ARR'&&p.app)return;apList(box,'STS',it,p.sts||'',v=>{setSts(p,v);list()},true);return}
   closeAp();
@@ -181,4 +181,5 @@ function tagMenu(p,e){closeAp();closeMenu();const m=document.createElement('div'
   else if(a==='fpl')openFpl(p);
   else if(a==='stand')stdMenu(p,e);
   list()};
- placeAt(m,e.clientX+4,e.clientY)}
+ document.body.appendChild(m);const cb=cv.getBoundingClientRect(),cs=p._cs,tx=cs?cb.left+cs[0]+cs[2]/2:e.clientX,ty=cs?cb.top+cs[1]+cs[3]/2:e.clientY,sb=m.querySelector('.tsb').getBoundingClientRect(),mr=m.getBoundingClientRect();
+ m.style.left=Math.max(0,Math.min(tx-(sb.left-mr.left)-sb.width/2,innerWidth-mr.width-4))+'px';m.style.top=Math.max(0,Math.min(ty-(sb.top-mr.top)-sb.height/2,innerHeight-mr.height-4))+'px'}
