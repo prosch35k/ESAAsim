@@ -14,6 +14,7 @@ function draw(){g.setTransform(1,0,0,1,0,0);g.fillStyle=C.COLOR_Terrain1;g.fillR
   g.strokeStyle='rgb(60,200,120)';g.lineWidth=2;g.setLineDash([]);g.beginPath();g.moveTo(...a);g.lineTo(...b);
   if(ap){const bx=(ap[1]-12.2832)*111320*Math.cos(57.6629*Math.PI/180),by=(ap[0]-57.6629)*111132,dx=bx-fx,dy=by-fy,l=Math.hypot(dx,dy)||1,e=tr(fx+dx/l*30000,fy+dy/l*30000);g.lineTo(...e)}g.stroke();
   g.fillStyle='rgb(60,200,120)';g.font='600 12px system-ui,sans-serif';g.fillText(p.copx,b[0]+6,b[1]-6)}
+ g.fillStyle='#fff';for(const p of planes)if(p.hist)for(const h of p.hist){const u=tr(h[0],h[1]);g.fillRect(Math.round(u[0]),Math.round(u[1]),1,1)}
  for(const p of planes.slice().sort((a,b)=>(a===sel)-(b===sel))){const q=tr(p.x,p.y),on=p===sel;
   if(p.route.length){g.strokeStyle=C.COLOR_Taxiway;g.setLineDash([4,4]);g.beginPath();g.moveTo(...q);p.route.forEach(r=>g.lineTo(...tr(r[0],r[1])));g.stroke();g.setLineDash([])}
   g.save();g.translate(q[0],q[1]);g.rotate((p.hdg+D.rot)*Math.PI/180);g.fillStyle=p.hold?C.COLOR_Stopbar:C.COLOR_OtherMarking;g.beginPath();g.moveTo(0,-8);g.lineTo(5,6);g.lineTo(0,3);g.lineTo(-5,6);g.fill();g.restore();
