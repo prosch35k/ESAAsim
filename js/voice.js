@@ -8,12 +8,13 @@ const vw=i=>VIA&&VIA.size?(TWL[i].size&&[...TWL[i]].some(x=>VIA.has(x))?.3:1.6):
 const TELE={WIF:'Widerøe',FPO:'french post',AFR:'airfrans',SAS:'scandinavian',NSZ:'norwegian',FIN:'finnair',DLH:'lufthansa',RYR:'ryanair',WZZ:'wizz',KLM:'klm',BAW:'speedbird',EZY:'easy',AUI:'ukraine international'};
 const NUMW={zero:'0',one:'1',two:'2',three:'3',tree:'3',four:'4',fower:'4',five:'5',fife:'5',six:'6',seven:'7',eight:'8',nine:'9',niner:'9'};
 const PHON={alpha:'a',alfa:'a',bravo:'b',charlie:'c',delta:'d',echo:'e',foxtrot:'f',golf:'g',hotel:'h',india:'i',juliet:'j',juliett:'j',kilo:'k',lima:'l',mike:'m',november:'n',oscar:'o',papa:'p',quebec:'q',romeo:'r',sierra:'s',tango:'t',uniform:'u',victor:'v',whiskey:'w',xray:'x','x-ray':'x',yankee:'y',zulu:'z'};
+const PHONR={};for(const[w,c]of Object.entries(PHON))(PHONR[c]=PHONR[c]||[]).push(w.replace('-','[- ]?'));
 const PHN={A:'Alfa',B:'Bravo',C:'Charlie',D:'Delta',E:'Echo',F:'Foxtrot',G:'Golf',H:'Hotel',J:'Juliett',K:'Kilo',L:'Lima',M:'Mike',N:'November',O:'Oscar',P:'Papa',Q:'Quebec',R:'Romeo',S:'Sierra',T:'Tango',U:'Uniform',V:'Victor',W:'Whiskey',X:'X-ray',Y:'Yankee',Z:'Zulu'};
 const DW=['zero','one','two','three','four','five','six','seven','eight','niner'];
 const spD=s=>String(s).split('').map(c=>DW[+c]??c).join(' ');
 const CITY={ESSA:'Arlanda',ENGM:'Oslo',EKCH:'Copenhagen',EFHK:'Helsinki',EGLL:'Heathrow',EHAM:'Amsterdam',EDDF:'Frankfurt',LFPG:'Paris',LEMD:'Madrid',LOWW:'Vienna',EPWA:'Warsaw',LSZH:'Zurich',EHRD:'Rotterdam',ESKN:'Skavsta',ENTO:'Torp',EGSS:'Stansted',EDDM:'Munich',LEMG:'Malaga',ESGG:'Landvetter',ESSB:'Bromma',ESMS:'Malmo',ESGP:'Save',EDDN:'Nuremberg',ESTA:'Angelholm',EKDK:'Copenhagen'};
 function speechOf(p,t){const m=(p.cs.match(/^[A-Z]+/)||[''])[0],num=p.cs.slice(m.length);
- t=t.split(p.cs).join((TELE[m]||m)+' '+spD(num));
+ t=t.split(p.cs).join(!num&&m.length===5?m.split('').map(c=>PHN[c]||c).join(' '):(TELE[m]||m)+' '+spD(num));
  t=t.replace(/(squawk )(\d{4})/gi,(a,b,c)=>b+spD(c)).replace(/\b(\d)000\b/g,(a,b)=>DW[b]+' thousand').replace(/\b(\d{2})000\b/g,(a,b)=>b+' thousand').replace(/\b0\d\b/g,a=>spD(a)).replace(/\b\d+\b/g,a=>spD(a));
  t=t.replace(/\b([A-Z]{3,})(\d)([A-Z])\b/g,(a,w,n,l)=>w+' '+DW[+n]+' '+PHN[l]).replace(/\b[A-Z]{4}\b/g,m=>CITY[m]||(typeof NAV!=='undefined'&&NAV.ap&&NAV.ap[m])||m.split('').map(c=>PHN[c]).join(' ')).replace(/\b(\d+)([A-Z])\b/g,(a,n,l)=>spD(n)+' '+PHN[l]);
  return t.replace(/\b[A-Z]\b/g,c=>PHN[c]||c).replace(/\bRWY\b/g,'runway')}
@@ -37,7 +38,8 @@ function norm(s){let t=s.toLowerCase();for(const[r,w]of SVW)t=t.replace(r,w);t=t
 function findCs(s){let best=null,bs=0,span=null;const ns=s.replace(/\s/g,'');
  for(const p of planes){const m=(p.cs.match(/^[A-Z]+/)||[''])[0],num=p.cs.slice(m.length).toLowerCase(),tl=(TELE[m]||m).toLowerCase().replace('ø','[øo]');let sc=0,sp=null;
   const re=new RegExp('\\b(?:'+tl+'|'+m.toLowerCase()+')\\s*(?:'+num+')(?!\\d)');const mm=re.exec(s);
-  if(mm){sc=3;sp=mm[0]}else if(ns.includes(p.cs.toLowerCase()))sc=2;
+  let m2=null;if(!mm&&!num&&m.length===5){m2=new RegExp('\\b'+[...m.toLowerCase()].map(c=>'(?:'+(PHONR[c]||[c]).join('|')+')').join('\\s+')+'\\b').exec(s)}
+  if(mm){sc=3;sp=mm[0]}else if(m2){sc=3;sp=m2[0]}else if(ns.includes(p.cs.toLowerCase()))sc=2;
   if(sc>bs){bs=sc;best=p;span=sp}}
  return{p:best,s:span?s.replace(span,' '):s}}
 function parseLocal(text){let s=norm(text);const f=findCs(s);s=f.s;const p=f.p||sel;
@@ -100,7 +102,7 @@ function exec(c){const p=c.p;
  case'contact':{const n=nextOf(p),ct=CTRL.find(x=>x.id===n),nm=/approach|departure/.test(c.raw||'')||(ct&&ct.cs==='ESGG_E_APP')?'approach':'tower';t='Contact '+nm+(c.freq?' '+c.freq:'')+', '+cs;break}
  case'clearance':{if(p.kind!=='DEP'||air){t='Unable, '+cs;break}
   const sid=c.sid||p.sid,al=c.alt||p.cfl||initCfl(p,sid),n=parseInt(al),sq=c.sq||p.sq;
-  p.awaitRb=true;p.vclr=true;t='Cleared to '+p.ades+(sid?' via '+sid+' departure':'')+(c.alt?', climb '+(n<=50?n*100+' feet':'flight level '+n):'')+(sq?', squawk '+sq:'')+', '+cs;break}
+  if(p.rules!=='V'){p.awaitRb=true;p.cfmAsked=false;p.rbAt=T}p.vclr=true;t='Cleared to '+p.ades+(sid?' via '+sid+' departure':'')+(c.alt?', climb '+(n<=50?n*100+' feet':'flight level '+n):'')+(sq?', squawk '+sq:'')+', '+cs;break}
  default:t='Say again, '+cs}
  list();pilot(p,t)}
 async function viaClaude(text){if(!SMP)return null;
@@ -135,6 +137,7 @@ addEventListener('blur',pttStop);
 
 /* pilot calls 60 s (sim time) after pushback is complete */
 function pilotCalls(){for(const p of planes){if(p.owner||p.air||p.app||p.land)continue;
+ if(p.awaitRb&&!p.cfmAsked&&p.rbAt!=null&&T-p.rbAt>=15){p.cfmAsked=true;askRadio(p,p.cs+', confirm our readback was correct?')}
  if(p.pbT!=null&&!p.reqTaxi&&T-p.pbT>=60){p.reqTaxi=true;if(!p.route.length&&!p.pb&&p.spd<1)askRadio(p,p.cs+', request taxi')}
  if(p.kind==='DEP'&&p.reqClrAt!=null&&!p.clrAsked&&T>=p.reqClrAt&&!p.pushed&&p.spd<1){p.clrAsked=true;
   if(p.rules==='V'){p.pushReqAt=T}else askRadio(p,'Landvetter Ground, '+p.cs+', stand '+(p.std||'')+', type '+p.type+', information '+ATIS.l+', QNH '+ATIS.q+', request clearance to '+p.ades+'.')}
