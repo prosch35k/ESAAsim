@@ -156,7 +156,7 @@ function openFpl(p){if(!p)return;if(fplEl)fplEl.remove();const e=document.create
   p.remarks=$('f_rm').value;
   if(p.kind==='DEP'){const a=parseInt($('f_al').value);if(a)p.xfl=a<=5000?'A'+String(Math.round(a/100)).padStart(2,'0'):String(Math.round(a/100)).padStart(3,'0')}close();list()}}
 let lastSel=null;
-function list(){$('ac').innerHTML=planes.map(p=>`<div data-id="${p.id}" class="${p===sel?'s':''}">${p.cs} ${p.kind} ${p.sts||'---'} ${Math.round(p.spd)}kt</div>`).join('')||'<span style="color:var(--mu)">No aircraft</span>';
+function list(){planes.forEach(p=>{if(p.kind==='DEP'&&!p.cfl&&/^(MISVI3P|SOJWI1P)$/.test(p.sid||''))p.cfl='040'});$('ac').innerHTML=planes.map(p=>`<div data-id="${p.id}" class="${p===sel?'s':''}">${p.cs} ${p.kind} ${p.sts||'---'} ${Math.round(p.spd)}kt</div>`).join('')||'<span style="color:var(--mu)">No aircraft</span>';
  $('clk').textContent=clockStr(T0+T);updateAlerts();renderLists();
  [...$('stb').children].forEach(b=>b.classList.toggle('on',!!sel&&sel.sts===b.dataset.st));
  $('clrnc').classList.toggle('on',!!(sel&&sel.clr));[...$('stb').children].forEach(b=>b.disabled=!!sel&&(sel.kind==='DEP'?(b.dataset.st==='TXI'||b.dataset.st==='PRK'):(sel.app||!(b.dataset.st==='TXI'||b.dataset.st==='PRK'))));

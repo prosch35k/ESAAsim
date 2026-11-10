@@ -29,7 +29,7 @@ function expandRoute(o){const{kind,rwy,route,adep,ades,sid,eobt,tas}=o,rows=[],G
   if(k.t==='aw'){aw=k.v;continue}
   if(k.t==='sid')continue;
   if(aw&&cur!==k.v){const pth=awPath(aw,cur,k.v);
-   if(pth){pth.slice(1).forEach(n=>add(n,aw,'ok'))}else add(k.v,aw,posOf(k.v)?'not on airway':'unknown');aw=null}
-  else{add(k.v,'DCT',posOf(k.v)?'':'unknown')}}
+   if(pth){pth.slice(1).forEach(n=>add(n,aw,'ok'))}else add(k.v,aw,posOf(k.v)?'not on airway':'');aw=null}
+  else{add(k.v,'DCT','')}}
  if(cur!==(kind==='DEP'?ades:'ESGG')){add(kind==='DEP'?ades:'ESGG','DCT','')}
  return rows}
