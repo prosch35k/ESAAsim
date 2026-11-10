@@ -26,7 +26,8 @@ async function pump(){if(sqRun)return;sqRun=true;
  sqRun=false}
 function rlog(cls,who,t){const d=document.createElement('div');d.className=cls;d.textContent=clockStr(T0+T)+' '+who+': '+t;const b=$('rl');b.prepend(d);while(b.children.length>40)b.lastChild.remove()}
 function pilot(p,t){setTimeout(()=>{rlog('rp',p.cs,t);if(TTS&&$('pv').checked){SQ.push({p,t});pump()}},700+Math.random()*500)}
-function norm(s){let t=s.toLowerCase().replace(/[.,;:!?"]/g,' ').replace(/(\d)\s*(?:decimal|point)\s*(\d)/g,'$1.$2').replace(/-/g,' ').replace(/\s+/g,' ').trim();
+const SVW=[[/hållpunkt(en)?|hållplats(en)?|väntplats(en)?|väntpunkt(en)?/g,'holding point'],[/klarerad för start|startklarering|start klar/g,'cleared for takeoff'],[/klarerad för landning|klarerad att landa/g,'cleared to land'],[/ställ upp|ställ dig upp|gå in på banan/g,'line up'],[/vänta/g,'wait'],[/taxa|taxi/g,'taxi'],[/pushback|backa ut|skjut ut/g,'pushback'],[/starta motorerna|starta motorer|motorstart|starttillstånd/g,'start up'],[/stå kvar|stanna|håll position/g,'hold position'],[/fortsätt/g,'continue'],[/kontakta/g,'contact'],[/frekvens/g,'frequency'],[/bana/g,'runway'],[/\b(plats|gate|stand)\b/g,'stand'],[/norr/g,'north'],[/söder|syd/g,'south'],[/\bnoll\b/g,'zero'],[/\bett\b/g,'one'],[/(?<![a-zåäö])två(?![a-zåäö])/g,'two'],[/\btre\b/g,'three'],[/\bfyra\b/g,'four'],[/\bfem\b/g,'five'],[/\bsex\b/g,'six'],[/\bsju\b/g,'seven'],[/(?<![a-zåäö])åtta(?![a-zåäö])/g,'eight'],[/\bnio\b/g,'nine'],[/\bdecimal\b|\bkomma\b/g,'decimal'],[/\bsvara\b/g,'']];
+function norm(s){let t=s.toLowerCase();for(const[r,w]of SVW)t=t.replace(r,w);t=t.replace(/[.,;:!?"]/g,' ').replace(/(\d)\s*(?:decimal|point)\s*(\d)/g,'$1.$2').replace(/-/g,' ').replace(/\s+/g,' ').trim();
  t=t.split(' ').map(w=>NUMW[w]??w).join(' ');t=t.replace(/(\d)\s+(?=\d)/g,'$1').replace(/(\d)\s*thousand/g,'$1000');return t}
 function findCs(s){let best=null,bs=0,span=null;const ns=s.replace(/\s/g,'');
  for(const p of planes){const m=(p.cs.match(/^[A-Z]+/)||[''])[0],num=p.cs.slice(m.length).toLowerCase(),tl=TELE[m]||m.toLowerCase();let sc=0,sp=null;
@@ -107,8 +108,11 @@ async function tx(text){text=text.trim();if(!text)return;rlog('tx','ATC',text);l
 $('rsend').onclick=()=>{const i=$('rtx');const v=i.value;i.value='';tx(v)};
 $('rtx').onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')$('rsend').onclick()};$('rtx').onkeyup=e=>e.stopPropagation();
 function setMic(){const b=$('mic');b.classList.toggle('on',listening&&!!sim);b.classList.toggle('pz',!sim);b.textContent=!sim?'UNPAUSE SIM FOR PTT':listening?'● Listening…':'PTT (LCtrl)'}
-let pttDown=false;
-function pttStart(){if(!DIC||pttDown||!sim)return;pttDown=true;if(TTS)TTS.stop();DIC.start().catch(e=>{pttDown=false;if(e&&e.code==='not_granted'){DIC=null;$('mic').style.display='none'}})}
+let pttDown=false,LANG='en';
+const setLang=l=>{LANG=l;$('lng').textContent=l.toUpperCase();$('lng').title=l==='en'?'Speech recognition: English (click for Swedish)':'Taligenkänning: svenska (click for English)'};
+$('lng').onclick=()=>setLang(LANG==='en'?'sv':'en');
+setLang('en');
+function pttStart(){if(!DIC||pttDown||!sim)return;pttDown=true;if(TTS)TTS.stop();DIC.start({language:LANG}).catch(e=>{pttDown=false;if(e&&e.code==='not_granted'){DIC=null;$('mic').style.display='none';$('lng').style.display='none'}else if(e&&e.code==='unavailable'&&LANG!=='en'){setLang('en');rlog('rx','ATC','Swedish dictation is not available here — switched to English')}})}
 function pttStop(){if(!pttDown)return;pttDown=false;if(DIC)DIC.stop().catch(()=>{})}
 $('mic').onpointerdown=e=>{e.preventDefault();pttStart()};$('mic').onpointerup=pttStop;$('mic').onpointerleave=pttStop;
 addEventListener('keydown',e=>{if(e.code==='ControlLeft'&&!e.repeat)pttStart()});
@@ -116,7 +120,7 @@ addEventListener('keyup',e=>{if(e.code==='ControlLeft')pttStop()});
 addEventListener('blur',pttStop);
 (async()=>{if(!(window.claude&&claude.use))return;
  try{DIC=await claude.use('dictation')}catch(e){}try{TTS=await claude.use('tts')}catch(e){}try{SMP=await claude.use('sample')}catch(e){}
- $('mic').style.display=DIC?'':'none';$('pvl').style.display=TTS?'':'none';
+ $('mic').style.display=DIC?'':'none';$('lng').style.display=DIC?'':'none';$('pvl').style.display=TTS?'':'none';
  $('rhint').textContent=DIC?'Hold Left Ctrl (or the PTT button) while you speak, e.g. “Scandinavian 123, taxi to holding point runway two one via Yankee”. Voice calls only move the aircraft and get a readback; strips, status and tags are never changed.':'Voice input is not available here — type the call below.';
  if(DIC){DIC.onPartial(({text})=>{$('rtx').value=text});DIC.onFinal(({text})=>{$('rtx').value='';tx(text)});DIC.onState(({state})=>{listening=state==='listening';setMic();if(!listening)$('rtx').value=''})}
  if(TTS)TTS.onState(()=>{})})();
