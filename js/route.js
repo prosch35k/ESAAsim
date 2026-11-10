@@ -33,3 +33,15 @@ function expandRoute(o){const{kind,rwy,route,adep,ades,sid,eobt,tas}=o,rows=[],G
   else{add(k.v,'DCT','')}}
  if(cur!==(kind==='DEP'?ades:'ESGG')){add(kind==='DEP'?ades:'ESGG','DCT','')}
  return rows}
+
+/* Apply SID logic from the route text (DEP):
+   - route starts with a SID name (optionally /RWY): force runway + SID (green = runway in use, pink = other runway)
+   - otherwise: first point with a SID in the active departure runway -> that SID; else the bare point is shown as RTE */
+function applyRoute(p){if(p.kind!=='DEP')return;
+ const tk=(p.route_||'').toUpperCase().split(/\s+/).filter(t=>t&&!isLvl(t)&&t!=='DCT'&&t!=='ESGG');if(!tk.length)return;
+ const[nmz,sfx]=tk[0].split('/'),rs=/^\d\d[LRC]?$/.test(sfx||'')?sfx.slice(0,2):null;
+ for(const r of rs?[rs,'03','21']:['03','21']){const s=(D.sids[r]||[]).find(x=>x[0]===nmz);
+  if(s){p.rwy=r;p.sid=s[0];p.copx=s[1];p.force=true;p.ahdg='';return}}
+ p.force=false;p.rwy=rwyDep;let L=(D.sids[rwyDep]||[]).filter(x=>x[1]===nmz&&!/^VFR/.test(x[0]));
+ if(!PROP.includes(p.type)){const J=L.filter(x=>/[MJ]$/.test(x[0]));if(J.length)L=J}
+ if(L.length){p.sid=L[0][0];p.copx=L[0][1]}else{p.sid=nmz;p.copx=nmz}p.ahdg=''}

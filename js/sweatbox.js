@@ -17,7 +17,7 @@ function importSweatbox(txt){const list_=parseSweatbox(txt);let nd=0,na=0;
   p.adep=f.adep;p.ades=f.ades;p.tas=f.tas;p.alt_=f.alt==='ESGG'&&f.ades==='ESGG'?'':(f.alt||'');p.rules=f.rules;p.remarks=f.remarks||'';p.route_=f.route;
   if(/^\d{4}$/.test(f.sq||''))p.sq=f.sq;
   if(p.kind==='DEP'){p.eobt=/^\d{4}$/.test(f.eobt)?f.eobt:p.eobt;const fl=f.cruise;p.xfl=fl?(fl<=5000?'A'+String(Math.round(fl/100)).padStart(2,'0'):String(Math.round(fl/100)).padStart(3,'0')):'';
-   const rt=(f.route||'').replace(/^\S+\s+/,'');const s_=sidFromFirst(p.rwy,f.route,'ESGG')||bestSid(p.rwy,p.ades,p.type);if(s_&&f.rules!=='V'){p.sid=s_[0];p.copx=s_[1]}else if(f.rules==='V'){p.sid='';p.copx=''}}
+   applyRoute(p)}
   else{p.std=autoStand(p)||p.std}
  }
  $('cs').value='';list();log('Sweatbox: '+(nd+na)+' flight plans loaded ('+nd+' dep, '+na+' arr)')}

@@ -40,7 +40,7 @@ function renderLists(){
  const txo=planes.filter(p=>p.kind==='DEP'&&p.sts==='TXO').sort((a,b)=>a.txoT-b.txoT);planes.forEach(p=>p.dsq=0);txo.forEach((p,i)=>p.dsq=i+1);
  for(const n of order){const L=LS[n],w=WIN[n],rows=planes.filter(p=>(p.kind==='DEP'?apAct.dep:apAct.arr)&&FIL[n](p)).sort(SRT[n]);w.cnt.textContent=rows.length;
   const head=L.cols.map(c=>`<th class="${c[2]?'ra':''}" style="min-width:${c[1]}ch">${c[0]}</th>`).join('');
-  const body=rows.map(p=>`<tr data-id="${p.id}" class="${p===sel?'sel':''} ${p.own?'as':'un'}${p.xfer?' xf':''}${p.owner?(T-(p.accT||0)>=3?' ob':' oa'):''}">`+L.cols.map(c=>`<td data-c="${c[0]}" class="${c[2]?'ra':''}">${(GET[c[0]](p,n)||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;')}</td>`).join('')+'</tr>').join('');
+  const body=rows.map(p=>`<tr data-id="${p.id}" class="${p===sel?'sel':''} ${p.own?'as':'un'}${p.xfer?' xf':''}${p.owner?(T-(p.accT||0)>=3?' ob':' oa'):''}">`+L.cols.map(c=>`<td data-c="${c[0]}" class="${c[2]?'ra':''}${c[0]==='DRWY'&&p.kind==='DEP'&&p.force?(p.rwy===rwyDep?' rg':' rp'):''}">${(GET[c[0]](p,n)||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;')}</td>`).join('')+'</tr>').join('');
   w.body.style.maxHeight=(L.lines*18+19)+'px';
   w.body.innerHTML=`<table><thead><tr>${head}</tr></thead><tbody>${body||`<tr><td class="em" colspan="${L.cols.length}">-</td></tr>`}</tbody></table>`}}
 let fplEl=null,rwEl=null,pmEl=null,ocEl=null,hovP=null;
@@ -104,7 +104,7 @@ const CFLS=['020','030','040','050','060','070','080','090','100'],XFLS=[];for(l
 const sidList=p=>(D.sids[p.rwy]||[]);
 function setSid(p,s_){p.sid=s_[0];p.copx=s_[1];p.ahdg='';if(p.route_)p.route_=genRoute(p)}
 function sidForFix(p,fix){const L=sidList(p),J=L.filter(s_=>s_[1]===fix&&(PROP.includes(p.type)||/[MJ]$/.test(s_[0])));return J[0]||L.find(s_=>s_[1]===fix)}
-function setRwy(p,r){if(p.rwy===r)return;if(p.kind==='ARR'&&(p.app||p.land||p.sts)){log(p.cs+': cannot change runway now');return}p.rwy=r;if(p.kind==='DEP'){const s_=bestSid(r,p.ades,p.type);if(s_)setSid(p,s_)}else{const t=r=='03'?[rw[0],rw[1]]:[rw[2],rw[3]];p.th=t}log(p.cs+' runway '+r)}
+function setRwy(p,r){if(p.rwy===r)return;if(p.kind==='ARR'&&(p.app||p.land||p.sts)){log(p.cs+': cannot change runway now');return}p.rwy=r;if(p.kind==='DEP'){p.force=false;const s_=bestSid(r,p.ades,p.type);if(s_)setSid(p,s_)}else{const t=r=='03'?[rw[0],rw[1]]:[rw[2],rw[3]];p.th=t}log(p.cs+' runway '+r)}
 function cellClick(e,n,btn){const td=e.target.closest('td[data-c]'),tr_=e.target.closest('tr[data-id]');if(!tr_)return;const p=planes.find(q=>q.id==tr_.dataset.id);if(!p)return;sel=p;list();if(!td||p.owner)return;
  td._tr=tr_.dataset.id;const c=td.dataset.c,A=ACT[c];if(!A||!A[btn])return;A[btn](p,e,n)}
 const ACT={
@@ -148,11 +148,11 @@ function openFpl(p){if(!p)return;if(fplEl)fplEl.remove();const e=document.create
  <div class="bt"><button id="f_ok">OK</button><button id="f_c">Cancel</button></div></div>`;
  $('map').appendChild(e);e.style.zIndex=++zTop+50;
  const th=e.querySelector('.th');let dr=null;th.onpointerdown=ev=>{if(ev.target.closest('span')||ev.button!==2)return;th.setPointerCapture(ev.pointerId);dr=[ev.clientX-e.offsetLeft,ev.clientY-e.offsetTop]};th.onpointermove=ev=>{if(dr){e.style.left=Math.max(0,ev.clientX-dr[0])+'px';e.style.top=Math.max(0,ev.clientY-dr[1])+'px'}};th.onpointerup=()=>{dr=null};
- const tb=e.querySelector('.wp tbody'),rr=()=>fplRows({kind:p.kind,rwy:p.rwy,adep:$('f_o').value.trim().toUpperCase(),ades:$('f_d').value.trim().toUpperCase(),sid:p.kind==='DEP'?(sidFromFirst(p.rwy,$('f_r').value,'ESGG')||{})[0]||p.sid:'',eobt:p.eobt,tas:$('f_t').value},$('f_r').value);
+ const tb=e.querySelector('.wp tbody'),rr=()=>{const q=Object.assign({},p,{route_:$('f_r').value,adep:$('f_o').value.trim().toUpperCase(),ades:$('f_d').value.trim().toUpperCase(),tas:$('f_t').value});applyRoute(q);return fplRows(q,q.route_)};
  $('f_r').oninput=$('f_o').oninput=$('f_d').oninput=$('f_t').oninput=()=>{tb.innerHTML=rr().map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join('')};
  const close=()=>{e.remove();fplEl=null};$('fx').onclick=close;$('f_c').onclick=close;
  $('f_ok').onclick=()=>{p.cs=$('f_cs').value.trim().toUpperCase()||p.cs;p.adep=$('f_o').value.trim().toUpperCase();p.ades=$('f_d').value.trim().toUpperCase();p.alt_=$('f_a').value.trim().toUpperCase();p.tas=$('f_t').value;p.sq=$('f_sq').value||p.sq;const od=e.od,rt=$('f_r').value;
-  if(p.kind==='DEP'){if(rt===p.route_&&od!==p.ades){const s_=bestSid(p.rwy,p.ades,p.type);if(s_){p.sid=s_[0];p.copx=s_[1]}p.route_=genRoute(p)}else{p.route_=rt;const s_=sidFromFirst(p.rwy,rt,'ESGG')||sidFromRoute(p.rwy,rt);if(s_){p.sid=s_[0];p.copx=s_[1]}}}else p.route_=rt;
+  if(p.kind==='DEP'){if(rt===p.route_&&od!==p.ades){const s_=bestSid(p.rwy,p.ades,p.type);if(s_){p.sid=s_[0];p.copx=s_[1]}p.route_=genRoute(p);applyRoute(p)}else{p.route_=rt}applyRoute(p)}else p.route_=rt;
   p.remarks=$('f_rm').value;
   if(p.kind==='DEP'){const a=parseInt($('f_al').value);if(a)p.xfl=a<=5000?'A'+String(Math.round(a/100)).padStart(2,'0'):String(Math.round(a/100)).padStart(3,'0')}close();list()}}
 let lastSel=null;
