@@ -1,5 +1,5 @@
 /* ---------- input ---------- */
-function pick(sx,sy){let b=null,bd=16;for(const p of planes){const q=tr(p.x,p.y),d=Math.hypot(q[0]-sx,q[1]-sy);if(d<bd){bd=d;b=p}}return b}
+function pick(sx,sy){let b=null,bd=16;for(const p of planes){const q=tr(p.rx??p.x,p.ry??p.y),d=Math.hypot(q[0]-sx,q[1]-sy);if(d<bd){bd=d;b=p}}return b}
 let drag=null;
 cv.onpointerdown=e=>{if(e.button!==0&&e.button!==2)return;cv.setPointerCapture(e.pointerId);const lp=pickLabel(e.offsetX,e.offsetY);drag={b:e.button,x:e.offsetX,y:e.offsetY,px:e.offsetX,py:e.offsetY,cx:cam.x,cy:cam.y,m:false,lp,lo:lp?[...lp.lo]:null}};
 cv.onpointermove=e=>{if(!drag){hovP=pickLabel(e.offsetX,e.offsetY);return}hovP=drag.lp||null;const dx=e.offsetX-drag.x,dy=e.offsetY-drag.y;if(Math.hypot(dx,dy)>4){if(drag.lp?drag.b===0:drag.b===2)drag.m=true;else drag.mv=true}if(drag.m&&drag.lp){drag.lp.lo=[drag.lo[0]+dx,drag.lo[1]+dy];if(sel!==drag.lp){sel=drag.lp;list()}}else if(drag.m){const ux=e.offsetX-drag.px,uy=e.offsetY-drag.py,w=inv(W/2-ux,H/2-uy);cam.x=w[0];cam.y=w[1]}drag.px=e.offsetX;drag.py=e.offsetY};
