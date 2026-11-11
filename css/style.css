@@ -75,3 +75,4 @@ body:not(.host):not(.student) #radio,body:not(.host):not(.student) #simc{display
 .win .wh .cnt{display:none}.win .wbt button{background:#4e5558;color:#ebeff1;border:0;border-left:1px solid #22252e;display:flex;align-items:center;justify-content:center;width:20px}.win .wbt button:hover{background:#6b7478;color:#fff}.win .wbt button svg{display:block}
 .win .wb.c1{max-height:0!important;visibility:hidden;overflow:hidden}.win .wb.c2{display:none}
 .win .wh>span.cnt{display:none!important}.win .wbt button.wcx{font-size:13px}
+.win .wbt button{background:#22252e!important}.win .wbt button:hover{background:#3a3f48!important}
