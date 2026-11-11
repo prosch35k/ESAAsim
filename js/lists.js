@@ -28,15 +28,14 @@ function buildWins(){for(const n of order){const L=LS[n],el=document.createEleme
  wh.onpointerup=()=>{dr=null};
  const cl=el.querySelector('.wcl'),TRI=u=>`<svg width="12" height="11" viewBox="0 0 12 11"><polygon points="${u?'6,0.7 11.5,10.3 0.5,10.3':'0.5,0.7 11.5,0.7 6,10.3'}" fill="currentColor"/></svg>`,setCol=m=>{const w=WIN[n];w.col=m;w.body.classList.toggle('c1',m===1);w.body.classList.toggle('c2',m===2);cl.innerHTML=TRI(m===0)};cl.innerHTML=TRI(true);
  cl.onclick=ev=>{ev.stopPropagation();setCol(WIN[n].col===1||WIN[n].col===2?0:1)};cl.oncontextmenu=ev=>{ev.preventDefault();ev.stopPropagation();setCol(WIN[n].col===2?0:2)};
- el.querySelector('.wcx').onclick=ev=>{ev.stopPropagation();const w=WIN[n];w.vis=false;el.style.display='none';const b=$('lsw').querySelector(`[data-l="${n}"]`);if(b)b.classList.remove('on')};
+ el.querySelector('.wcx').onclick=ev=>{ev.stopPropagation();const w=WIN[n];w.vis=false;el.style.display='none';};
  el.onpointerdown=()=>{el.style.zIndex=++zTop};
  const wb=el.querySelector('.wb');let rd=null,rdm=false;
  wb.onpointerdown=e=>{const t=e.target.closest('tr[data-id]');rd=t&&e.button===2?{id:t.dataset.id,x:e.clientX,y:e.clientY}:null;rdm=false};
  wb.onpointermove=e=>{if(rd&&!rdm&&Math.hypot(e.clientX-rd.x,e.clientY-rd.y)>4){rdm=true;const p=planes.find(q=>q.id==rd.id);if(p){sel=p;list()}}};
  wb.onpointerup=()=>{rd=null;setTimeout(()=>{rdm=false},80)};
  wb.onclick=e=>{if(rdm)return;cellClick(e,n,'L')};wb.oncontextmenu=e=>{e.preventDefault();if(rdm)return;cellClick(e,n,'R')};
- WIN[n]={el,body:el.querySelector('.wb'),cnt:el.querySelector('.cnt'),vis:L.vis};el.style.display=L.vis?'':'none'}
- $('lsw').innerHTML=order.map(n=>`<button data-l="${n}" class="${LS[n].vis?'on':''}">${n}</button>`).join('')}
+ WIN[n]={el,body:el.querySelector('.wb'),cnt:el.querySelector('.cnt'),vis:L.vis};el.style.display=L.vis?'':'none'}}
 const LINK={TAXIIN:'TAXIOUT',ADCS:'TAKEOFF'};
 function alignWins(){for(const n in LINK){const a=WIN[n],b=WIN[LINK[n]];if(!a||!b||a.moved||b.el.style.display==='none')continue;a.el.style.left=(b.el.offsetLeft+b.el.offsetWidth+3)+'px';a.el.style.top=b.el.offsetTop+'px'}}
 function renderLists(){

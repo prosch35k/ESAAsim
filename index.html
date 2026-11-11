@@ -3,7 +3,7 @@
 <title>ESAAsim</title>
 <link rel="stylesheet" href="css/style.css">
 </head><body>
-<div id="map"><canvas id="cv"></canvas><div id="tb"><button id="rwb" title="Active airport/runway selector"></button><button id="ocb">Other controllers</button><span id="atis"></span><button id="ncb">Connect</button></div></div>
+<div id="map"><canvas id="cv"></canvas><div id="tb"><button id="ncb">Connect</button><span id="pos" title="Position">ESGG_GND</span><span id="utc" title="UTC">00:00:00</span><button id="qsb" title="Quick settings: show/hide lists">QUICK<br>SET</button><button id="rwb" title="Active airport/runway selector"></button><span id="atis"></span><button id="ocb" title="Other controllers"></button></div></div>
 <div id="simc"><span id="sct">00:00:00</span><span id="ssp">PAUSED</span><span id="sbs"><button data-s="0" class="on" title="Pause">⏸</button><button data-s="1">1×</button><button data-s="2">2×</button><button data-s="4">4×</button></span></div>
 <div id="prop" style="display:none"></div>
 <div id="radio"><div id="rh">Radio</div>
@@ -19,8 +19,6 @@
 <h3>Tools (click on map)</h3>
 <div class="r"><button id="net">Show ground network</button></div>
 <div class="r" id="modes"><button data-m="0" class="on">Select</button><button data-m="1">Taxi route</button><button data-m="2">Place</button></div>
-<h3>Lists</h3>
-<div class="r sm" id="lsw"></div>
 <h3>New aircraft</h3>
 <div class="r"><input id="cs" placeholder="Callsign" size="7"><select id="ty"><option>A320</option><option>B738</option><option>E190</option><option>AT76</option><option>SF34</option><option>A21N</option><option>A333</option><option>B789</option></select></div>
 <div class="r"><select id="stsel"></select><button id="spst">Spawn departure</button></div>
@@ -55,5 +53,6 @@
 <script src="js/voice.js"></script>
 <script src="js/net.js"></script>
 <script src="js/settings.js"></script>
+<script src="js/topbar.js"></script>
 <script src="js/main.js"></script>
 </body></html>

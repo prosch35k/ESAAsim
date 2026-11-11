@@ -12,7 +12,6 @@ cv.onwheel=e=>{e.preventDefault();cam.s*=e.deltaY<0?1.15:1/1.15};
 $('modes').onclick=e=>{if(e.target.dataset.m){mode=+e.target.dataset.m;[...e.currentTarget.children].forEach(b=>b.classList.toggle('on',b===e.target))}};
 function setSim(s){sim=s;document.querySelectorAll('#spd button,#sbs button').forEach(b=>b.classList.toggle('on',+b.dataset.s===s));list()}
 $('spd').onclick=$('sbs').onclick=e=>{if(e.target.dataset.s!=null)setSim(+e.target.dataset.s)};
-$('lsw').onclick=e=>{const n=e.target.dataset.l;if(n){WIN[n].vis=!WIN[n].vis;WIN[n].el.style.display=WIN[n].vis?'':'none';e.target.classList.toggle('on',WIN[n].vis)}};
 const STATES=[['','none'],['FRQ','FRQ'],['S/U','S/U'],['S/P','S/P'],['TXO','TXO'],['xLU','xLU'],['xTO','xTO'],['TXI','TXI'],['PRK','PRK']];
 $('stb').innerHTML=STATES.map(s=>`<button data-st="${s[0]}">${s[1]}</button>`).join('');
 $('stb').onclick=e=>{if(e.target.dataset.st!=null&&sel){setSts(sel,e.target.dataset.st);list()}};
@@ -25,7 +24,7 @@ $('ocb').onclick=()=>{if(ocEl){ocEl.remove();ocEl=null;return}const e=document.c
   e.querySelectorAll('input').forEach(i=>i.onchange=()=>{const c=CTRL[+i.dataset.i];c.on=i.checked;if(!c.on)for(const p of planes){if(p.owner===c.id)p.owner='';if(p.nxm===c.id)p.nxm='';if(p.nx===c.id){p.nx='';p.xfer=false}}list()});
   const th=e.querySelector('.th');let dr=null;th.onpointerdown=ev=>{if(ev.target.closest('span')||ev.button!==2)return;th.setPointerCapture(ev.pointerId);dr=[ev.clientX-e.offsetLeft,ev.clientY-e.offsetTop]};th.onpointermove=ev=>{if(dr){e.style.left=Math.max(0,ev.clientX-dr[0])+'px';e.style.top=Math.max(0,ev.clientY-dr[1])+'px'}};th.onpointerup=()=>{dr=null}};
  $('map').appendChild(e);draw()};
-function updRw(){$('rwb').textContent=rwLabel()}updRw();
+function updRw(){$('rwb').title=rwLabel()}updRw();
 $('rwb').onclick=()=>{if(rwEl){rwEl.remove();rwEl=null;return}const e=document.createElement('div');e.className='fpl';rwEl=e;e.style.width='420px';e.style.left='200px';e.style.top='40px';
  let st={d:rwyDep,a:rwyArr,ad:apAct.dep,aa:apAct.arr};
  const draw=()=>{e.innerHTML=`<div class="th"><b>Active airport/runway selector dialog</b><span id="rx">✕</span></div><div class="bd"><div class="rt"><table><thead><tr><th>Airport</th><th>DEP</th><th>ARR</th><th>RWY</th><th>DEP</th><th>ARR</th></tr></thead><tbody>${['03','21'].map(r=>`<tr class="${r===st.d||r===st.a?'on':''}"><td>ESGG</td><td><input type="checkbox" data-k="ad" ${st.ad?'checked':''}></td><td><input type="checkbox" data-k="aa" ${st.aa?'checked':''}></td><td>${r}</td><td><input type="checkbox" data-k="d" data-r="${r}" ${st.d===r?'checked':''}></td><td><input type="checkbox" data-k="a" data-r="${r}" ${st.a===r?'checked':''}></td></tr>`).join('')}</tbody></table></div><div class="bt"><button id="rok">OK</button><button id="rc">Cancel</button></div></div>`;

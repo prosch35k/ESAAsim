@@ -76,3 +76,14 @@ body:not(.host):not(.student) #radio,body:not(.host):not(.student) #simc{display
 .win .wb.c1{max-height:0!important;visibility:hidden;overflow:hidden}.win .wb.c2{display:none}
 .win .wh>span.cnt{display:none!important}.win .wbt button.wcx{font-size:13px}
 .win .wbt button{background:#22252e!important}.win .wbt button:hover{background:#3a3f48!important}
+/* top bar */
+#tb{left:0;right:0;gap:4px;padding:2px 100px 2px 2px;align-items:stretch;border-width:0 0 1px 0}
+#tb>button,#tb>span{height:32px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;margin:0}
+#tb #pos,#tb #utc{padding:0 12px;background:#4a4a52;color:#e6e6e2;border:1px solid #6a6a72;font:600 13px ui-monospace,Menlo,monospace}
+#tb #utc{min-width:84px;color:#9ef09e}
+#tb #qsb{font:600 10px/1.1 ui-monospace,Menlo,monospace;padding:0 8px;text-align:center;letter-spacing:.04em}
+#tb #rwb,#tb #ocb{width:38px;padding:0}#tb #atis{margin-left:auto}
+#qsm{position:fixed;z-index:210;min-width:210px;background:#2b2e35;color:#e6e6e2;border:1px solid #6a6a72;box-shadow:3px 3px 10px rgba(0,0,0,.5);font:13px ui-monospace,Menlo,monospace;user-select:none}
+#qsm .qt{text-align:center;background:#22252e;padding:2px 8px;font-size:11px;color:#bfc7cb}
+#qsm .qi{display:flex;align-items:center;gap:6px;padding:2px 10px 2px 6px;cursor:pointer}#qsm .qi:hover{background:#4a4a52}
+#qsm .qc{width:14px;height:14px;box-sizing:border-box;border:1px solid #8a8f94;background:#1a1c21;color:#3ddc3d;font-size:12px;line-height:12px;text-align:center}
