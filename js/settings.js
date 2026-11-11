@@ -1,0 +1,17 @@
+/* ---------- settings menu (top right) + in-program privacy policy ---------- */
+const PRIVACY_CONTACT=''; /* put a contact e-mail here, it is shown at the end of the policy when set */
+const PRIVACY=[
+['About','ESAAsim is an unofficial, independent training simulator for ground control. It is not affiliated with, endorsed by or operated by VATSIM.'],
+['What we collect','When you choose "Login with VATSIM", VATSIM Connect gives this program your full name, your VATSIM CID and your controller rating (scopes: full_name, vatsim_details). No e-mail address, password or other personal data is requested. The name and rating are used only to show who you are in a session and to decide whether you may act as mentor (rating S2 or higher) or only as student.'],
+['Where it is stored','Nothing is written to a database. Your login details (name, CID, rating and a signed token valid for 12 hours) are kept only in your own browser or app (local storage) so you do not have to log in again each time. The relay server keeps session data (session code, display names, simulation traffic and instructions) in memory only while a session is running; it is deleted when the session ends or the server restarts.'],
+['Who can see it','Other participants in the same session see your display name. Data is not sold, shared with third parties, used for advertising or analysed. There are no cookies and no tracking or analytics.'],
+['Voice','Spoken instructions are converted to text and used only to propose an instruction to the mentor. Audio is not recorded or stored by this program.'],
+['Your choices','"Log out" in the Connect window removes the stored login from your device. You can also clear the site data in your browser. Without logging in you cannot use mentor/student sessions.'],
+['Changes','This policy may be updated when the program changes; the current version is always the one shown in the program.']];
+function openPrivacy(){if($('prv')){$('prv').remove();return}const e=document.createElement('div');e.id='prv';e.className='fpl';e.style.cssText='width:520px;left:200px;top:50px;z-index:60';
+ e.innerHTML='<div class="th"><b>Privacy Policy</b><span id="prx">✕</span></div><div style="padding:10px 14px;max-height:430px;overflow:auto;user-select:text;font:13px/1.45 \'Segoe UI\',system-ui,sans-serif">'+PRIVACY.map(([h,t])=>'<h4 style="margin:10px 0 3px;font-size:13px">'+h+'</h4><div>'+t+'</div>').join('')+(PRIVACY_CONTACT?'<h4 style="margin:10px 0 3px;font-size:13px">Contact</h4><div>'+PRIVACY_CONTACT+'</div>':'')+'</div>';
+ $('map').appendChild(e);$('prx').onclick=()=>e.remove();
+ const th=e.querySelector('.th');let dr=null;th.onpointerdown=ev=>{if(ev.target.closest('span'))return;th.setPointerCapture(ev.pointerId);dr=[ev.clientX-e.offsetLeft,ev.clientY-e.offsetTop]};th.onpointermove=ev=>{if(dr){e.style.left=Math.max(0,ev.clientX-dr[0])+'px';e.style.top=Math.max(0,ev.clientY-dr[1])+'px'}};th.onpointerup=()=>{dr=null}}
+{const b=document.createElement('button'),m=document.createElement('div');b.id='setb';b.title='Settings';b.textContent='⚙';m.id='stm';m.style.display='none';m.innerHTML='<div class="mi" data-a="priv">Privacy Policy</div>';document.body.append(b,m);
+ b.onclick=ev=>{ev.stopPropagation();m.style.display=m.style.display==='none'?'':'none'};m.onclick=ev=>{const a=ev.target.closest('.mi');if(!a)return;m.style.display='none';if(a.dataset.a==='priv')openPrivacy()};
+ addEventListener('pointerdown',ev=>{if(!ev.target.closest('#stm,#setb'))m.style.display='none'})}

@@ -66,3 +66,6 @@ button{cursor:pointer}button.on{background:var(--ac);color:#fff;border-color:var
 #prop .pc{display:flex;align-items:center;gap:6px;padding:5px 8px;border-top:1px solid #4a4a52}#prop .px{flex:1;min-width:0}#prop .px i{color:#9a9a94}
 #prop button{padding:3px 10px;border-radius:0;border:1px solid #777;background:#4a4a52;color:#fff;font-size:12px}#prop button[data-a="1"]{background:#1a6b3a;border-color:#1a6b3a}#prop button[data-a="0"]{background:#8a2a2a;border-color:#8a2a2a}
 .student #swb,.student #sb,.student #ocb{display:none}.student #rwb{pointer-events:none}.student #simc #sbs{pointer-events:none;opacity:.5}
+#setb{position:fixed;right:50px;top:8px;z-index:40;width:34px;height:34px;padding:0;background:rgba(36,36,40,.93);border:1px solid #5a5a60;border-radius:4px;color:#e6e6e2;font-size:18px;line-height:1}
+#stm{position:fixed;right:50px;top:46px;z-index:200;min-width:150px;background:#f0f0f0;color:#000;border:1px solid #5a5a5a;box-shadow:3px 3px 10px rgba(0,0,0,.5);font:12px "Segoe UI",system-ui,sans-serif;user-select:none}
+#stm .mi{padding:4px 14px;cursor:pointer}#stm .mi:hover{background:#0078d7;color:#fff}
