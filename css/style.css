@@ -69,3 +69,4 @@ button{cursor:pointer}button.on{background:var(--ac);color:#fff;border-color:var
 #setb{position:fixed;right:50px;top:8px;z-index:40;width:34px;height:34px;padding:0;background:rgba(36,36,40,.93);border:1px solid #5a5a60;border-radius:4px;color:#e6e6e2;font-size:18px;line-height:1}
 #stm{position:fixed;right:50px;top:46px;z-index:200;min-width:150px;background:#f0f0f0;color:#000;border:1px solid #5a5a5a;box-shadow:3px 3px 10px rgba(0,0,0,.5);font:12px "Segoe UI",system-ui,sans-serif;user-select:none}
 #stm .mi{padding:4px 14px;cursor:pointer}#stm .mi:hover{background:#0078d7;color:#fff}
+body:not(.host):not(.student) #radio,body:not(.host):not(.student) #simc{display:none}
