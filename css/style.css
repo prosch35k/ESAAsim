@@ -109,3 +109,4 @@ body:not(.host):not(.student) #radio,body:not(.host):not(.student) #simc{display
 /* no bold in the top bar */
 #tb,#tb *,#simc,#simc *{font-weight:400!important}
 .fpl button:disabled{opacity:.45;cursor:default}
+body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #tb #sb{display:flex}
