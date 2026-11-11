@@ -5,7 +5,7 @@ function dijV(src){const m=VIAL.length,M=m+1,N=NET.n.length,d=Array.from({length
   for(const[v,i]of ADJ[u]){const T=TWP[i];let k2=k,c;if(k<m&&T.has(VIAL[k])){k2=k+1;c=.3}else if(k>0&&T.has(VIAL[k-1]))c=.3;else c=k===m?1:3;const nd=d[u][k]+NE[i].len*c*(TWP[i].has(VIAL[m-1])?.5:1);if(nd<d[v][k2]){d[v][k2]=nd;pr[v][k2]=[u,k,i];q.push([v,k2])}}}
  return{d,pr}}const TWL=NE.map(e=>new Set((e.n||'').split(/[\/\- ]/).filter(x=>/^[A-Z]$/.test(x)))),TWP=NE.map(e=>{const n=e.n||'';return new Set((n.includes('/')?n.split('/')[0]:n).split(/[\- ]/).filter(x=>/^[A-Z]$/.test(x)))});
 const vw=i=>VIA&&VIA.size?(TWL[i].size&&[...TWL[i]].some(x=>VIA.has(x))?.3:1.6):1;
-const TELE={WIF:'Widerøe',FPO:'french post',AFR:'airfrans',SAS:'scandinavian',NSZ:'norwegian',FIN:'finnair',DLH:'lufthansa',RYR:'ryanair',WZZ:'wizz',KLM:'K L M',BAW:'speedbird',EZY:'easy',AUI:'ukraine international'};
+const TELE={WIF:'Widerøe',FPO:'french post',AFR:'airfrans',SAS:'scandinavian',NSZ:'norwegian',FIN:'finnair',DLH:'lufthansa',RYR:'ryanair',WZZ:'wizz',KLM:'Keyelem',BAW:'speedbird',EZY:'easy',AUI:'ukraine international'};
 const NUMW={zero:'0',one:'1',two:'2',three:'3',tree:'3',four:'4',fower:'4',five:'5',fife:'5',six:'6',seven:'7',eight:'8',nine:'9',niner:'9'};
 const PHON={alpha:'a',alfa:'a',bravo:'b',charlie:'c',delta:'d',echo:'e',foxtrot:'f',golf:'g',hotel:'h',india:'i',juliet:'j',juliett:'j',kilo:'k',lima:'l',mike:'m',november:'n',oscar:'o',papa:'p',quebec:'q',romeo:'r',sierra:'s',tango:'t',uniform:'u',victor:'v',whiskey:'w',xray:'x','x-ray':'x',yankee:'y',zulu:'z'};
 const PHONR={};for(const[w,c]of Object.entries(PHON))(PHONR[c]=PHONR[c]||[]).push(w.replace('-','[- ]?'));
@@ -17,7 +17,7 @@ const TYPES={A319:'Airbus three nineteen',A320:'Airbus three twenty',A321:'Airbu
  B737:'Boeing seven three seven',B738:'Boeing seven three seven eight hundred',B739:'Boeing seven three seven nine hundred',B38M:'Boeing seven three seven max eight',B752:'Boeing seven five seven',B763:'Boeing seven six seven',B772:'Boeing seven seven seven',B77W:'Boeing seven seven seven three hundred',B788:'Boeing seven eight seven eight',B789:'Boeing seven eight seven nine',B744:'Boeing seven four seven four hundred',
  E170:'Embraer one seventy',E190:'Embraer one ninety',E195:'Embraer one ninety five',AT72:'A T R seven two',AT76:'A T R seven two six hundred',DH8A:'Dash eight',DH8D:'Dash eight four hundred',SF34:'Saab three forty',SB20:'Saab two thousand',CRJ9:'C R J nine hundred',P28R:'Piper Arrow',TRIN:'Socata Trinidad',C172:'Cessna one seventy two',SR22:'Cirrus S R two two'};
 const ACCENT={KLM:'nl',AFR:'fr',FPO:'fr',WIF:'no',SAS:['sv','no','da'],RYR:'sv',DLH:'de',FIN:'fi',NSZ:'no',BAW:'en-GB',EZY:'en-GB',WZZ:'pl',AUI:'uk'};
-function langOf(p){if(!$('pa')||!$('pa').checked)return 'en';const m=(p.cs.match(/^[A-Z]+/)||[''])[0],a=ACCENT[m];return Array.isArray(a)?a[hashN(p.cs)%a.length]:(a||'en')}
+function langOf(p){return 'en';const m=(p.cs.match(/^[A-Z]+/)||[''])[0],a=ACCENT[m];return Array.isArray(a)?a[hashN(p.cs)%a.length]:(a||'en')}
 function speechOf(p,t){for(const k in TYPES)if(t.includes(k))t=t.replace(new RegExp('\\b'+k+'\\b','g'),TYPES[k]);const m=(p.cs.match(/^[A-Z]+/)||[''])[0],num=p.cs.slice(m.length);
  t=t.split(p.cs).join(!num&&m.length===5?m.split('').map(c=>PHN[c]||c).join(' '):(TELE[m]||m)+' '+spD(num));
  t=t.replace(/(squawk )(\d{4})/gi,(a,b,c)=>b+spD(c)).replace(/\b(\d)000\b/g,(a,b)=>DW[b]+' thousand').replace(/\b(\d{2})000\b/g,(a,b)=>b+' thousand').replace(/\b0\d\b/g,a=>spD(a)).replace(/\b\d+\b/g,a=>spD(a));
@@ -134,7 +134,7 @@ addEventListener('keyup',e=>{if(e.code==='ControlLeft')pttStop()});
 addEventListener('blur',pttStop);
 (async()=>{if(!(window.claude&&claude.use))return;
  try{DIC=await claude.use('dictation')}catch(e){}try{TTS=await claude.use('tts')}catch(e){}try{SMP=await claude.use('sample')}catch(e){}
- $('mic').style.display=DIC?'':'none';$('lng').style.display=DIC?'':'none';$('pvl').style.display=TTS?'':'none';$('pal').style.display=TTS?'':'none';
+ $('mic').style.display=DIC?'':'none';$('lng').style.display=DIC?'':'none';$('pvl').style.display=TTS?'':'none';
  $('rhint').textContent=DIC?'Hold Left Ctrl (or the PTT button) while you speak, e.g. “Scandinavian 123, taxi to holding point runway two one via Yankee”. Voice calls only move the aircraft and get a readback; strips, status and tags are never changed.':'Voice input is not available here — type the call below.';
  if(DIC){DIC.onPartial(({text})=>{$('rtx').value=text});DIC.onFinal(({text})=>{$('rtx').value='';tx(text)});DIC.onState(({state})=>{listening=state==='listening';if(!listening)busyUntil=Math.max(busyUntil,Date.now()+2500);setMic();if(!listening)$('rtx').value=''})}
  if(TTS)TTS.onState(()=>{})})();
