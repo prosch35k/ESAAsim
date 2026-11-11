@@ -69,6 +69,8 @@ function netEdits(){if(!(MP.on&&MP.role==='student'))return;for(const p of plane
 /* ---- connect dialog ---- */
 /* login always goes to this server; after login the user may pick any server that shares its SESSION_SECRET */
 const AUTH_SERVER=NLS.get('esaasim.authserver','ws://localhost:8080');
+/* TEMPORARY: auto-login until the VATSIM organization is approved. Set to false to use the real VATSIM login. */
+const DEV_AUTOLOGIN=true,DEV_USER={name:'Rey',cid:'0',rating:5,rn:'C1'};
 let ncEl=null;const httpOf=u=>netUrl(u).replace(/^ws/i,'http').replace(/\/$/,'');
 const authGet=()=>NLS.get('esaasim.auth1',null),authSet=(b,v)=>NLS.set('esaasim.auth1',v||null);
 function netDialog(){if(ncEl){ncEl.remove();ncEl=null;return}const cfg=NLS.get('esaasim.net',{servers:[AUTH_SERVER],last:{}}),L=cfg.last||{};
@@ -85,17 +87,17 @@ function netDialog(){if(ncEl){ncEl.remove();ncEl=null;return}const cfg=NLS.get('
   <div class="full" id="nst" style="min-height:16px;color:#333">${MP.status}</div>
   <div class="bt gt"><button id="ngo">Connect</button><button id="nds">Disconnect</button></div></div>`;
  $('map').appendChild(e);
- const base=()=>httpOf(AUTH_SERVER),me=()=>authGet(),user=()=>{const a=me();return a&&a.user},isMentor=()=>e.querySelector('input[name=nrole]:checked').value==='host',setSt=t=>{$('nst').textContent=t};
+ const base=()=>httpOf(AUTH_SERVER),me=()=>DEV_AUTOLOGIN?{token:'',user:DEV_USER}:authGet(),user=()=>{const a=me();return a&&a.user},isMentor=()=>e.querySelector('input[name=nrole]:checked').value==='host',setSt=t=>{$('nst').textContent=t};
  const fill=()=>{$('ns').innerHTML=cfg.servers.map(s=>`<option>${s}</option>`).join('')+'<option value="">(other…)</option>'};fill();
  if(L.url&&cfg.servers.includes(L.url))$('ns').value=L.url;
  const render=()=>{const u=user(),ok=!ST.req||!!u,canM=!ST.req||(u&&u.rating>=3);
-  $('nlg').innerHTML=!ST.req?'<i>This server does not require login</i>':u?`<span>${u.name.replace(/</g,'&lt;')} · ${u.cid} · <b>${u.rn}</b></span><button id="nlo">Log out</button>`:'<button id="nli">Login with VATSIM</button>';
+  $('nlg').innerHTML=!ST.req?'<i>This server does not require login</i>':u?`<span>${u.name.replace(/</g,'&lt;')} · ${u.cid} · <b>${u.rn}</b>${DEV_AUTOLOGIN?' <i>(temporary auto-login)</i>':''}</span>${DEV_AUTOLOGIN?'':'<button id="nlo">Log out</button>'}`:'<button id="nli">Login with VATSIM</button>';
   if($('nli'))$('nli').onclick=doLogin;if($('nlo'))$('nlo').onclick=()=>{authSet(base(),null);render()};
   e.querySelectorAll('.gt').forEach(x=>x.style.display=ok?'':'none');$('nrh').style.display=canM?'':'none';
   const rs=[...e.querySelectorAll('input[name=nrole]')];if(!canM)rs[1].checked=true;else if(!rs.some(r=>r.checked))rs[L.role==='host'?0:1].checked=true;
   const m=ok&&isMentor()&&canM;$('nswl').style.display=$('nswd').style.display=ok&&m?'':'none';$('nsc').textContent=SPAWNQ.length?SPAWNQ.length+' flight(s) waiting to appear':'';
   $('nn').readOnly=!!u&&ST.req;if(u&&ST.req)$('nn').value=u.name.slice(0,24);};
- const probe=async()=>{ST.req=true;const b=base();if(!b)return render();try{const j=await fetch(b+'/auth/config').then(r=>r.json());ST.req=!!j.auth}catch(x){}render()};
+ const probe=async()=>{ST.req=true;if(DEV_AUTOLOGIN)return render();const b=base();if(!b)return render();try{const j=await fetch(b+'/auth/config').then(r=>r.json());ST.req=!!j.auth}catch(x){}render()};
  const doLogin=()=>{const b=base();const sid=Array.from(crypto.getRandomValues(new Uint8Array(24)),x=>(x%36).toString(36)).join('');
   const url=b+'/auth/login?sid='+sid;clearInterval(ST.poll);window.open(url,'_blank');
   $('nst').innerHTML='Waiting for VATSIM login… <a href="'+url+'" target="_blank">open the login page</a>';const t0=Date.now();
