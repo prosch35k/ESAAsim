@@ -70,3 +70,4 @@ button{cursor:pointer}button.on{background:var(--ac);color:#fff;border-color:var
 #stm{position:fixed;right:50px;top:46px;z-index:200;min-width:150px;background:#f0f0f0;color:#000;border:1px solid #5a5a5a;box-shadow:3px 3px 10px rgba(0,0,0,.5);font:12px "Segoe UI",system-ui,sans-serif;user-select:none}
 #stm .mi{padding:4px 14px;cursor:pointer}#stm .mi:hover{background:#0078d7;color:#fff}
 body:not(.host):not(.student) #radio,body:not(.host):not(.student) #simc{display:none}
+.win .wh{align-items:center}.win .wh .cnt{margin-left:auto}.win .wbt{display:flex;gap:2px;margin-left:6px}.win .wbt button{width:16px;height:14px;padding:0;border:1px solid #4a4f55;border-radius:0;background:#33373d;color:#bfc7cb;font-size:9px;line-height:1;cursor:pointer}.win .wbt button:hover{background:#4a4f55;color:#fff}.win .wh{cursor:grab}

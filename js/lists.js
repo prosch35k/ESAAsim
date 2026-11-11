@@ -21,11 +21,13 @@ const SRT={STUP:(a,b)=>a.eobt<b.eobt?-1:1,TAXIOUT:(a,b)=>a.txoT-b.txoT,TAKEOFF:(
 const WIN={};let zTop=6;
 const WK=13/11;
 function buildWins(){for(const n of order){const L=LS[n],el=document.createElement('div');el.className='win';el.style.left=Math.round(L.x*WK)+'px';el.style.top=Math.round(L.y*WK)+'px';
- el.innerHTML=`<div class="wh"><span>${n}</span><span class="cnt"></span></div><div class="wb"></div>`;$('map').appendChild(el);
+ el.innerHTML=`<div class="wh"><span>${n}</span><span class="cnt"></span><span class="wbt"><button class="wcl" title="Collapse / expand">&#9650;</button><button class="wcx" title="Close">&#10005;</button></span></div><div class="wb"></div>`;$('map').appendChild(el);
  const wh=el.querySelector('.wh');let dr=null;
- wh.onpointerdown=e=>{if(e.button!==2)return;wh.setPointerCapture(e.pointerId);dr=[e.clientX-el.offsetLeft,e.clientY-el.offsetTop];el.style.zIndex=++zTop};
+ wh.onpointerdown=e=>{if(e.target.closest('.wbt')||e.button===1)return;wh.setPointerCapture(e.pointerId);dr=[e.clientX-el.offsetLeft,e.clientY-el.offsetTop];el.style.zIndex=++zTop};
  wh.onpointermove=e=>{if(dr){WIN[n].moved=true;el.style.left=Math.max(0,e.clientX-dr[0])+'px';el.style.top=Math.max(0,e.clientY-dr[1])+'px'}};
  wh.onpointerup=()=>{dr=null};
+ el.querySelector('.wcl').onclick=ev=>{ev.stopPropagation();const w=WIN[n];w.col=!w.col;w.body.style.display=w.col?'none':'';ev.currentTarget.innerHTML=w.col?'&#9660;':'&#9650;'};
+ el.querySelector('.wcx').onclick=ev=>{ev.stopPropagation();const w=WIN[n];w.vis=false;el.style.display='none';const b=$('lsw').querySelector(`[data-l="${n}"]`);if(b)b.classList.remove('on')};
  el.onpointerdown=()=>{el.style.zIndex=++zTop};
  const wb=el.querySelector('.wb');let rd=null,rdm=false;
  wb.onpointerdown=e=>{const t=e.target.closest('tr[data-id]');rd=t&&e.button===2?{id:t.dataset.id,x:e.clientX,y:e.clientY}:null;rdm=false};
@@ -42,7 +44,7 @@ function renderLists(){
   const head=L.cols.map(c=>`<th class="${c[2]?'ra':''}" style="min-width:${c[1]}ch">${c[0]}</th>`).join('');
   const body=rows.map(p=>`<tr data-id="${p.id}" class="${p===sel?'sel':''} ${p.own?'as':'un'}${p.xfer?' xf':''}${p.owner?(T-(p.accT||0)>=3?' ob':' oa'):''}">`+L.cols.map(c=>`<td data-c="${c[0]}" class="${c[2]?'ra':''}${c[0]==='DRWY'&&p.kind==='DEP'&&p.force?(p.rwy===rwyDep?' rg':' rp'):''}">${(GET[c[0]](p,n)||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;')}</td>`).join('')+'</tr>').join('');
   w.body.style.maxHeight=(L.lines*18+19)+'px';
-  w.body.innerHTML=`<table><thead><tr>${head}</tr></thead><tbody>${body||`<tr><td class="em" colspan="${L.cols.length}">-</td></tr>`}</tbody></table>`}}
+  w.body.innerHTML=`<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`}}
 let fplEl=null,rwEl=null,pmEl=null,ocEl=null,hovP=null;
 function closeMenu(){if(pmEl){pmEl.remove();pmEl=null}}
 addEventListener('pointerdown',e=>{if(pmEl&&!pmEl.contains(e.target))closeMenu()},true);addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
