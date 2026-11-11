@@ -21,12 +21,13 @@ const SRT={STUP:(a,b)=>a.eobt<b.eobt?-1:1,TAXIOUT:(a,b)=>a.txoT-b.txoT,TAKEOFF:(
 const WIN={};let zTop=6;
 const WK=13/11;
 function buildWins(){for(const n of order){const L=LS[n],el=document.createElement('div');el.className='win';el.style.left=Math.round(L.x*WK)+'px';el.style.top=Math.round(L.y*WK)+'px';
- el.innerHTML=`<div class="wh"><span>${n}</span><span class="cnt"></span><span class="wbt"><button class="wcl" title="Collapse / expand">&#9650;</button><button class="wcx" title="Close">&#10005;</button></span></div><div class="wb"></div>`;$('map').appendChild(el);
+ el.innerHTML=`<div class="wh"><span>${n}</span><span class="cnt"></span><span class="wbt"><button class="wcl" title="Left click: hide rows, right click: minimise"></button><button class="wcx" title="Close">&#10005;</button></span></div><div class="wb"></div>`;$('map').appendChild(el);
  const wh=el.querySelector('.wh');let dr=null;
  wh.onpointerdown=e=>{if(e.target.closest('.wbt')||e.button===1)return;wh.setPointerCapture(e.pointerId);dr=[e.clientX-el.offsetLeft,e.clientY-el.offsetTop];el.style.zIndex=++zTop};
  wh.onpointermove=e=>{if(dr){WIN[n].moved=true;el.style.left=Math.max(0,e.clientX-dr[0])+'px';el.style.top=Math.max(0,e.clientY-dr[1])+'px'}};
  wh.onpointerup=()=>{dr=null};
- el.querySelector('.wcl').onclick=ev=>{ev.stopPropagation();const w=WIN[n];w.col=!w.col;w.body.style.display=w.col?'none':'';ev.currentTarget.innerHTML=w.col?'&#9660;':'&#9650;'};
+ const cl=el.querySelector('.wcl'),TRI=u=>`<svg width="12" height="11" viewBox="0 0 12 11"><polygon points="${u?'6,0.7 11.5,10.3 0.5,10.3':'0.5,0.7 11.5,0.7 6,10.3'}" fill="currentColor"/></svg>`,setCol=m=>{const w=WIN[n];w.col=m;w.body.classList.toggle('c1',m===1);w.body.classList.toggle('c2',m===2);cl.innerHTML=TRI(m===0)};cl.innerHTML=TRI(true);
+ cl.onclick=ev=>{ev.stopPropagation();setCol(WIN[n].col===1||WIN[n].col===2?0:1)};cl.oncontextmenu=ev=>{ev.preventDefault();ev.stopPropagation();setCol(WIN[n].col===2?0:2)};
  el.querySelector('.wcx').onclick=ev=>{ev.stopPropagation();const w=WIN[n];w.vis=false;el.style.display='none';const b=$('lsw').querySelector(`[data-l="${n}"]`);if(b)b.classList.remove('on')};
  el.onpointerdown=()=>{el.style.zIndex=++zTop};
  const wb=el.querySelector('.wb');let rd=null,rdm=false;

@@ -72,3 +72,6 @@ button{cursor:pointer}button.on{background:var(--ac);color:#fff;border-color:var
 body:not(.host):not(.student) #radio,body:not(.host):not(.student) #simc{display:none}
 .win .wh{align-items:center}.win .wh .cnt{margin-left:auto}.win .wbt{display:flex;gap:2px;margin-left:6px}.win .wbt button{width:16px;height:14px;padding:0;border:1px solid #4a4f55;border-radius:0;background:#33373d;color:#bfc7cb;font-size:9px;line-height:1;cursor:pointer}.win .wbt button:hover{background:#4a4f55;color:#fff}.win .wh{cursor:grab}
 .win .wh{padding:0 0 0 6px;align-items:stretch;gap:8px}.win .wh>span:not(.wbt){display:flex;align-items:center}.win .wbt{margin-left:4px;gap:1px;align-self:stretch}.win .wbt button{width:19px;height:auto;min-height:15px;padding:0;background:#d6d6d6;color:#1c1c1c;border:0;border-left:1px solid #22252e;font-size:10px}.win .wbt button:hover{background:#fff;color:#000}.win .wbt button.wcx{font-size:11px}
+.win .wh .cnt{display:none}.win .wbt button{background:#4e5558;color:#ebeff1;border:0;border-left:1px solid #22252e;display:flex;align-items:center;justify-content:center;width:20px}.win .wbt button:hover{background:#6b7478;color:#fff}.win .wbt button svg{display:block}
+.win .wb.c1{max-height:0!important;visibility:hidden;overflow:hidden}.win .wb.c2{display:none}
+.win .wh>span.cnt{display:none!important}.win .wbt button.wcx{font-size:13px}
