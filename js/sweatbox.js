@@ -23,5 +23,4 @@ function spawnFlight(f){const keep=sel,gnd=f.adep==='ESGG'&&f.la,xy=f.la?LL(f.la
  else{p.std=autoStand(p)||p.std}
  sel=keep;$('cs').value='';log(p.cs+' appeared ('+p.kind+')')}
 const sbf=document.createElement('input');sbf.type='file';sbf.accept='.txt,.sweatbox,text/plain';sbf.style.display='none';document.body.appendChild(sbf);
-$('swb').onclick=()=>sbf.click();
 sbf.onchange=()=>{const f=sbf.files[0];if(!f)return;f.text().then(importSweatbox);sbf.value=''};

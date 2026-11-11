@@ -9,9 +9,9 @@ const NLS={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){r
 MP.send=o=>{if(MP.ws&&MP.ws.readyState===1)MP.ws.send(JSON.stringify(o))};
 function netUrl(u){u=(u||'').trim();if(!u)return'';if(/^https?:\/\//i.test(u))u=u.replace(/^http/i,'ws');else if(!/^wss?:\/\//i.test(u))u=(/^(localhost|127\.|192\.168\.|10\.)/.test(u)?'ws://':'wss://')+u;return u}
 function netStatus(s){MP.status=s;const b=$('ncb');if(b){b.textContent=MP.on?(MP.role==='host'?'Mentor ':'Student ')+MP.code+(MP.role==='host'?' ('+MP.peers.length+')':''):'Connect';b.classList.toggle('on',MP.on)}const e=$('nst');if(e)e.textContent=s}
-function netConnect(o){if(MP.ws)netDisconnect(true);MP.role='';MP.code=o.code.toUpperCase();MP.name=o.name||'User';let ws;
+function netConnect(o){if(MP.ws)netDisconnect(true);MP.role='';MP.base=httpOf(o.url);MP.code=o.code.toUpperCase();MP.name=o.name||'User';let ws;
  try{ws=new WebSocket(netUrl(o.url))}catch(e){netStatus('Bad server address');return}MP.ws=ws;netStatus('Connecting…');
- ws.onopen=()=>ws.send(JSON.stringify({t:'hello',role:o.role,code:MP.code,name:MP.name}));
+ ws.onopen=()=>ws.send(JSON.stringify({t:'hello',role:o.role,code:MP.code,name:MP.name,token:o.token||''}));
  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}netMsg(m)};
  ws.onerror=()=>netStatus('Could not reach the server');
  ws.onclose=()=>{if(MP.ws===ws){MP.ws=null;const was=MP.on;MP.on=false;document.body.classList.remove('student','host');MP.role='';MP.peers=[];netStatus(was?'Disconnected':MP.status);}}}
@@ -19,7 +19,7 @@ function netDisconnect(quiet){const w=MP.ws;MP.ws=null;MP.on=false;MP.role='';MP
 function netMsg(m){
  if(m.t==='ok'){MP.on=true;MP.role=m.role;MP.id=m.id;MP.code=m.code;document.body.classList.add(m.role==='host'?'host':'student');
   if(m.role==='student'){planes=[];sel=null;SPAWNQ=[];sim=0;list()}netStatus('Connected as '+(m.role==='host'?'mentor':'student')+', session '+m.code)}
- else if(m.t==='err'){netStatus(m.msg);if(MP.ws){const w=MP.ws;MP.ws=null;try{w.close()}catch(e){}}}
+ else if(m.t==='err'){netStatus(m.msg);if(/Log in with VATSIM/.test(m.msg))try{const a=NLS.get('esaasim.auth',{});delete a[MP.base];NLS.set('esaasim.auth',a)}catch(x){};if(MP.ws){const w=MP.ws;MP.ws=null;try{w.close()}catch(e){}}}
  else if(m.t==='closed'){netStatus(m.msg);netDisconnect(true);planes=[];sel=null;list()}
  else if(m.t==='peers'){MP.peers=m.students||[];netStatus(MP.status.startsWith('Connected')?'Connected as '+(MP.role==='host'?'mentor':'student')+', session '+MP.code+' · '+(MP.peers.length)+' student(s)':MP.status)}
  else if(m.t==='joined'&&MP.role==='host'){rlog('rx','Session',m.name+' joined');netState()}
@@ -67,30 +67,48 @@ function netApply(m){T=m.T;sim=m.sim;rwyDep=m.rwyDep;rwyArr=m.rwyArr;apAct=m.apA
 function netEdits(){if(!(MP.on&&MP.role==='student'))return;for(const p of planes){if(!p._nb)continue;const d={};for(const f of EDIT){const v=JSON.stringify(p[f]??null);if(v!==JSON.stringify(p._nb[f])){d[f]=p[f]??null;p._nb[f]=JSON.parse(v);(p._pend=p._pend||{})[f]={v:p[f],t:Date.now()}}}
   if(Object.keys(d).length)MP.send({t:'patch',id:p.id,f:d})}}
 /* ---- connect dialog ---- */
-let ncEl=null;
+let ncEl=null;const httpOf=u=>netUrl(u).replace(/^ws/i,'http').replace(/\/$/,'');
+const authGet=b=>(NLS.get('esaasim.auth',{}))[b]||null,authSet=(b,v)=>{const a=NLS.get('esaasim.auth',{});if(v)a[b]=v;else delete a[b];NLS.set('esaasim.auth',a)};
 function netDialog(){if(ncEl){ncEl.remove();ncEl=null;return}const cfg=NLS.get('esaasim.net',{servers:['ws://localhost:8080'],last:{}}),L=cfg.last||{};
- const e=document.createElement('div');e.className='fpl';ncEl=e;e.style.width='430px';e.style.left='160px';e.style.top='40px';
+ const e=document.createElement('div');e.className='fpl';ncEl=e;e.style.width='440px';e.style.left='160px';e.style.top='40px';const ST={req:true,poll:0};
  e.innerHTML=`<div class="th"><b>Connect to session</b><span id="nx">✕</span></div><div class="bd" style="grid-template-columns:auto 1fr">
   <label>Server</label><select id="ns"></select>
   <label>Address</label><input id="nu" placeholder="wss://your-server.onrender.com" value="${L.url||''}">
   <div></div><div style="display:flex;gap:6px"><button id="nsv">Save to list</button><button id="ndl">Remove</button></div>
-  <label>Role</label><div style="display:flex;flex-direction:column;gap:3px"><label style="text-align:left"><input type="radio" name="nrole" value="host" ${L.role==='student'?'':'checked'}> Mentor (runs the simulation)</label><label style="text-align:left"><input type="radio" name="nrole" value="student" ${L.role==='student'?'checked':''}> Student</label></div>
+  <label>VATSIM</label><div id="nlg" style="display:flex;gap:8px;align-items:center"></div>
+  <label id="nrl">Role</label><div id="nrd" style="display:flex;flex-direction:column;gap:3px"><label style="text-align:left" id="nrh"><input type="radio" name="nrole" value="host"> Mentor (runs the simulation)</label><label style="text-align:left"><input type="radio" name="nrole" value="student"> Student</label></div>
+  <label id="nswl">Simulation</label><div id="nswd" style="display:flex;gap:8px;align-items:center"><button id="nsw">Import Sweatbox</button><span id="nsc"></span></div>
   <label>Session</label><div style="display:flex;gap:6px"><input id="nc" maxlength="12" placeholder="e.g. K7Q2XD" value="${L.code||''}"><button id="ng">New</button></div>
   <label>Name</label><input id="nn" maxlength="24" value="${L.name||''}">
   <div class="full" id="nst" style="min-height:16px;color:#333">${MP.status}</div>
   <div class="bt"><button id="ngo">Connect</button><button id="nds">Disconnect</button></div></div>`;
  $('map').appendChild(e);
+ const base=()=>httpOf($('nu').value),me=()=>authGet(base()),user=()=>{const a=me();return a&&a.user},isMentor=()=>e.querySelector('input[name=nrole]:checked').value==='host',setSt=t=>{$('nst').textContent=t};
  const fill=()=>{$('ns').innerHTML=cfg.servers.map(s=>`<option>${s}</option>`).join('')+'<option value="">(other…)</option>'};fill();
  if(L.url&&cfg.servers.includes(L.url))$('ns').value=L.url;
- $('ns').onchange=()=>{if($('ns').value)$('nu').value=$('ns').value};
+ const render=()=>{const u=user(),ok=!ST.req||!!u,canM=!ST.req||(u&&u.rating>=3);
+  $('nlg').innerHTML=!ST.req?'<i>This server does not require login</i>':u?`<span>${u.name.replace(/</g,'&lt;')} · ${u.cid} · <b>${u.rn}</b></span><button id="nlo">Log out</button>`:'<button id="nli">Login with VATSIM</button>';
+  if($('nli'))$('nli').onclick=doLogin;if($('nlo'))$('nlo').onclick=()=>{authSet(base(),null);render()};
+  $('nrl').style.display=$('nrd').style.display=ok?'':'none';$('nrh').style.display=canM?'':'none';
+  const rs=[...e.querySelectorAll('input[name=nrole]')];if(!canM)rs[1].checked=true;else if(!rs.some(r=>r.checked))rs[L.role==='host'?0:1].checked=true;
+  const m=ok&&isMentor()&&canM;$('nswl').style.display=$('nswd').style.display=m?'':'none';$('nsc').textContent=SPAWNQ.length?SPAWNQ.length+' flight(s) waiting to appear':'';
+  $('nn').readOnly=!!u&&ST.req;if(u&&ST.req)$('nn').value=u.name.slice(0,24);$('ngo').disabled=!ok};
+ const probe=async()=>{ST.req=true;const b=base();if(!b)return render();try{const j=await fetch(b+'/auth/config').then(r=>r.json());ST.req=!!j.auth}catch(x){}render()};
+ const doLogin=()=>{const b=base();if(!b){setSt('Enter a server address');return}const sid=Array.from(crypto.getRandomValues(new Uint8Array(24)),x=>(x%36).toString(36)).join('');
+  const url=b+'/auth/login?sid='+sid;clearInterval(ST.poll);window.open(url,'_blank');
+  $('nst').innerHTML='Waiting for VATSIM login… <a href="'+url+'" target="_blank">open the login page</a>';const t0=Date.now();
+  ST.poll=setInterval(async()=>{if(!ncEl||Date.now()-t0>300000){clearInterval(ST.poll);return}try{const j=await fetch(b+'/auth/poll?sid='+sid).then(r=>r.json());if(j.ok){clearInterval(ST.poll);authSet(b,{token:j.token,user:j.user});setSt('Logged in');render()}}catch(x){}},1500)};
+ $('ns').onchange=()=>{if($('ns').value){$('nu').value=$('ns').value;probe()}};$('nu').onchange=probe;
  $('nsv').onclick=()=>{const u=$('nu').value.trim();if(u&&!cfg.servers.includes(u)){cfg.servers.push(u);NLS.set('esaasim.net',cfg);fill();$('ns').value=u}};
  $('ndl').onclick=()=>{const u=$('ns').value;cfg.servers=cfg.servers.filter(s=>s!==u);NLS.set('esaasim.net',cfg);fill()};
  $('ng').onclick=()=>{$('nc').value=Array.from({length:6},()=>'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[Math.random()*31|0]).join('')};
- $('ngo').onclick=()=>{const role=e.querySelector('input[name=nrole]:checked').value,url=$('nu').value.trim(),code=$('nc').value.trim().toUpperCase(),name=$('nn').value.trim()||(role==='host'?'Mentor':'Student');
-  if(!url){netStatus('Enter a server address');return}if(code.length<4){netStatus('Session code must be at least 4 characters');return}
-  cfg.last={url,role,code,name};if(!cfg.servers.includes(url))cfg.servers.push(url);NLS.set('esaasim.net',cfg);netConnect({url,role,code,name})};
- $('nds').onclick=()=>{netDisconnect();};
- $('nx').onclick=()=>{e.remove();ncEl=null};
+ e.querySelectorAll('input[name=nrole]').forEach(r=>r.onchange=render);
+ $('nsw').onclick=()=>sbf.click();sbf.addEventListener('change',()=>setTimeout(()=>{if(ncEl)render()},600));
+ $('ngo').onclick=()=>{const u=user(),role=isMentor()&&(!ST.req||u&&u.rating>=3)?'host':'student',url=$('nu').value.trim(),code=$('nc').value.trim().toUpperCase(),name=$('nn').value.trim()||(role==='host'?'Mentor':'Student');
+  if(!url){setSt('Enter a server address');return}if(code.length<4){setSt('Session code must be at least 4 characters');return}
+  cfg.last={url,role,code,name};if(!cfg.servers.includes(url))cfg.servers.push(url);NLS.set('esaasim.net',cfg);netConnect({url,role,code,name,token:me()?me().token:''})};
+ $('nds').onclick=()=>{netDisconnect()};$('nx').onclick=()=>{clearInterval(ST.poll);e.remove();ncEl=null};
  e.querySelectorAll('input').forEach(i=>{i.onkeydown=ev=>ev.stopPropagation();i.onkeyup=ev=>ev.stopPropagation()});
- const th=e.querySelector('.th');let dr=null;th.onpointerdown=ev=>{if(ev.target.closest('span')||ev.button!==2)return;th.setPointerCapture(ev.pointerId);dr=[ev.clientX-e.offsetLeft,ev.clientY-e.offsetTop]};th.onpointermove=ev=>{if(dr){e.style.left=Math.max(0,ev.clientX-dr[0])+'px';e.style.top=Math.max(0,ev.clientY-dr[1])+'px'}};th.onpointerup=()=>{dr=null}}
+ const th=e.querySelector('.th');let dr=null;th.onpointerdown=ev=>{if(ev.target.closest('span'))return;th.setPointerCapture(ev.pointerId);dr=[ev.clientX-e.offsetLeft,ev.clientY-e.offsetTop]};th.onpointermove=ev=>{if(dr){e.style.left=Math.max(0,ev.clientX-dr[0])+'px';e.style.top=Math.max(0,ev.clientY-dr[1])+'px'}};th.onpointerup=()=>{dr=null};
+ probe()}
 $('ncb').onclick=netDialog;netStatus('Offline');
