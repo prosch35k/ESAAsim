@@ -51,4 +51,3 @@ function editRmk(p){if(p.edRmk)return;const r=p._sp;if(!r)return;p.edRmk=true;co
  $('map').appendChild(i);i.focus();i.select();let done=false;
  const fin=ok=>{if(done)return;done=true;if(ok){p.rmk=i.value.trim().toUpperCase().slice(0,12);if(sel===p)$('rmk').value=p.rmk;renderLists()}p.edRmk=false;i.remove()};
  i.onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')fin(true);else if(e.key==='Escape')fin(false)};i.onkeyup=e=>e.stopPropagation();i.onblur=()=>fin(true);i.onpointerdown=e=>e.stopPropagation()}
-$('atis').innerHTML='ATIS <b>'+ATIS.l+'</b> Q'+ATIS.q;
