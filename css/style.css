@@ -108,3 +108,4 @@ body:not(.host):not(.student) #radio,body:not(.host):not(.student) #simc{display
 #simc{font-size:16px}#simc #ssp{font-size:16px}#simc button{font-size:14px}
 /* no bold in the top bar */
 #tb,#tb *,#simc,#simc *{font-weight:400!important}
+.fpl button:disabled{opacity:.45;cursor:default}

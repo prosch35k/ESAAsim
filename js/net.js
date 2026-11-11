@@ -8,7 +8,7 @@ const CMDF=['act','hp','hpDef','cat','rwy','via','stand','sq','sid','alt','dir',
 const NLS={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 MP.send=o=>{if(MP.ws&&MP.ws.readyState===1)MP.ws.send(JSON.stringify(o))};
 function netUrl(u){u=(u||'').trim();if(!u)return'';if(/^https?:\/\//i.test(u))u=u.replace(/^http/i,'ws');else if(!/^wss?:\/\//i.test(u))u=(/^(localhost|127\.|192\.168\.|10\.)/.test(u)?'ws://':'wss://')+u;return u}
-function netStatus(s){MP.status=s;const b=$('ncb');if(b){b.textContent=MP.on?(MP.role==='host'?'Mentor ':'Student ')+MP.code+(MP.role==='host'?' ('+MP.peers.length+')':''):'Connect';b.classList.toggle('on',MP.on)}const e=$('nst');if(e)e.textContent=s}
+function netStatus(s){MP.status=s;const b=$('ncb');if(b){b.textContent=MP.on?(MP.role==='host'?'Mentor ':'Student ')+MP.code+(MP.role==='host'?' ('+MP.peers.length+')':''):'Connect';b.classList.toggle('on',MP.on)}const e=$('nst');if(e)e.textContent=s;const g=$('ngo'),d=$('nds');if(g)g.disabled=MP.on;if(d)d.disabled=!MP.on}
 function netConnect(o){if(MP.ws)netDisconnect(true);MP.role='';MP.base=httpOf(o.url);MP.code=o.code.toUpperCase();MP.name=o.name||'User';let ws;
  try{ws=new WebSocket(netUrl(o.url))}catch(e){netStatus('Bad server address');return}MP.ws=ws;netStatus('Connecting…');
  ws.onopen=()=>ws.send(JSON.stringify({t:'hello',role:o.role,code:MP.code,name:MP.name,token:o.token||''}));
@@ -93,7 +93,7 @@ function netDialog(){if(ncEl){ncEl.remove();ncEl=null;return}const cfg=NLS.get('
  const render=()=>{const u=user(),ok=!ST.req||!!u,canM=!ST.req||(u&&u.rating>=3);
   $('nlg').innerHTML=!ST.req?'<i>This server does not require login</i>':u?`<span>${u.name.replace(/</g,'&lt;')} · ${u.cid} · <b>${u.rn}</b>${DEV_AUTOLOGIN?' <i>(temporary auto-login)</i>':''}</span>${DEV_AUTOLOGIN?'':'<button id="nlo">Log out</button>'}`:'<button id="nli">Login with VATSIM</button>';
   if($('nli'))$('nli').onclick=doLogin;if($('nlo'))$('nlo').onclick=()=>{authSet(base(),null);render()};
-  e.querySelectorAll('.gt').forEach(x=>x.style.display=ok?'':'none');$('nrh').style.display=canM?'':'none';
+  e.querySelectorAll('.gt').forEach(x=>x.style.display=ok?'':'none');$('ngo').disabled=MP.on;$('nds').disabled=!MP.on;$('nrh').style.display=canM?'':'none';
   const rs=[...e.querySelectorAll('input[name=nrole]')];if(!canM)rs[1].checked=true;else if(!rs.some(r=>r.checked))rs[L.role==='host'?0:1].checked=true;
   const m=ok&&isMentor()&&canM;$('nswl').style.display=$('nswd').style.display=ok&&m?'':'none';$('nsc').textContent=SPAWNQ.length?SPAWNQ.length+' flight(s) waiting to appear':'';
   $('nn').readOnly=!!u&&ST.req;if(u&&ST.req)$('nn').value=u.name.slice(0,24);};
