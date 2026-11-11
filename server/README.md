@@ -29,3 +29,5 @@ The server performs the VATSIM Connect login (the client secret must never be in
 Scopes requested: `full_name vatsim_details`. Rating S2 or higher may choose mentor or student; OBS/S1 are always students (enforced by the server).
 Without `VATSIM_CLIENT_ID` the server requires no login (handy for local testing). `VATSIM_MOCK=1` fakes a login for testing only.
 Request a client at https://vatsim.dev (Connect). 
+
+Login always goes through one fixed server: set `AUTH_SERVER` near the connect dialog code in `js/net.js` to your Render address (default `ws://localhost:8080`). After logging in, the user can pick any server; to accept the login token on other servers they must use the same `SESSION_SECRET`.
