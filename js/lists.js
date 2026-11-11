@@ -160,7 +160,7 @@ function openFpl(p){if(!p)return;if(fplEl)fplEl.remove();const e=document.create
   p.remarks=$('f_rm').value;p.rules=e.querySelectorAll('input[name=frul]')[1].checked?'V':'I';
   if(p.kind==='DEP'){const a=parseInt($('f_al').value);if(a)p.xfl=a<=5000?'A'+String(Math.round(a/100)).padStart(2,'0'):String(Math.round(a/100)).padStart(3,'0')}close();list()}}
 let lastSel=null;
-function list(){if(typeof setMic==='function')setMic();if(clEl&&clEl._pull&&document.body.contains(clEl))clEl._pull();$('ac').innerHTML=planes.map(p=>`<div data-id="${p.id}" class="${p===sel?'s':''}">${p.cs} ${p.kind} ${p.sts||'---'} ${Math.round(p.spd)}kt</div>`).join('')||'<span style="color:var(--mu)">No aircraft</span>';
+function list(){if(typeof netEdits==='function')netEdits();if(typeof setMic==='function')setMic();if(clEl&&clEl._pull&&document.body.contains(clEl))clEl._pull();$('ac').innerHTML=planes.map(p=>`<div data-id="${p.id}" class="${p===sel?'s':''}">${p.cs} ${p.kind} ${p.sts||'---'} ${Math.round(p.spd)}kt</div>`).join('')||'<span style="color:var(--mu)">No aircraft</span>';
  $('clk').textContent=clockStr(T0+T);$('sct').textContent=p2(Math.floor(T/3600))+':'+p2(Math.floor(T%3600/60))+':'+p2(Math.floor(T)%60);$('ssp').textContent=sim?sim+'×':'PAUSED';updateAlerts();renderLists();
  [...$('stb').children].forEach(b=>b.classList.toggle('on',!!sel&&sel.sts===b.dataset.st));
  $('clrnc').classList.toggle('on',!!(sel&&sel.clr));[...$('stb').children].forEach(b=>b.disabled=!!sel&&(sel.kind==='DEP'?(b.dataset.st==='TXI'||b.dataset.st==='PRK'):(sel.app||!(b.dataset.st==='TXI'||b.dataset.st==='PRK'))));

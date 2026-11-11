@@ -34,8 +34,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function pump(){if(sqRun)return;sqRun=true;
  while(SQ.length&&TTS){const it=SQ.shift();for(let k=0;k<8&&TTS;k++){try{await TTS.speak(speechOf(it.p,it.t),{voice:voiceOf(it.p),rate:rateOf(it.p),language:it.lg||langOf(it.p)});break}catch(e){if(e&&(e.code==='busy'||e.code==='rate_limited')){await sleep(600);continue}if(e&&e.code==='invalid_argument'&&(it.lg||langOf(it.p))!=='en'){it.lg='en';continue}if(e&&e.code==='not_granted'){TTS=null;SQ.length=0}break}}rbPending=Math.max(0,rbPending-1);busyUntil=Date.now()+500}
  sqRun=false;if(!TTS)rbPending=0}
-function rlog(cls,who,t){const d=document.createElement('div');d.className=cls;d.textContent=clockStr(T0+T)+' '+who+': '+t;const b=$('rl');b.prepend(d);while(b.children.length>40)b.lastChild.remove()}
-function pilot(p,t,req){if(!t)return;rbPending++;const go=()=>{rlog('rp',p.cs,t);if(TTS&&$('pv').checked){SQ.push({p,t});pump()}else{busyUntil=Date.now()+Math.min(6000,t.length*55);rbPending=Math.max(0,rbPending-1)}};req?go():setTimeout(go,700+Math.random()*500)}
+function rlog(cls,who,t){const d=document.createElement('div');d.className=cls;d.textContent=clockStr(T0+T)+' '+who+': '+t;const b=$('rl');b.prepend(d);while(b.children.length>40)b.lastChild.remove();if(MP.on&&MP.role==='host')MP.send({t:'radio',cls,line:d.textContent})}
+function pilot(p,t,req){if(!t)return;rbPending++;const go=()=>{rlog('rp',p.cs,t);if(TTS&&$('pv').checked&&!MP.on){SQ.push({p,t});pump()}else{busyUntil=Date.now()+Math.min(6000,t.length*55);rbPending=Math.max(0,rbPending-1)}};req?go():setTimeout(go,700+Math.random()*500)}
 const askRadio=(p,t)=>PQ.push({p,t});
 const SVW=[[/hållpunkt(en)?|hållplats(en)?|väntplats(en)?|väntpunkt(en)?/g,'holding point'],[/klarerad för start|startklarering|start klar/g,'cleared for takeoff'],[/klarerad för landning|klarerad att landa/g,'cleared to land'],[/ställ upp|ställ dig upp|gå in på banan/g,'line up'],[/vänta/g,'wait'],[/taxa|taxi/g,'taxi'],[/pushback|backa ut|skjut ut/g,'pushback'],[/starta motorerna|starta motorer|motorstart|starttillstånd/g,'start up'],[/stå kvar|stanna|håll position/g,'hold position'],[/fortsätt/g,'continue'],[/kontakta/g,'contact'],[/frekvens/g,'frequency'],[/bana/g,'runway'],[/\b(plats|gate|stand)\b/g,'stand'],[/norr/g,'north'],[/söder|syd/g,'south'],[/\bnoll\b/g,'zero'],[/\bett\b/g,'one'],[/(?<![a-zåäö])två(?![a-zåäö])/g,'two'],[/\btre\b/g,'three'],[/\bfyra\b/g,'four'],[/\bfem\b/g,'five'],[/\bsex\b/g,'six'],[/\bsju\b/g,'seven'],[/(?<![a-zåäö])åtta(?![a-zåäö])/g,'eight'],[/\bnio\b/g,'nine'],[/\bdecimal\b|\bkomma\b/g,'decimal'],[/\bsvara\b/g,''],[/(återläsning|återläsningen|readback) (stämmer|är korrekt|korrekt|rätt)/g,'readback correct']];
 function norm(s){let t=s.toLowerCase();for(const[r,w]of SVW)t=t.replace(r,w);t=t.replace(/[.,;:!?"]/g,' ').replace(/(\d)\s*(?:decimal|point)\s*(\d)/g,'$1.$2').replace(/-/g,' ').replace(/\s+/g,' ').trim();
@@ -115,10 +115,12 @@ async function viaClaude(text){if(!SMP)return null;
   const r=await SMP.json('You parse air traffic controller radio calls for a ground-control simulator at ESGG. Aircraft: '+L+'. Transmission (speech-to-text, may contain errors): "'+text+'". Reply with JSON only: {"cs":"exact callsign from the list or null","act":"startup|pushback|taxi|lineup|takeoff|land|hold|continue|contact|clearance|squawk|none","hp":"holding point letter or null","cat3":false,"rwy":"03 or 21 or null","via":["taxiway letters"],"stand":"stand number or null","sid":"SID name or null","alt":"altitude in feet or null","sq":"4 digit squawk or null"}',{modelTier:'quick'});
   if(!r||r.act==='none'||!r.act)return null;const p=planes.find(x=>x.cs===r.cs)||sel;
   const c={p,act:r.act,found:true};if(r.hp)c.hp=String(r.hp).toUpperCase();c.cat=!!r.cat3;if(r.rwy)c.rwy=String(r.rwy).padStart(2,'0');if(r.via&&r.via.length)c.via=r.via.map(v=>String(v).toUpperCase());if(r.stand)c.stand=String(r.stand).toUpperCase();if(r.sid)c.sid=r.sid;if(r.alt){const n=+r.alt;c.alt=String(n>=1000?Math.round(n/100):n).padStart(3,'0')}if(r.sq)c.sq=String(r.sq);return c}catch(e){return null}}
-async function tx(text){text=text.trim();if(!text)return;busyUntil=Date.now()+2500;rlog('tx','ATC',text);let c=parseLocal(text);
+async function tx(text){text=text.trim();if(!text)return;busyUntil=Date.now()+2500;if(MP.role!=='student')rlog('tx','ATC',text);let c=parseLocal(text);
  if(!c.act||!c.p){const a=await viaClaude(text);if(a)c=a}
  if(!c.p||(!c.found&&!c.act)){rlog('rx','ATC','No matching aircraft — say the callsign');return}
- if(!c.act)c.act='?';exec(c)}
+ if(!c.act)c.act='?';
+ if(MP.role==='student'){if(c.act==='?'){rlogRaw('rx','Not understood: '+text);return}MP.propose(c,text);return}
+ exec(c)}
 $('rsend').onclick=()=>{const i=$('rtx');const v=i.value;i.value='';tx(v)};
 $('rtx').onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')$('rsend').onclick()};$('rtx').onkeyup=e=>e.stopPropagation();
 function setMic(){const b=$('mic');b.classList.toggle('on',listening&&!!sim);b.classList.toggle('pz',!sim);b.textContent=!sim?'UNPAUSE SIM FOR PTT':listening?'● Listening…':'PTT (LCtrl)'}
