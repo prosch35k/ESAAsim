@@ -106,3 +106,5 @@ body:not(.host):not(.student) #radio,body:not(.host):not(.student) #simc{display
 #tb #ncb{font-size:14px}#tb #pos,#tb #utc{font-size:14px}#tb #atis{font-size:15px}#tb #atis b{font-size:16px}
 #tb #qsb{flex-direction:column;gap:0;line-height:1}#tb #qsb .q1{font:600 7px/8px ui-monospace,Menlo,monospace;letter-spacing:-.2px}#tb #qsb .q2{font:700 12px/12px ui-monospace,Menlo,monospace;letter-spacing:-.3px}
 #simc{font-size:16px}#simc #ssp{font-size:16px}#simc button{font-size:14px}
+/* no bold in the top bar */
+#tb,#tb *,#simc,#simc *{font-weight:400!important}
