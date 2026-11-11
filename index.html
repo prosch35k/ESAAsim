@@ -13,9 +13,12 @@
 <div id="rhint" style="font-size:11px;color:var(--mu);margin:2px 0">Type a radio call below (voice input needs Chromium).</div>
 <div id="rl"></div>
 </div>
-<button id="sb" title="Settings"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" transform="rotate(45 12 12)" d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z"/></svg></button>
+<button id="sb" title="Mentor menu">M</button>
 <div id="side">
-<div id="clk">12:00:00Z</div>
+<h3 id="mh">Mentor menu</h3>
+<h3>Radio log</h3>
+<div id="pend"></div><div id="plog"></div>
+<div id="clk" style="margin-top:10px">12:00:00Z</div>
 <h3>Tools (click on map)</h3>
 <div class="r"><button id="net">Show ground network</button></div>
 <div class="r" id="modes"><button data-m="0" class="on">Select</button><button data-m="1">Taxi route</button><button data-m="2">Place</button></div>
@@ -52,6 +55,7 @@
 <script src="js/sweatbox.js"></script>
 <script src="js/voice.js"></script>
 <script src="js/net.js"></script>
+<script src="js/mentor.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/topbar.js"></script>
 <script src="js/main.js"></script>

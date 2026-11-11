@@ -110,3 +110,10 @@ body:not(.host):not(.student) #radio,body:not(.host):not(.student) #simc{display
 #tb,#tb *,#simc,#simc *{font-weight:400!important}
 .fpl button:disabled{opacity:.45;cursor:default}
 body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #tb #sb{display:flex}
+/* mentor menu */
+#tb #sb{font:16px ui-monospace,Menlo,monospace}#tb #sb.pn{background:#e6c200;color:#000;border-color:#b89b00}
+#pend{display:flex;flex-direction:column;gap:3px;margin-bottom:6px}#pend .pe{color:var(--mu);font-size:12px;padding:2px 0}
+#pend .pi{display:flex;align-items:center;gap:6px;padding:4px 6px;border:1px solid var(--bd);border-left:3px solid #e6c200;background:var(--bg);font:12px ui-monospace,Menlo,monospace}
+#pend .px{flex:1;min-width:0;word-wrap:break-word}#pend .pt{color:var(--mu)}
+#pend .pk{width:28px;height:28px;padding:0;flex:none;background:#1a6b3a;border-color:#1a6b3a;color:#fff;font-size:16px;line-height:1;border-radius:3px}
+#plog #rl{max-height:200px}#mh{display:none}
