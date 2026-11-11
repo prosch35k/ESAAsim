@@ -8,3 +8,4 @@ setInterval(()=>{$('utc').textContent=new Date().toISOString().slice(11,19)},250
  $('qsb').onclick=ev=>{ev.stopPropagation();if(m.style.display===''){m.style.display='none';return}build();const r=$('qsb').getBoundingClientRect();m.style.left=r.left+'px';m.style.top=r.bottom+2+'px';m.style.display=''};
  m.onclick=ev=>{const it=ev.target.closest('.qi');if(!it)return;const n=it.dataset.l,w=WIN[n];w.vis=!w.vis;w.el.style.display=w.vis?'':'none';if(w.vis)w.el.style.zIndex=++zTop;it.querySelector('.qc').innerHTML=w.vis?'&#10003;':''};
  addEventListener('pointerdown',ev=>{if(!ev.target.closest('#qsm,#qsb'))m.style.display='none'})}
+$('tb').append($('setb'),$('sb'));
