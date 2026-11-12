@@ -131,4 +131,4 @@ function pilotCalls(){for(const p of planes){if(p.owner||p.air||p.app||p.land)co
  if(p.kind==='DEP'&&p.reqClrAt!=null&&!p.clrAsked&&T>=p.reqClrAt&&!p.pushed&&p.spd<1){p.clrAsked=true;
   if(p.rules==='V'){p.pushReqAt=T}else askRadio(p,'Landvetter Ground, '+p.cs+', stand '+(p.std||'')+', type '+p.type+', information '+ATIS.l+', QNH '+ATIS.q+', request clearance to '+p.ades+'.')}
  if(p.kind==='ARR'&&p.landed&&!p.arrAsked&&!p.route.length&&p.spd<1&&!p.pb){p.arrAsked=true;askRadio(p,'Landvetter Ground, '+p.cs+', on taxiway Y.')}
- if(p.pushReqAt!=null&&!p.pushAsked&&T>=p.pushReqAt&&!p.pushed&&p.spd<1){p.pushAsked=true;askRadio(p,/^[123]$/.test(String(p.std))?p.cs+', request start-up.':p.cs+', stand '+(p.std||'')+', request pushback and start-up.')}}}
+ if(p.pushReqAt!=null&&!p.pushAsked&&T>=p.pushReqAt&&!p.pushed&&p.spd<1){p.pushAsked=true;askRadio(p,/^(1|2|3|42|44)$/.test(String(p.std))?p.cs+', request start-up.':p.cs+', stand '+(p.std||'')+', request pushback and start-up.')}}}
