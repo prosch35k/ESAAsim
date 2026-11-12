@@ -23,7 +23,9 @@ function mkPlane(kind,x,y,hdg,spd,std){
 let NOSTS=false;function setSts(p,s){if(NOSTS)return;if(p.kind==='DEP'&&(s==='TXI'||s==='PRK'))return;if(p.kind==='ARR'&&(s!=='TXI'&&s!=='PRK'||p.app||p.air))return;p.sts=s;if(s==='TXO')p.txoT=T}
 function autoTaxi(p){}
 function addTo(p,w,sn){const B=sn||snap(w[0],w[1]);if(!B||B.d>80){log('Click closer to a taxiway');return false}const A=p.last||snap(p.x,p.y),r=findRoute(A,B);if(!r){log(p.cs+': no route');return false}p.route.push(...r);p.last=B;autoTaxi(p);return true}
-function go(p,d){p.route=[];p.last=null;p.hold=false;p.pend=null;if(!addTo(p,null,snap(d[1],d[2])))return;if(d[3]==2)p.pend='xLU';else if(d[3]==0&&p.kind==='ARR')p.pend='PRK';log(p.cs+' taxi to '+d[0])}
+/* shorten a route by len metres from its end (holding points are placed 20 m before the stop line) */
+function trimTail(r,len){let acc=0;while(r.length>1){const a=r[r.length-2],b=r[r.length-1],L=Math.hypot(b[0]-a[0],b[1]-a[1]);if(acc+L>len){const t=(len-acc)/L;r[r.length-1]=[b[0]+(a[0]-b[0])*t,b[1]+(a[1]-b[1])*t,b[2]];return}acc+=L;r.pop()}}
+function go(p,d){p.route=[];p.last=null;p.hold=false;p.pend=null;if(!addTo(p,null,snap(d[1],d[2])))return;if(d[3]==1&&p.route.length){trimTail(p.route,20);const e=p.route[p.route.length-1];p.last=snap(e[0],e[1])}if(d[3]==2)p.pend='xLU';else if(d[3]==0&&p.kind==='ARR')p.pend='PRK';log(p.cs+' taxi to '+d[0])}
 function mv(p,dt){const m=p.spd*.5144*dt;p.x+=Math.sin(p.hdg*Math.PI/180)*m;p.y+=Math.cos(p.hdg*Math.PI/180)*m}
 const AIMP=400;
 function pickExit(p){const nm=p.rwy==='03'?'EXIT 03 E':(Math.random()<.5?'EXIT 21 C':'EXIT 21 D'),E=NE.find(e=>e.n===nm),off=q=>Math.abs((q[0]-rw[0])*rdy-(q[1]-rw[1])*rdx)/rl;
@@ -61,5 +63,5 @@ function startPush(p,dir){const h=p.hdg*Math.PI/180,rx=-Math.sin(h),ry=-Math.cos
 function pushStep(p,dt){const b=p.pb;
  if(b.ph===0){const m=5*.5144*dt,dx=b.tx-p.x,dy=b.ty-p.y,d=Math.hypot(dx,dy);p.spd=5;
   if(d<=m){p.x=b.tx;p.y=b.ty;b.ph=1;p.spd=0}else{const h=p.hdg*Math.PI/180;p.x-=Math.sin(h)*m;p.y-=Math.cos(h)*m}}
- else if(b.ph===1){const df=nrm(b.fh-p.hdg),st=8*dt;if(Math.abs(df)<=st){p.hdg=b.fh;b.ph=2;b.rem=28}else p.hdg=(p.hdg+Math.sign(df)*st+360)%360}
+ else if(b.ph===1){const df=nrm(b.fh-p.hdg),st=8*dt,m=3*.5144*dt,h0=p.hdg*Math.PI/180;p.spd=3;p.x-=Math.sin(h0)*m;p.y-=Math.cos(h0)*m;if(Math.abs(df)<=st){p.hdg=b.fh;b.ph=2;b.rem=28}else p.hdg=(p.hdg+Math.sign(df)*st+360)%360}
  else{const m=Math.min(b.rem,5*.5144*dt),h=p.hdg*Math.PI/180;p.spd=5;p.x-=Math.sin(h)*m;p.y-=Math.cos(h)*m;b.rem-=m;if(b.rem<=.01){p.pb=null;p.spd=0;p.pbT=T;log(p.cs+' pushback complete')}}}
