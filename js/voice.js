@@ -100,14 +100,14 @@ function exec(c){const p=c.p;
   if(c.rwy&&c.rwy!==on){t='Negative, we are lined up runway '+on+', '+cs;break}
   const e=doTakeoff(p,true);t=e?'Negative, we are not lined up, '+cs:'Cleared for takeoff runway '+r+', '+cs;break}
  case'land':if(p.kind==='ARR'&&(p.app||p.air)){t='Cleared to land runway '+(c.rwy||p.rwy)+', '+cs}else t='Unable, '+cs;break;
- case'rbok':if(p.awaitRb){p.awaitRb=false;p.pushReqAt=T+60}return;
+ case'rbok':return;
  case'hold':p.vhold=true;t='Holding position, '+cs;break;
  case'continue':p.vhold=false;t='Continuing taxi, '+cs;break;
  case'squawk':t=c.sq?'Squawk '+c.sq+', '+cs:'Say again squawk, '+cs;break;
  case'contact':{const n=nextOf(p),ct=CTRL.find(x=>x.id===n),nm=/approach|departure/.test(c.raw||'')||(ct&&ct.cs==='ESGG_E_APP')?'approach':'tower';t='Contact '+nm+(c.freq?' '+c.freq:'')+', '+cs;break}
  case'clearance':{if(p.kind!=='DEP'||air){t='Unable, '+cs;break}
   const sid=c.sid||p.sid,al=c.alt||p.cfl||initCfl(p,sid),n=parseInt(al),sq=c.sq||p.sq;
-  if(p.rules!=='V'){p.awaitRb=true;p.cfmAsked=false;p.rbAt=T}p.vclr=true;t='Cleared to '+p.ades+(sid?' via '+sid+' departure':'')+(c.alt?', climb '+(n<=50?n*100+' feet':'flight level '+n):'')+(sq?', squawk '+sq:'')+', '+cs;break}
+  if(p.rules!=='V'&&MP.role!=='host')p.pushReqAt=T+60;p.vclr=true;t='Cleared to '+p.ades+(sid?' via '+sid+' departure':'')+(c.alt?', climb '+(n<=50?n*100+' feet':'flight level '+n):'')+(sq?', squawk '+sq:'')+', '+cs;break}
  default:t='Say again, '+cs}
  list();pilot(p,t)}
 async function viaClaude(text){if(!SMP)return null;
@@ -144,7 +144,6 @@ addEventListener('blur',pttStop);
 
 /* pilot calls 60 s (sim time) after pushback is complete */
 function pilotCalls(){for(const p of planes){if(p.owner||p.air||p.app||p.land)continue;
- if(p.awaitRb&&!p.cfmAsked&&p.rbAt!=null&&T-p.rbAt>=15){p.cfmAsked=true;askRadio(p,p.cs+', confirm our readback was correct?')}
  if(p.pbT!=null&&!p.reqTaxi&&T-p.pbT>=60){p.reqTaxi=true;if(!p.route.length&&!p.pb&&p.spd<1)askRadio(p,p.cs+', request taxi')}
  if(p.kind==='DEP'&&p.reqClrAt!=null&&!p.clrAsked&&T>=p.reqClrAt&&!p.pushed&&p.spd<1){p.clrAsked=true;
   if(p.rules==='V'){p.pushReqAt=T}else askRadio(p,'Landvetter Ground, '+p.cs+', stand '+(p.std||'')+', type '+p.type+', information '+ATIS.l+', QNH '+ATIS.q+', request clearance to '+p.ades+'.')}

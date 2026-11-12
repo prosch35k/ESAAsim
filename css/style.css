@@ -120,3 +120,4 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 .ntoast{position:fixed;left:50%;top:44px;transform:translateX(-50%);z-index:300;background:#e6c200;color:#000;padding:8px 16px;border:1px solid #b89b00;font:14px system-ui,sans-serif;box-shadow:2px 2px 10px rgba(0,0,0,.5);cursor:pointer}
 #side{bottom:auto;max-height:100%}
 #pend .pi{align-items:center}#pend .pcs{font-weight:700;font-size:13px;margin-bottom:2px}#pend .ptx{color:var(--fg);font-size:12px;line-height:1.35}
+#pend .pdb{display:flex;gap:4px;flex:none}#pend .pd{width:32px;height:32px;padding:0;background:#1a6b3a;border-color:#1a6b3a;color:#fff;font-size:14px;border-radius:3px}
