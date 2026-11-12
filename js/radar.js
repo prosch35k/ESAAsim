@@ -23,6 +23,7 @@ function draw(){g.setTransform(1,0,0,1,0,0);g.fillStyle=C.COLOR_Terrain1;g.fillR
    for(let i=1;i<pts.length;i++){const ov=i>1&&OVL.get(segKey(pts[i-1],pts[i]))>1,col=ov?'#ff2d2d':'#ffd400';if(col!==cur||!run){flush();g.strokeStyle=cur=col;g.beginPath();const a=tr(pts[i-1][0],pts[i-1][1]);g.moveTo(...a);run=true}g.lineTo(...tr(pts[i][0],pts[i][1]))}
    flush();g.setLineDash([]);g.lineWidth=1}
   g.save();g.translate(q[0],q[1]);g.rotate((p.rh+D.rot)*Math.PI/180);g.fillStyle=p.hold?C.COLOR_Stopbar:C.COLOR_OtherMarking;g.beginPath();g.moveTo(0,-8);g.lineTo(5,6);g.lineTo(0,3);g.lineTo(-5,6);g.fill();g.restore();
+  if(labelHidden(p)){p._lr=p._cs=p._sp=p._std=null;continue}
   const hv=hovP===p,L_=labelLines(p,hv);p.lo=p.lo||[26,7];g.font=LFONT;let mw=0;for(const s of L_)mw=Math.max(mw,g.measureText(s).width);if(p.kind==='DEP')mw=Math.max(mw,g.measureText(p.cs+' RMK').width);
   const lh=15,pad=4,bw=mw+2*pad,bh=L_.length*lh+2*pad-1;
   /* label anchor = where the leader line meets the box (la, relative to the plane); ls = which edge: 'L' box to the right, 'R' box to the left */

@@ -8,8 +8,8 @@ const na=(t,sub)=>({t,dis:true,sub});
 const listsToggle=()=>order.map(n=>({t:n,chk:()=>WIN[n].vis,fn:()=>{const w=WIN[n];w.vis=!w.vis;w.el.style.display=w.vis?'':'none';if(w.vis)w.el.style.zIndex=++zTop}}));
 const TREE={
  settings:[{t:'Units',sub:[na('Altitude'),na('- reference'),na('Flight level'),na('Distance'),na('Speed')]},
-  {t:'Display',sub:[{hdr:'Surveillance'},na('Pro mode'),{hdr:'Tracks'},na('Display'),na('History'),na('HDG line'),na('AltFilter'),{hdr:'Label Filters'},na('Stby'),na('SqError'),na('NoState'),na('OnFreq'),na('Parked')]},
-  {t:'Labels',sub:[{hdr:'Position'},na('X'),na('Y'),{hdr:'Fields'},na('Callsign'),na('Type / WTC'),na('Stand')]},
+  {t:'Display',sub:[{hdr:'Surveillance------'},na('Pro mode'),{hdr:'Tracks------------'},{t:'Display',dis:true,chk:()=>true},{t:'History',dis:true,val:'5'},na('HDG line'),{t:'AltFilter',dis:true,val:'050'},{hdr:'Label Filters-----'}].concat(['Stby','SqError','NoState','OnFreq','Parked'].map(n=>({t:n,chk:()=>GRFILT[n],fn:()=>{GRFILT[n]=!GRFILT[n]}})))},
+  {t:'Labels',sub:[{hdr:'Position---'},{t:'X',dis:true,val:'15'},{t:'Y',dis:true,val:'15'},{hdr:'Fields------'}].concat(['ATYP','DEP','RMK','STAND','WTC'].map(n=>({t:n,chk:()=>GRFLD[n],fn:()=>{GRFLD[n]=!GRFLD[n]}})))},
   {t:'Lists',sub:['Alerts','ARR','DEP','Dep Timer','Maps','Stands','TTT'].map(n=>na(n))},
   na('Raw Video')],
  window:[na('2nd'),na('APP 1'),na('Approach Path'),na('TTT'),na('Dep Timer'),{t:'Lists',sub:listsToggle()},{t:'Runway Conf',fn:()=>$('rwb').click()},na('RVR'),na('QNH'),na('METAR'),na('Wind Rose')],
@@ -17,7 +17,7 @@ const TREE={
  dev:[na('Reload Settings'),na('Reload Data Files'),na('Show/Hide Airport Data')]};
 let reg=[];
 const build=items=>items.map(it=>{if(it.hdr)return`<div class="gh">${it.hdr}</div>`;const id=reg.push(it)-1;
- return`<div class="gi${it.dis?' dis':''}" data-i="${id}" ${it.dis?`title="${NA}"`:''}>${it.chk&&it.chk()?'<span class="ck">&#10003;</span>':''}${it.t}${it.sub?'<span class="arr">&#9656;</span><div class="gsub gmn">'+build(it.sub)+'</div>':''}</div>`}).join('');
+ return`<div class="gi${it.dis?' dis':''}" data-i="${id}" ${it.dis?`title="${NA}"`:''}>${it.chk&&it.chk()?'<span class="ck">&#10003;</span>':''}${it.t}${it.val?'<span class="gv">'+it.val+'</span>':''}${it.sub?'<span class="arr">&#9656;</span><div class="gsub gmn">'+build(it.sub)+'</div>':''}</div>`}).join('');
 let openBy=null;
 const close=()=>{menu.style.display='none';if(openBy)openBy.classList.remove('op');openBy=null;bar.classList.remove('pk')};
 const open=(el,key)=>{if(openBy===el){close();return}close();reg=[];menu.innerHTML=build(TREE[key]);const r=el.getBoundingClientRect();menu.style.left=r.left+'px';menu.style.top=r.bottom+'px';menu.style.display='';openBy=el;el.classList.add('op');bar.classList.add('pk')};
