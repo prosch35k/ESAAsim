@@ -127,3 +127,28 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 #simc #sbs button[data-s='0']{display:inline-flex;align-items:center;justify-content:center;padding:0 7px}
 #tb #setb{font-size:22px;padding-bottom:2px}
 #pend .pk{width:32px;height:32px}
+
+/* ---- Ground Radar plugin global menu bar ---- */
+#grb{position:fixed;left:0;right:0;top:29px;height:24px;z-index:41;box-sizing:border-box;display:flex;align-items:center;gap:0;padding:0 2px;background:#c7c7c7;border-bottom:1px solid #6e6e6e;border-top:1px solid #e8e8e8;color:#1c1c3c;font:12px/1 Consolas,"DejaVu Sans Mono",Menlo,monospace;letter-spacing:.09em;user-select:none;transition:transform .15s}
+#grb.hid{transform:translateY(-21px)}#grb.hid:hover,#grb.hid.pk{transform:none}
+#grb .gs{align-self:stretch;width:2px;margin:2px 6px;border-left:1px solid #8a8a8a;border-right:1px solid #f2f2f2;flex:0 0 auto}
+#grb .gm{padding:0 11px;height:20px;display:flex;align-items:center;cursor:default}#grb .gm:hover,#grb .gm.op{background:#a5a5a5}
+#grb .gl{padding:0 4px 0 2px}
+#grb .gpin{width:20px;height:20px;margin:0 1px;padding:0;border:1px solid #7a7a7a;border-radius:4px;background:#b9b9b9;position:relative}#grb .gpin.on{border-color:#222}
+#grb .gpin::after{content:"";position:absolute;left:5px;top:6px;width:7px;height:5px;border:1px solid #1c1c3c;border-radius:50% 50% 50% 50%;transform:rotate(-35deg)}
+#gal{width:22px;height:20px;display:flex;align-items:center;justify-content:center}#gal svg{width:18px;height:16px}
+#gq{display:flex;align-items:stretch;height:20px;width:134px;box-sizing:border-box;background:#c9c9c9;border:1px solid #7d7d7d;border-radius:5px;overflow:hidden}#gq.chg{background:#ffff00}
+#gqv{flex:1;display:flex;align-items:center;justify-content:center;letter-spacing:.2em}
+#gq .gsp{width:16px;display:flex;flex-direction:column;border-left:1px solid #8a8a8a;background:#b3b3b3}#gq .gsp i{flex:1;position:relative}#gq .gsp i::after{content:"";position:absolute;left:3px;top:3px;border:4px solid transparent}
+#gq .gsp i:first-child::after{border-bottom:5px solid #666;border-top:0;top:2px}#gq .gsp i:last-child::after{border-top:5px solid #666;border-bottom:0;top:2px}
+#glv{display:flex;align-items:stretch;height:20px;width:134px;box-sizing:border-box;background:#d8d8d8;border:1px solid #7d7d7d;border-radius:5px;overflow:hidden;cursor:default}#glv.lvp{background:#e6e600}
+#glt{flex:1;display:flex;align-items:center;padding-left:4px}#glv .gdd{width:18px;border-left:1px solid #8a8a8a;background:#b3b3b3;position:relative}#glv .gdd::after{content:"";position:absolute;left:4px;top:7px;border:5px solid transparent;border-top:7px solid #000;border-bottom:0}
+#gsn{display:flex;gap:6px;margin-left:2px}#gsn b{font-weight:400;display:flex;align-items:center;justify-content:center;width:36px;height:20px;box-sizing:border-box;background:#00ff00;color:#000;border:2px solid #00b600;border-right-color:#006a00;border-bottom-color:#006a00;cursor:default;letter-spacing:.07em;font-size:12px}#gsn b.off{background:#ffff00;border-color:#d0d000 #7a7a00 #7a7a00 #d0d000}
+#grb .gfill{flex:1}
+#gdt{padding:0 8px;font-size:14px;letter-spacing:.1em;font-family:Consolas,"DejaVu Sans Mono",monospace}
+#ghi{color:#1e7cf0;padding:0 10px 0 6px;font-size:13px;cursor:default;letter-spacing:.14em}
+#gmenu{position:fixed;z-index:60;min-width:190px;background:#c7c7c7;border:1px solid #333;box-shadow:2px 2px 0 rgba(0,0,0,.3);color:#1c1c3c;font:12px/1 Consolas,"DejaVu Sans Mono",monospace;letter-spacing:.05em;padding:2px 0}
+#gmenu .gi{display:flex;align-items:center;gap:10px;padding:5px 14px 5px 22px;position:relative;white-space:nowrap}#gmenu .gi:hover:not(.dis){background:#1c1c7c;color:#fff}#gmenu .gi.dis{color:#8a8a8a}#gmenu .gi .arr{margin-left:auto;padding-left:16px}
+#gmenu .gi .ck{position:absolute;left:7px}#gmenu .gh{padding:4px 12px 3px 8px;color:#555;font-size:11px;border-top:1px solid #9a9a9a;margin-top:2px}#gmenu .gh:first-child{border-top:0;margin-top:0}
+#side{padding-top:78px}
+#gmenu .gsub{display:none;position:absolute;left:100%;top:-3px;min-width:170px;background:#c7c7c7;border:1px solid #333;box-shadow:2px 2px 0 rgba(0,0,0,.3);padding:2px 0;color:#1c1c3c}#gmenu .gi:hover>.gsub{display:block}

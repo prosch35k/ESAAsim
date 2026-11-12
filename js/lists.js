@@ -20,11 +20,11 @@ const FIL={
 const SRT={STUP:(a,b)=>a.eobt<b.eobt?-1:1,TAXIOUT:(a,b)=>a.txoT-b.txoT,TAKEOFF:(a,b)=>a.sts<b.sts?-1:a.sts>b.sts?1:0,ADCS:(a,b)=>etaSec(a)-etaSec(b),TAXIIN:(a,b)=>a.cs<b.cs?-1:1};
 const WIN={};let zTop=6;
 const WK=13/11;
-function buildWins(){for(const n of order){const L=LS[n],el=document.createElement('div');el.className='win';el.style.left=Math.round(L.x*WK)+'px';el.style.top=Math.max($('tb').offsetHeight,Math.round(L.y*WK))+'px';
+function buildWins(){for(const n of order){const L=LS[n],el=document.createElement('div');el.className='win';el.style.left=Math.round(L.x*WK)+'px';el.style.top=Math.max(typeof topLim==='function'?topLim():$('tb').offsetHeight,Math.round(L.y*WK))+'px';
  el.innerHTML=`<div class="wh"><span>${n}</span><span class="cnt"></span><span class="wbt"><button class="wcl" title="Left click: hide rows, right click: minimise"></button><button class="wcx" title="Close">&#10005;</button></span></div><div class="wb"></div>`;$('map').appendChild(el);
  const wh=el.querySelector('.wh');let dr=null;
  wh.onpointerdown=e=>{if(e.target.closest('.wbt')||e.button===1)return;wh.setPointerCapture(e.pointerId);dr=[e.clientX-el.offsetLeft,e.clientY-el.offsetTop];el.style.zIndex=++zTop};
- wh.onpointermove=e=>{if(dr){WIN[n].moved=true;el.style.left=Math.max(0,e.clientX-dr[0])+'px';el.style.top=Math.max($('tb').offsetHeight,e.clientY-dr[1])+'px'}};
+ wh.onpointermove=e=>{if(dr){WIN[n].moved=true;el.style.left=Math.max(0,e.clientX-dr[0])+'px';el.style.top=Math.max(typeof topLim==='function'?topLim():$('tb').offsetHeight,e.clientY-dr[1])+'px'}};
  wh.onpointerup=()=>{dr=null};
  const cl=el.querySelector('.wcl'),TRI=u=>`<svg width="12" height="11" viewBox="0 0 12 11"><polygon points="${u?'6,0.7 11.5,10.3 0.5,10.3':'0.5,0.7 11.5,0.7 6,10.3'}" fill="currentColor"/></svg>`,setCol=m=>{const w=WIN[n];w.col=m;w.body.classList.toggle('c1',m===1);w.body.classList.toggle('c2',m===2);cl.innerHTML=TRI(m===0)};cl.innerHTML=TRI(true);
  cl.onclick=ev=>{ev.stopPropagation();setCol(WIN[n].col===1||WIN[n].col===2?0:1)};cl.oncontextmenu=ev=>{ev.preventDefault();ev.stopPropagation();setCol(WIN[n].col===2?0:2)};
