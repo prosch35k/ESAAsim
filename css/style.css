@@ -126,3 +126,4 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 #side .ph{display:flex;align-items:center;justify-content:space-between}#side .ph button{font-size:11px;padding:2px 8px;background:#22252e;border:1px solid var(--bd);color:var(--fg);border-radius:3px}#side .ph button.on{background:#2f5f8a;border-color:#2f5f8a}#pend .ar{border-left-color:#1a6b3a;opacity:.8}
 #simc #sbs button[data-s='0']{display:inline-flex;align-items:center;justify-content:center;padding:0 7px}
 #tb #setb{font-size:22px;padding-bottom:2px}
+#pend .pk{width:32px;height:32px}

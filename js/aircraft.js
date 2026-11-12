@@ -56,5 +56,5 @@ function startPush(p,dir){const h=p.hdg*Math.PI/180,rx=-Math.sin(h),ry=-Math.cos
 function pushStep(p,dt){const b=p.pb;
  if(b.ph===0){const m=5*.5144*dt,dx=b.tx-p.x,dy=b.ty-p.y,d=Math.hypot(dx,dy);p.spd=5;
   if(d<=m){p.x=b.tx;p.y=b.ty;b.ph=1;p.spd=0}else{const h=p.hdg*Math.PI/180;p.x-=Math.sin(h)*m;p.y-=Math.cos(h)*m}}
- else if(b.ph===1){const df=nrm(b.fh-p.hdg),st=8*dt;if(Math.abs(df)<=st){p.hdg=b.fh;b.ph=2;b.rem=10}else p.hdg=(p.hdg+Math.sign(df)*st+360)%360}
+ else if(b.ph===1){const df=nrm(b.fh-p.hdg),st=8*dt;if(Math.abs(df)<=st){p.hdg=b.fh;b.ph=2;b.rem=28}else p.hdg=(p.hdg+Math.sign(df)*st+360)%360}
  else{const m=Math.min(b.rem,5*.5144*dt),h=p.hdg*Math.PI/180;p.spd=5;p.x-=Math.sin(h)*m;p.y-=Math.cos(h)*m;b.rem-=m;if(b.rem<=.01){p.pb=null;p.spd=0;p.pbT=T;log(p.cs+' pushback complete')}}}
