@@ -12,7 +12,7 @@ function netToast(t){const d=document.createElement('div');d.className='ntoast';
 function netStatus(s){MP.status=s;const b=$('ncb');if(b){b.textContent=MP.on?(MP.role==='host'?'Mentor ':'Student ')+MP.code+(MP.role==='host'?' ('+MP.peers.length+')':''):'Connect';b.classList.toggle('on',MP.on)}const e=$('nst');if(e)e.textContent=s;const g=$('ngo'),d=$('nds');if(g)g.disabled=MP.on;if(d)d.disabled=!MP.on}
 function netConnect(o){if(MP.ws)netDisconnect(true);MP.role='';MP.base=httpOf(o.url);MP.code=o.code.toUpperCase();MP.name=o.name||'User';let ws;
  try{ws=new WebSocket(netUrl(o.url))}catch(e){netStatus('Bad server address');return}MP.ws=ws;netStatus('Connecting…');
- ws.onopen=()=>ws.send(JSON.stringify({t:'hello',role:o.role,code:MP.code,name:MP.name,token:o.token||''}));
+ ws.onopen=()=>ws.send(JSON.stringify({t:'hello',role:o.role,code:MP.code,name:MP.name,token:o.token||'',cid:(()=>{let c=NLS.get('esaasim.cid',null);if(!c){c=Array.from(crypto.getRandomValues(new Uint8Array(16)),x=>(x%36).toString(36)).join('');NLS.set('esaasim.cid',c)}return c})()}));
  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(x){return}netMsg(m)};
  ws.onerror=()=>netStatus('Could not reach the server');
  ws.onclose=()=>{if(MP.ws===ws){MP.ws=null;const was=MP.on;MP.on=false;document.body.classList.remove('student','host');MP.role='';MP.peers=[];netStatus(was?'Disconnected':MP.status);}}}

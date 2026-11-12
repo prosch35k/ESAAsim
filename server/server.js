@@ -53,18 +53,18 @@ function parse(c){for(;;){const b=c.buf;if(b.length<2)return;const fin=b[0]&128,
 const peers=r=>[...r.students].map(s=>({id:s.id,name:s.name}));
 function presence(r){const o={t:'peers',host:r.host?r.host.name:null,students:peers(r)};if(r.host)send(r.host,o);r.students.forEach(s=>send(s,o))}
 function msg(c,t){let o;try{o=JSON.parse(t)}catch(e){return}
- if(o.t==='hello'){if(c.room)return;const code=String(o.code||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);let name=String(o.name||'User').slice(0,24);
-  if(REQUIRE){const u=chkTok(o.token);if(!u){send(c,{t:'err',msg:'Log in with VATSIM first'});return}name=String(u.name).slice(0,24);if(o.role==='host'&&u.rating<3){send(c,{t:'err',msg:'The mentor role requires rating S2 or higher'});return}}
+ if(o.t==='hello'){if(c.room)return;const code=String(o.code||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,12);let name=String(o.name||'User').slice(0,24),ident='c:'+String(o.cid||'').slice(0,40);
+  if(REQUIRE){const u=chkTok(o.token);if(!u){send(c,{t:'err',msg:'Log in with VATSIM first'});return}name=String(u.name).slice(0,24);ident='u:'+u.cid;if(o.role==='host'&&u.rating<3){send(c,{t:'err',msg:'The mentor role requires rating S2 or higher'});return}}
   if(code.length<4){send(c,{t:'err',msg:'Session code must be at least 4 characters'});return}
   let r=rooms.get(code);
-  if(o.role==='host'){if(r&&r.host){send(c,{t:'err',msg:'That session already has a mentor connected'});return}if(!r){r={code,host:null,students:new Set()};rooms.set(code,r)}r.host=c;c.role='host'}
+  if(o.role==='host'){if(r&&r.host){if(r.host.alive&&r.host.ident===ident&&ident.length>2){const old=r.host;old.replaced=true;close(old);r.host=null}else{send(c,{t:'err',msg:'That session already has a mentor connected'});return}}if(!r){r={code,host:null,students:new Set()};rooms.set(code,r)}r.host=c;c.role='host'}
   else{if(!r||!r.host){send(c,{t:'err',msg:'No mentor is hosting that session code'});return}r.students.add(c);c.role='student'}
-  c.room=r;c.name=name;send(c,{t:'ok',role:c.role,code,id:c.id});presence(r);if(c.role==='student')send(r.host,{t:'joined',id:c.id,name});return}
+  c.room=r;c.name=name;c.ident=ident;send(c,{t:'ok',role:c.role,code,id:c.id});presence(r);if(c.role==='student')send(r.host,{t:'joined',id:c.id,name});return}
  const r=c.room;if(!r)return;
  if(c.role==='host'){if(o.to){const s=[...r.students].find(x=>x.id===o.to);if(s)send(s,o)}else r.students.forEach(s=>send(s,o))}
  else if(r.host){o.from=c.id;o.name=c.name;send(r.host,o)}}
 function close(c){if(!c.alive)return;c.alive=false;try{c.sock.destroy()}catch(e){}const r=c.room;if(!r)return;
- if(c.role==='host'){r.students.forEach(s=>{send(s,{t:'closed',msg:'The mentor left the session'});try{s.sock.end()}catch(e){}});rooms.delete(r.code)}
+ if(c.role==='host'){if(c.replaced)return;r.students.forEach(s=>{send(s,{t:'closed',msg:'The mentor left the session'});try{s.sock.end()}catch(e){}});rooms.delete(r.code)}
  else{r.students.delete(c);presence(r)}}
 setInterval(()=>{rooms.forEach(r=>{[r.host,...r.students].forEach(c=>{if(c&&c.alive&&!c.sock.destroyed)c.sock.write(frame(9,Buffer.alloc(0)))})})},25000);
 srv.listen(PORT,()=>console.log('ESAAsim relay listening on :'+PORT));
