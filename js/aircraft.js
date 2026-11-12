@@ -22,14 +22,14 @@ function mkPlane(kind,x,y,hdg,spd,std){
  planes.push(p);sel=p;return p}
 let NOSTS=false;function setSts(p,s){if(NOSTS)return;if(p.kind==='DEP'&&(s==='TXI'||s==='PRK'))return;if(p.kind==='ARR'&&(s!=='TXI'&&s!=='PRK'||p.app||p.air))return;p.sts=s;if(s==='TXO')p.txoT=T}
 function autoTaxi(p){}
-/* stands 42 and 44: aircraft park pointing west (up on screen) and arrive from the east via their own link from HPC3Z */
+/* stands 42 and 44: aircraft park pointing west (up on screen) (towards the runway); departures leave via their own link from HPC3Z */
 const parkH=()=>(SCR_RIGHT+270)%360,EASTSTD=/^(42|44)$/;
 function stubSnap(n,x,y){const i=NE.findIndex(e=>e.n==='S'+n+'-HPC3Z');if(i<0)return null;const E=NE[i];let b=null;for(let k=1;k<E.pts.length;k++){const P=E.pts[k-1],Q=E.pts[k],dx=Q[0]-P[0],dy=Q[1]-P[1],L2=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((x-P[0])*dx+(y-P[1])*dy)/L2)),px=P[0]+t*dx,py=P[1]+t*dy,d=Math.hypot(x-px,y-py);if(!b||d<b.d)b={e:i,s:E.cum[k-1]+t*Math.sqrt(L2),x:px,y:py,d}}return b}
 let STARTPT=null;/* optional route start (snap object) for stands whose exit link is not connected to the stand edge */
 function addTo(p,w,sn){const B=sn||snap(w[0],w[1]);if(!B||B.d>80){log('Click closer to a taxiway');return false}const A=p.last||STARTPT||snap(p.x,p.y),r=findRoute(A,B);if(!r){log(p.cs+': no route');return false}p.route.push(...r);p.last=B;autoTaxi(p);return true}
 /* shorten a route by len metres from its end (holding points are placed 20 m before the stop line) */
 function trimTail(r,len){let acc=0;while(r.length>1){const a=r[r.length-2],b=r[r.length-1],L=Math.hypot(b[0]-a[0],b[1]-a[1]);if(acc+L>len){const t=(len-acc)/L;r[r.length-1]=[b[0]+(a[0]-b[0])*t,b[1]+(a[1]-b[1])*t,b[2]];return}acc+=L;r.pop()}}
-function go(p,d){p.route=[];p.last=null;p.hold=false;p.pend=null;const es=p.kind==='ARR'&&d[3]==0&&/^Stand (42|44)$/.test(d[0])?stubSnap(d[0].slice(6),d[1],d[2]):null;if(!addTo(p,null,es||snap(d[1],d[2])))return;if(es){p.route.push([d[1],d[2],8]);p.last=snap(d[1],d[2])}if(d[3]==1&&p.route.length){trimTail(p.route,20);const e=p.route[p.route.length-1];p.last=snap(e[0],e[1])}if(d[3]==2)p.pend='xLU';else if(d[3]==0&&p.kind==='ARR')p.pend='PRK';log(p.cs+' taxi to '+d[0])}
+function go(p,d){p.route=[];p.last=null;p.hold=false;p.pend=null;if(!addTo(p,null,snap(d[1],d[2])))return;if(d[3]==1&&p.route.length){trimTail(p.route,20);const e=p.route[p.route.length-1];p.last=snap(e[0],e[1])}if(d[3]==2)p.pend='xLU';else if(d[3]==0&&p.kind==='ARR')p.pend='PRK';log(p.cs+' taxi to '+d[0])}
 function mv(p,dt){const m=p.spd*.5144*dt;p.x+=Math.sin(p.hdg*Math.PI/180)*m;p.y+=Math.cos(p.hdg*Math.PI/180)*m}
 const AIMP=400;
 function pickExit(p){const nm=p.rwy==='03'?'EXIT 03 E':(Math.random()<.5?'EXIT 21 C':'EXIT 21 D'),E=NE.find(e=>e.n===nm),off=q=>Math.abs((q[0]-rw[0])*rdy-(q[1]-rw[1])*rdx)/rl;
