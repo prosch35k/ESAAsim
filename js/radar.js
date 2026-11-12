@@ -15,7 +15,7 @@ function draw(){g.setTransform(1,0,0,1,0,0);g.fillStyle=C.COLOR_Terrain1;g.fillR
   g.strokeStyle='rgb(60,200,120)';g.lineWidth=2;g.setLineDash([]);g.beginPath();g.moveTo(...a);g.lineTo(...b);
   if(ap){const bx=(ap[1]-12.2832)*111320*Math.cos(57.6629*Math.PI/180),by=(ap[0]-57.6629)*111132,dx=bx-fx,dy=by-fy,l=Math.hypot(dx,dy)||1,e=tr(fx+dx/l*30000,fy+dy/l*30000);g.lineTo(...e)}g.stroke();
   g.fillStyle='rgb(60,200,120)';g.font='600 12px system-ui,sans-serif';g.fillText(p.copx,b[0]+6,b[1]-6)}
- if(typeof drawProps==='function')drawProps();
+ if(typeof drawProps==='function')drawProps();if(typeof drawMan==='function')drawMan();
  g.fillStyle='#fff';for(const p of planes)if(p.hist)for(const h of p.hist){const u=tr(h[0],h[1]);g.fillRect(Math.round(u[0]),Math.round(u[1]),1,1)}
  OVL.clear();if(MP.role==='host')for(const p of planes){const r=p.route;if(!r||r.length<2)continue;const seen=new Set();for(let i=1;i<r.length;i++){const k=segKey(r[i-1],r[i]);if(!seen.has(k)){seen.add(k);OVL.set(k,(OVL.get(k)||0)+1)}}}
  for(const p of planes.slice().sort((a,b)=>(a===sel)-(b===sel))){if(p.rx===undefined){p.rx=p.x;p.ry=p.y;p.rh=p.hdg}const q=tr(p.rx,p.ry),on=p===sel;

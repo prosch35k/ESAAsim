@@ -38,7 +38,7 @@ function step(dt){for(const p of planes.slice()){if(p.xfer){p.xt-=dt;if(p.xt<=0)
  if(p.app){p.spd+=Math.max(-2*dt,Math.min(2*dt,135-p.spd));mv(p,dt);if(alongTh(p)>=0){p.app=false;p.land=true;p.vx=pickExit(p);p.da=0;log(p.cs+' touchdown')}continue}
  if(p.land){const x=p.vx,a=alongTh(p);
   if(a<AIMP)tg=p.spd;else{if(!p.da){const v0=p.spd*.5144,v1=22*.5144,dd=Math.max(300,x.d-AIMP);p.da=Math.max(.6,(v0*v0-v1*v1)/(2*dd))/.5144}tg=22}
-  if(a>=x.d){p.land=false;p.vx=null;if(!p.route.length){const A=snap(p.x,p.y),B=snap(x.e[0],x.e[1]),rt=A&&B&&findRoute(A,B);if(rt){p.route=rt;p.last=B}}}}
+  if(a>=x.d){p.land=false;p.landed=true;p.vx=null;if(!p.route.length){const A=snap(p.x,p.y),B=snap(x.e[0],x.e[1]),rt=A&&B&&findRoute(A,B);if(rt){p.route=rt;p.last=B}}}}
  if(!p.land&&p.route.length&&!p.hold&&!p.vhold){const t=p.route[0],dx=t[0]-p.x,dy=t[1]-p.y,d=Math.hypot(dx,dy),df=nrm(Math.atan2(dx,dy)*180/Math.PI-p.hdg);
   p.hdg=(p.hdg+Math.max(-30*dt,Math.min(30*dt,df))+360)%360;const bs=t[2]||15;tg=Math.abs(df)>35||(p.route.length==1&&d<30)?Math.min(5,bs):bs;if(d<(p.route.length>1?6:3)){p.route.shift()}}
  p.spd+=Math.max(-(p.land?(p.da||5):3)*dt,Math.min(2*dt,tg-p.spd));if(p.spd<0)p.spd=0;
