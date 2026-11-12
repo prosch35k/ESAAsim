@@ -1,7 +1,7 @@
 /* ---------- mentor menu: interactive radio log (pending pilot requests) ---------- */
 const PEND=[],ARCH=[];let pendId=0,showArch=false;
 function archive(r){ARCH.unshift(Object.assign({},r,{done:clockStr(T0+T)}));if(ARCH.length>80)ARCH.pop()}
-function addPend(p,t){const k=/request clearance/i.test(t)?'clr':/request pushback/i.test(t)?'push':/request taxi|on taxiway/i.test(t)?'taxi':null;if(!k)return;PEND.unshift({id:++pendId,cs:p.cs,t,k,at:clockStr(T0+T)});if(PEND.length>60)PEND.pop();pendRender()}
+function addPend(p,t){const k=/request clearance/i.test(t)?'clr':/request pushback/i.test(t)?'push':/request start-?up/i.test(t)?'start':/request taxi|on taxiway/i.test(t)?'taxi':null;if(!k)return;PEND.unshift({id:++pendId,cs:p.cs,t,k,at:clockStr(T0+T)});if(PEND.length>60)PEND.pop();pendRender()}
 function pendRender(){const e=$('pend');if(!e)return;
  const ab=$('arb');if(ab){ab.classList.toggle('on',showArch);ab.textContent=showArch?'Pending':'Archive';ab.title=showArch?'Back to pending requests':'Show acknowledged requests'}
  const ph=document.querySelector('#side .ph span');if(ph)ph.textContent=showArch?'Archive':'Pending requests';
@@ -24,7 +24,7 @@ function stdTaxi(p){
  const sv=[p.route,p.last,p.wt,p.pend];
  for(const c of L){p.route=[];p.last=null;exec({act:'taxi',hp:'Y',hpDef:true,rwy:rwyDep,via:[c,'Z'],p,raw:'',found:true});
   const r0=p.route[0],f=r0&&p.route.find(q=>Math.hypot(q[0]-r0[0],q[1]-r0[1])>8);
-  if(!p.pushed||!f||((f[0]-r0[0])*fx+(f[1]-r0[1])*fy)>-3)return true;
+  if(p.pushH==null||!f||((f[0]-r0[0])*fx+(f[1]-r0[1])*fy)>-3)return true;
   p.route=sv[0];p.last=sv[1];p.wt=sv[2];p.pend=sv[3]}
  /* nothing satisfied the direction: fall back to the nearest connector */
  exec({act:'taxi',hp:'Y',hpDef:true,rwy:rwyDep,via:[L[0],'Z'],p,raw:'',found:true});return true}
@@ -48,6 +48,7 @@ $('pend').onclick=ev=>{const b=ev.target.closest('.pk,.pd,.pm');if(!b)return;con
  archive(r);PEND.splice(i,1);
  if(b.classList.contains('pd'))exec({act:'pushback',dir:b.dataset.d,p,raw:'',found:true});
  else if(r.k==='taxi')stdTaxi(p);
+ else if(r.k==='start'){p.pushed=true;p.pbT=T-40;log(p.cs+' start-up approved')}
  else if(p.rules!=='V'&&p.pushReqAt==null)p.pushReqAt=T+60;/* clearance done = readback correct: push request follows */
  pendRender();list()};
 pendRender();
