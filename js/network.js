@@ -9,7 +9,9 @@ function slice(ei,s0,s1){const E=NE[ei],o=[];const at=s=>{for(let k=1;k<E.pts.le
  o.push(at(s1));return o.map(p=>[p[0],p[1],E.s])}
 function dij(src){const d=NET.n.map(()=>1e9),pr=NET.n.map(()=>null),done=new Set(),q=[src];d[src]=0;
  while(q.length){q.sort((a,b)=>d[a]-d[b]);const u=q.shift();if(done.has(u))continue;done.add(u);for(const[v,i]of ADJ[u]){const nd=d[u]+NE[i].len*vw(i);if(nd<d[v]){d[v]=nd;pr[v]=[u,i];q.push(v)}}}return{d,pr}}
-function findRoute(A,B){let out;if(A.e==B.e)out=slice(A.e,A.s,B.s);else{let best=null;
+/* a plane already standing on a preferred taxiway (e.g. Y) has satisfied that "via" - otherwise the route doubles back to the node behind it */
+function findRoute(A,B){const V0=VIAL;try{if(VIAL){const V=VIAL.slice();while(V.length&&typeof TWP!=='undefined'&&TWP[A.e]&&TWP[A.e].has(V[0]))V.shift();VIAL=V.length?V:null}return findRoute0(A,B)}finally{VIAL=V0}}
+function findRoute0(A,B){let out;if(A.e==B.e)out=slice(A.e,A.s,B.s);else{let best=null;
  for(const ea of[0,1])for(const eb of[0,1]){const na=ea?NE[A.e].b:NE[A.e].a,nb=eb?NE[B.e].b:NE[B.e].a,sa=ea?NE[A.e].len:0,sb=eb?NE[B.e].len:0;let Rr,c,kk=0;
   if(VIAL){Rr=dijV(na);let bv=1e9;for(let k=0;k<=VIAL.length;k++){const v=Rr.d[nb][k]+(VIAL.length-k)*3000;if(v<bv){bv=v;kk=k}}c=Math.abs(A.s-sa)+bv+Math.abs(B.s-sb)}else{Rr=dij(na);c=Math.abs(A.s-sa)+Rr.d[nb]+Math.abs(B.s-sb)}
   if(!best||c<best.c)best={c,na,nb,sa,sb,R:Rr,kk}}
