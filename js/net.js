@@ -59,7 +59,7 @@ function drawProps(){for(const pr of PROPS){if(!pr.pv)continue;g.strokeStyle='#f
 /* ---- student: apply state ---- */
 function netApply(m){T=m.T;sim=m.sim;rwyDep=m.rwyDep;rwyArr=m.rwyArr;apAct=m.apAct;Object.assign(ATIS,m.atis);m.ctrl.forEach(([id,on])=>{const c=CTRL.find(x=>x.id===id);if(c)c.on=on});updRw();
  const now=Date.now(),by=new Map(planes.map(p=>[p.id,p])),out=[];
- for(const s of m.planes){let p=by.get(s.id);if(!p){p=s;p._pend={};}else{const keep={lo:p.lo,_pend:p._pend||{}};for(const k of Object.keys(p))if(k[0]!=='_'&&k!=='lo')delete p[k];Object.assign(p,s,keep)}
+ for(const s of m.planes){let p=by.get(s.id);if(!p){p=s;p._pend={};}else{const keep={lo:p.lo,la:p.la,ls:p.ls,_pend:p._pend||{}};for(const k of Object.keys(p))if(k[0]!=='_'&&k!=='lo'&&k!=='la'&&k!=='ls')delete p[k];Object.assign(p,s,keep)}
   for(const f of Object.keys(p._pend||{})){if(now-p._pend[f].t<3000)p[f]=p._pend[f].v;else delete p._pend[f]}
   p._nb={};EDIT.forEach(f=>p._nb[f]=JSON.parse(JSON.stringify(p[f]??null)));out.push(p)}
  planes=out;if(sel&&!planes.includes(sel))sel=planes.find(p=>p.id===sel.id)||null;
