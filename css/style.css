@@ -122,3 +122,5 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 #pend .pi{align-items:center}#pend .pcs{font-weight:700;font-size:13px;margin-bottom:2px}#pend .ptx{color:var(--fg);font-size:12px;line-height:1.35}
 #pend .pdb{display:flex;gap:4px;flex:none}#pend .pd{width:32px;height:32px;padding:0;background:#1a6b3a;border-color:#1a6b3a;color:#fff;font-size:14px;border-radius:3px}
 #pend .pm{width:auto;min-width:40px;height:32px;padding:0 8px;background:#2f5f8a;border-color:#2f5f8a;color:#fff;font-size:13px;border-radius:3px}
+
+#side .ph{display:flex;align-items:center;justify-content:space-between}#side .ph button{font-size:11px;padding:2px 8px;background:#22252e;border:1px solid var(--bd);color:var(--fg);border-radius:3px}#side .ph button.on{background:#2f5f8a;border-color:#2f5f8a}#pend .ar{border-left-color:#1a6b3a;opacity:.8}

@@ -34,8 +34,8 @@ const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function pump(){if(sqRun)return;sqRun=true;
  while(SQ.length&&TTS){const it=SQ.shift();for(let k=0;k<8&&TTS;k++){try{await TTS.speak(speechOf(it.p,it.t),{voice:voiceOf(it.p),rate:rateOf(it.p),language:it.lg||langOf(it.p)});break}catch(e){if(e&&(e.code==='busy'||e.code==='rate_limited')){await sleep(600);continue}if(e&&e.code==='invalid_argument'&&(it.lg||langOf(it.p))!=='en'){it.lg='en';continue}if(e&&e.code==='not_granted'){TTS=null;SQ.length=0}break}}rbPending=Math.max(0,rbPending-1);busyUntil=Date.now()+500}
  sqRun=false;if(!TTS)rbPending=0}
-function rlog(cls,who,t){const d=document.createElement('div');d.className=cls;d.textContent=clockStr(T0+T)+' '+who+': '+t;const b=$('rl');b.prepend(d);while(b.children.length>40)b.lastChild.remove();if(MP.on&&MP.role==='host')MP.send({t:'radio',cls,line:d.textContent})}
-function pilot(p,t,req){if(!t)return;if(req&&MP.role==='host')addPend(p,t);rbPending++;const go=()=>{rlog('rp',p.cs,t);if(TTS&&$('pv').checked&&!MP.on){SQ.push({p,t});pump()}else{busyUntil=Date.now()+Math.min(6000,t.length*55);rbPending=Math.max(0,rbPending-1)}};req?go():setTimeout(go,700+Math.random()*500)}
+function rlog(cls,who,t){}
+function pilot(p,t,req){if(!t)return;if(req&&MP.role==='host')addPend(p,t);rbPending++;const go=()=>{rlog('rp',p.cs,t);if(false){}else{busyUntil=Date.now()+Math.min(6000,t.length*55);rbPending=Math.max(0,rbPending-1)}};req?go():setTimeout(go,700+Math.random()*500)}
 const askRadio=(p,t)=>PQ.push({p,t});
 const SVW=[[/hållpunkt(en)?|hållplats(en)?|väntplats(en)?|väntpunkt(en)?/g,'holding point'],[/klarerad för start|startklarering|start klar/g,'cleared for takeoff'],[/klarerad för landning|klarerad att landa/g,'cleared to land'],[/ställ upp|ställ dig upp|gå in på banan/g,'line up'],[/vänta/g,'wait'],[/taxa|taxi/g,'taxi'],[/pushback|backa ut|skjut ut/g,'pushback'],[/starta motorerna|starta motorer|motorstart|starttillstånd/g,'start up'],[/stå kvar|stanna|håll position/g,'hold position'],[/fortsätt/g,'continue'],[/kontakta/g,'contact'],[/frekvens/g,'frequency'],[/bana/g,'runway'],[/\b(plats|gate|stand)\b/g,'stand'],[/norr/g,'north'],[/söder|syd/g,'south'],[/\bnoll\b/g,'zero'],[/\bett\b/g,'one'],[/(?<![a-zåäö])två(?![a-zåäö])/g,'two'],[/\btre\b/g,'three'],[/\bfyra\b/g,'four'],[/\bfem\b/g,'five'],[/\bsex\b/g,'six'],[/\bsju\b/g,'seven'],[/(?<![a-zåäö])åtta(?![a-zåäö])/g,'eight'],[/\bnio\b/g,'nine'],[/\bdecimal\b|\bkomma\b/g,'decimal'],[/\bsvara\b/g,''],[/(återläsning|återläsningen|readback) (stämmer|är korrekt|korrekt|rätt)/g,'readback correct']];
 function norm(s){let t=s.toLowerCase();for(const[r,w]of SVW)t=t.replace(r,w);t=t.replace(/[.,;:!?"]/g,' ').replace(/(\d)\s*(?:decimal|point)\s*(\d)/g,'$1.$2').replace(/-/g,' ').replace(/\s+/g,' ').trim();
@@ -121,25 +121,7 @@ async function tx(text){text=text.trim();if(!text)return;busyUntil=Date.now()+25
  if(!c.act)c.act='?';
  if(MP.role==='student'){if(c.act==='?'){rlogRaw('rx','Not understood: '+text);return}MP.propose(c,text);return}
  exec(c)}
-$('rsend').onclick=()=>{const i=$('rtx');const v=i.value;i.value='';tx(v)};
-$('rtx').onkeydown=e=>{e.stopPropagation();if(e.key==='Enter')$('rsend').onclick()};$('rtx').onkeyup=e=>e.stopPropagation();
-function setMic(){const b=$('mic');b.classList.toggle('on',listening&&!!sim);b.classList.toggle('pz',!sim);b.textContent=!sim?'UNPAUSE SIM FOR PTT':listening?'● Listening…':'PTT (LCtrl)'}
-let pttDown=false,LANG='en';
-const setLang=l=>{LANG=l;$('lng').textContent=l.toUpperCase();$('lng').title=l==='en'?'Speech recognition: English (click for Swedish)':'Taligenkänning: svenska (click for English)'};
-$('lng').onclick=()=>setLang(LANG==='en'?'sv':'en');
-setLang('en');
-function pttStart(){if(!DIC||pttDown||!sim)return;pttDown=true;if(TTS)TTS.stop();DIC.start({language:LANG}).catch(e=>{pttDown=false;if(e&&e.code==='not_granted'){DIC=null;$('mic').style.display='none';$('lng').style.display='none'}else if(e&&e.code==='unavailable'&&LANG!=='en'){setLang('en');rlog('rx','ATC','Swedish dictation is not available here — switched to English')}})}
-function pttStop(){if(!pttDown)return;pttDown=false;if(DIC)DIC.stop().catch(()=>{})}
-$('mic').onpointerdown=e=>{e.preventDefault();pttStart()};$('mic').onpointerup=pttStop;$('mic').onpointerleave=pttStop;
-addEventListener('keydown',e=>{if(e.code==='ControlLeft'&&!e.repeat)pttStart()});
-addEventListener('keyup',e=>{if(e.code==='ControlLeft')pttStop()});
-addEventListener('blur',pttStop);
-(async()=>{if(!(window.claude&&claude.use))return;
- try{DIC=await claude.use('dictation')}catch(e){}try{TTS=await claude.use('tts')}catch(e){}try{SMP=await claude.use('sample')}catch(e){}
- $('mic').style.display=DIC?'':'none';$('lng').style.display=DIC?'':'none';$('pvl').style.display=TTS?'':'none';
- $('rhint').textContent=DIC?'Hold Left Ctrl (or the PTT button) while you speak, e.g. “Scandinavian 123, taxi to holding point runway two one via Yankee”. Voice calls only move the aircraft and get a readback; strips, status and tags are never changed.':'Voice input is not available here — type the call below.';
- if(DIC){DIC.onPartial(({text})=>{$('rtx').value=text});DIC.onFinal(({text})=>{$('rtx').value='';tx(text)});DIC.onState(({state})=>{listening=state==='listening';if(!listening)busyUntil=Math.max(busyUntil,Date.now()+2500);setMic();if(!listening)$('rtx').value=''})}
- if(TTS)TTS.onState(()=>{})})();
+
 
 
 /* pilot calls 60 s (sim time) after pushback is complete */

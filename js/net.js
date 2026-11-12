@@ -25,12 +25,12 @@ function netMsg(m){
  else if(m.t==='peers'){MP.peers=m.students||[];netStatus(MP.status.startsWith('Connected')?'Connected as '+(MP.role==='host'?'mentor':'student')+', session '+MP.code+' · '+(MP.peers.length)+' student(s)':MP.status)}
  else if(m.t==='joined'&&MP.role==='host'){rlog('rx','Session',m.name+' joined');netState()}
  else if(MP.role==='host'){if(m.t==='prop')netProp(m);else if(m.t==='patch')netPatch(m)}
- else if(MP.role==='student'){if(m.t==='state')netApply(m);else if(m.t==='radio')rlogRaw(m.cls,m.line);else if(m.t==='res')rlogRaw(m.ok?'rp':'rx','('+(m.ok?'Approved':'Rejected')+') '+m.desc)}}
+ else if(MP.role==='student'){if(m.t==='state')netApply(m);else if(m.t==='res')rlogRaw(m.ok?'rp':'rx','('+(m.ok?'Approved':'Rejected')+') '+m.desc)}}
 /* ---- host: state broadcast ---- */
 const skipK=(k,v)=>k[0]==='_'||k==='lo'||k==='edRmk'?undefined:v;
 function netState(){if(!(MP.on&&MP.role==='host'))return;MP.send({t:'state',T,sim,rwyDep,rwyArr,apAct,atis:ATIS,ctrl:CTRL.map(c=>[c.id,c.on]),planes:JSON.parse(JSON.stringify(planes,skipK))})}
 function netTick(){if(MP.on&&MP.role==='host'&&MP.peers.length)netState()}
-function rlogRaw(cls,line){const d=document.createElement('div');d.className=cls;d.textContent=line;const b=$('rl');b.prepend(d);while(b.children.length>40)b.lastChild.remove()}
+function rlogRaw(cls,line){if(typeof netToast==='function')netToast(line)}
 /* ---- host: patches from students ---- */
 function netPatch(m){const p=planes.find(q=>q.id===m.id);if(!p||p.owner&&false)return;for(const f of Object.keys(m.f))if(EDIT.includes(f))p[f]=m.f[f];list()}
 /* ---- host: proposals ---- */
