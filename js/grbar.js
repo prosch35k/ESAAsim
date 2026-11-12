@@ -28,6 +28,7 @@ bar.querySelectorAll('.gm').forEach(el=>el.onpointerenter=()=>{if(openBy&&openBy
 menu.onclick=ev=>{const g=ev.target.closest('.gi');if(!g)return;const it=reg[+g.dataset.i];if(!it||it.dis||it.sub)return;it.fn&&it.fn();
  const ck=g.querySelector('.ck');if(it.chk){if(it.chk()){if(!ck)g.insertAdjacentHTML('afterbegin','<span class="ck">&#10003;</span>')}else if(ck)ck.remove()}else close()};
 addEventListener('pointerdown',ev=>{if(!ev.target.closest('#gmenu,#grb .gm,#ghi'))close()});
+bar.addEventListener('pointerenter',()=>{GRFILTOFF=true});bar.addEventListener('pointerleave',()=>{GRFILTOFF=false});
 /* pin */
 $('grp').onclick=()=>{const on=$('grp').classList.toggle('on');bar.classList.toggle('hid',!on);clampWins()};
 /* alerts: filled when at least one alert is active, hollow otherwise */

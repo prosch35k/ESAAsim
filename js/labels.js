@@ -4,7 +4,8 @@ const LFONT='500 14px "SMR ESGG","DejaVu Sans Mono",Menlo,Consolas,monospace';
 const GRFLD={ATYP:true,DEP:false,RMK:true,STAND:true,WTC:true},GRFILT={Stby:false,SqError:false,NoState:true,OnFreq:true,Parked:true};
 const sqErr=p=>!!p.sq&&p.tsq!==p.sq;/* assigned squawk not set on the transponder */
 /* filters only hide labels of stationary ground tracks (selection does not matter) */
-function labelHidden(p){if(p.spd>=1||p.air||p.app||p.land)return false;const F=GRFILT;
+let GRFILTOFF=false;/* filters are suspended while the pointer is over the Ground Radar bar */
+function labelHidden(p){if(GRFILTOFF||p.spd>=1||p.air||p.app||p.land)return false;const F=GRFILT;
  return F.Stby||(F.SqError&&sqErr(p))||(p.kind==='DEP'&&((F.NoState&&!p.sts)||(F.OnFreq&&p.sts==='FRQ')))||(p.kind==='ARR'&&F.Parked&&p.sts==='PRK')}
 function labelLines(p,hv){const F=hv?{ATYP:1,DEP:1,RMK:1,STAND:1,WTC:1}:GRFLD,rm=F.RMK?(p.edRmk?'':p.rmk):'',wt=p.hideW||!F.WTC?'':'/'+p.w,ty=F.ATYP?p.type:'',al=p.alert?'!!':'',cm=sqErr(p)?p.sq:'',j=(...a)=>a.filter(x=>x).join(' ');
  p._r0=!!(al||cm);
