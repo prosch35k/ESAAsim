@@ -8,6 +8,7 @@ const CMDF=['act','hp','hpDef','cat','rwy','via','stand','sq','sid','alt','dir',
 const NLS={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 MP.send=o=>{if(MP.ws&&MP.ws.readyState===1)MP.ws.send(JSON.stringify(o))};
 function netUrl(u){u=(u||'').trim();if(!u)return'';if(/^https?:\/\//i.test(u))u=u.replace(/^http/i,'ws');else if(!/^wss?:\/\//i.test(u))u=(/^(localhost|127\.|192\.168\.|10\.)/.test(u)?'ws://':'wss://')+u;return u}
+function netToast(t){const d=document.createElement('div');d.className='ntoast';d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),8000);d.onclick=()=>d.remove()}
 function netStatus(s){MP.status=s;const b=$('ncb');if(b){b.textContent=MP.on?(MP.role==='host'?'Mentor ':'Student ')+MP.code+(MP.role==='host'?' ('+MP.peers.length+')':''):'Connect';b.classList.toggle('on',MP.on)}const e=$('nst');if(e)e.textContent=s;const g=$('ngo'),d=$('nds');if(g)g.disabled=MP.on;if(d)d.disabled=!MP.on}
 function netConnect(o){if(MP.ws)netDisconnect(true);MP.role='';MP.base=httpOf(o.url);MP.code=o.code.toUpperCase();MP.name=o.name||'User';let ws;
  try{ws=new WebSocket(netUrl(o.url))}catch(e){netStatus('Bad server address');return}MP.ws=ws;netStatus('Connecting…');
@@ -20,7 +21,7 @@ function netMsg(m){
  if(m.t==='ok'){MP.on=true;MP.role=m.role;MP.id=m.id;MP.code=m.code;document.body.classList.add(m.role==='host'?'host':'student');
   if(m.role==='student'){planes=[];sel=null;SPAWNQ=[];sim=0;list()}netStatus('Connected as '+(m.role==='host'?'mentor':'student')+', session '+m.code);if(ncEl){ncEl.remove();ncEl=null}}
  else if(m.t==='err'){netStatus(m.msg);if(/Log in with VATSIM/.test(m.msg))try{NLS.set('esaasim.auth1',null)}catch(x){};if(MP.ws){const w=MP.ws;MP.ws=null;try{w.close()}catch(e){}}}
- else if(m.t==='closed'){netStatus(m.msg);netDisconnect(true);planes=[];sel=null;list()}
+ else if(m.t==='closed'){netStatus(m.msg);netDisconnect(true);planes=[];sel=null;list();netToast(m.msg+' - you have been disconnected')}
  else if(m.t==='peers'){MP.peers=m.students||[];netStatus(MP.status.startsWith('Connected')?'Connected as '+(MP.role==='host'?'mentor':'student')+', session '+MP.code+' · '+(MP.peers.length)+' student(s)':MP.status)}
  else if(m.t==='joined'&&MP.role==='host'){rlog('rx','Session',m.name+' joined');netState()}
  else if(MP.role==='host'){if(m.t==='prop')netProp(m);else if(m.t==='patch')netPatch(m)}

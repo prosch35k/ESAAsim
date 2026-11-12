@@ -117,3 +117,4 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 #pend .px{flex:1;min-width:0;word-wrap:break-word}#pend .pt{color:var(--mu)}
 #pend .pk{width:28px;height:28px;padding:0;flex:none;background:#1a6b3a;border-color:#1a6b3a;color:#fff;font-size:16px;line-height:1;border-radius:3px}
 #plog #rl{max-height:200px}#mh{display:none}
+.ntoast{position:fixed;left:50%;top:44px;transform:translateX(-50%);z-index:300;background:#e6c200;color:#000;padding:8px 16px;border:1px solid #b89b00;font:14px system-ui,sans-serif;box-shadow:2px 2px 10px rgba(0,0,0,.5);cursor:pointer}
