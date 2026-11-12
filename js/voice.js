@@ -28,6 +28,7 @@ const VOICES=['buttery','airy','glassy','rounded'];
 const voiceOf=p=>VOICES[hashN(p.cs)%4],rateOf=p=>1.2+(hashN(p.cs+'r')%25)/100;
 let DIC=null,TTS=null,SMP=null,listening=false;
 const SQ=[],PQ=[];let sqRun=false,rbPending=0,busyUntil=0;
+let pttDown=false;
 const chanBusy=()=>listening||pttDown||rbPending>0||sqRun||Date.now()<busyUntil;
 setInterval(()=>{if(PQ.length&&!chanBusy()){const it=PQ.shift();pilot(it.p,it.t,true)}},400);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
