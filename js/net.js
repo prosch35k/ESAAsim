@@ -18,7 +18,7 @@ function netConnect(o){if(MP.ws)netDisconnect(true);MP.role='';MP.base=httpOf(o.
  ws.onclose=()=>{if(MP.ws===ws){MP.ws=null;const was=MP.on;MP.on=false;document.body.classList.remove('student','host');MP.role='';MP.peers=[];netStatus(was?'Disconnected':MP.status);}}}
 function netDisconnect(quiet){const w=MP.ws;MP.ws=null;MP.on=false;MP.role='';MP.peers=[];document.body.classList.remove('student','host');if(w)try{w.close()}catch(e){}if(!quiet)netStatus('Offline')}
 function netMsg(m){
- if(m.t==='ok'){MP.on=true;MP.role=m.role;MP.id=m.id;MP.code=m.code;document.body.classList.add(m.role==='host'?'host':'student');
+ if(m.t==='ok'){MP.on=true;MP.role=m.role;MP.id=m.id;MP.code=m.code;document.body.classList.add(m.role==='host'?'host':'student');if(m.role==='host'){$('side').classList.add('open');$('sb').classList.add('on')}
   if(m.role==='student'){planes=[];sel=null;SPAWNQ=[];sim=0;list()}netStatus('Connected as '+(m.role==='host'?'mentor':'student')+', session '+m.code);if(ncEl){ncEl.remove();ncEl=null}}
  else if(m.t==='err'){netStatus(m.msg);if(/Log in with VATSIM/.test(m.msg))try{NLS.set('esaasim.auth1',null)}catch(x){};if(MP.ws){const w=MP.ws;MP.ws=null;try{w.close()}catch(e){}}}
  else if(m.t==='closed'){netStatus(m.msg);netDisconnect(true);planes=[];sel=null;list();netToast(m.msg+' - you have been disconnected')}
