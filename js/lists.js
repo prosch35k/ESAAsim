@@ -12,7 +12,7 @@ const GET={
  'DRWY':p=>p.kind==='DEP'?p.rwy:'','ARWY':p=>p.kind==='ARR'?p.rwy:'','RTE/AHD':p=>p.ahdg?'H'+p.ahdg:p.sid,'CFL':p=>fmtAlt(p.cfl),'XFL':p=>p.xfl,'COPX':p=>p.copx,'ASSR':p=>p.sq,
  'CLR':p=>p.clr?'OK':'','SI':p=>p.xfer?p.nx:p.owner?p.owner:nextOf(p),'RMK':p=>p.rmk,'EOBT':p=>p.eobt,'ETA':p=>p.app?hhmm(T0+T+etaSec(p)):'','HS':p=>p.hold?'HS':'','DSQ':p=>p.dsq||''};
 const FIL={
- STUP:p=>p.kind==='DEP'&&['','FRQ','S/U','S/P'].includes(p.sts),
+ STUP:p=>p.kind==='DEP'&&['','FRQ','RDY','S/U','S/P'].includes(p.sts),
  TAXIOUT:p=>p.kind==='DEP'&&p.sts==='TXO',
  TAKEOFF:p=>p.kind==='DEP'&&!p.air&&(p.sts==='xLU'||p.sts==='xTO'),
  ADCS:p=>(p.kind==='ARR'&&!p.sts)||p.air,
@@ -48,7 +48,7 @@ function renderLists(){
 let fplEl=null,rwEl=null,pmEl=null,ocEl=null,hovP=null;
 function closeMenu(){if(pmEl){pmEl.remove();pmEl=null}}
 addEventListener('pointerdown',e=>{if(pmEl&&!pmEl.contains(e.target))closeMenu()},true);addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});
-function popup(ev,title,items,cur){closeMenu();const m=document.createElement('div');m.id='pm';pmEl=m;m.innerHTML=`<div class="pt">${title}</div>`;
+function popup(ev,title,items,cur){closeMenu();const m=document.createElement('div');m.id='pm';pmEl=m;const stm=title==='Ground state';if(stm){m.className='stm';title='State';items=items.filter(i=>i[0]!=='(none)').concat(items.filter(i=>i[0]==='(none)'))}m.innerHTML=`<div class="pt">${title}</div>`;
  items.forEach(([lb,fn])=>{const d=document.createElement('div');d.className='mi'+(lb===cur?' cur':'');d.textContent=lb||'(none)';d.onclick=()=>{closeMenu();fn();list()};m.appendChild(d)});
  document.body.appendChild(m);const r=m.getBoundingClientRect();m.style.left=Math.max(0,Math.min(ev.clientX,innerWidth-r.width-4))+'px';m.style.top=Math.max(0,Math.min(ev.clientY,innerHeight-r.height-4))+'px'}
 function editCell(ev,val,max,fn){closeMenu();const td0=ev.target.closest('td'),tr0=ev.target.closest('tr');if(!td0||!tr0)return;document.getElementById('cellin')?.remove();const td=document.querySelector(`.win tr[data-id="${tr0.dataset.id}"] td[data-c="${td0.dataset.c}"]`)||td0,r=td.getBoundingClientRect(),i=document.createElement('input');i.id='cellin';i.value=val||'';i.maxLength=max;
@@ -104,7 +104,7 @@ function assumeMenu(p,e){if(p.owner)return;const box=boxAt(e),on=CTRL.filter(c=>
  apList(box,p.cs,it,null,v=>{if(v==='c'){p.xfer=false;p.nx='';log(p.cs+' transfer cancelled')}else if(v==='a'||v==='f')assume(p);else if(v==='t')startXfer(p,nextOf(p));else if(v==='m')apList(box,'Transfer to',on.map(c=>[`<span>${c.id}</span><span>${c.cs}</span>`,c.id]),null,t=>{startXfer(p,t);list()},true,null,'cm');list()},true,null,'cm')}
 function assume(p){if(p.owner)return;p.own=!p.own;if(!p.own){p.nx='';p.nxm='';p.xfer=false}log(p.cs+(p.own?' assumed':' freed'))}
 function parkedStand(p){let b='',bd=30;for(const s_ of D.stands){const d=Math.hypot(p.x-s_[1],p.y-s_[2]);if(d<bd){bd=d;b=s_[0]}}return b}
-const STSL=[['(none)',''],['FRQ','FRQ'],['S/U','S/U'],['S/P','S/P'],['TXO','TXO'],['xLU','xLU'],['xTO','xTO'],['TXI','TXI'],['PRK','PRK']];
+const STSL=[['(none)',''],['FRQ','FRQ'],['RDY','RDY'],['S/U','S/U'],['S/P','S/P'],['TXO','TXO'],['xLU','xLU'],['xTO','xTO'],['TXI','TXI'],['PRK','PRK']];
 const fmtAlt=v=>{const n=parseInt(v);return isNaN(n)?(v||''):n<=50?'A'+String(n).padStart(2,'0'):String(n).padStart(3,'0')};
 const CFLS=['020','030','040','050','060','070','080','090','100'],XFLS=[];for(let f=100;f<=400;f+=10)XFLS.push('F'+f);
 const sidList=p=>(D.sids[p.rwy]||[]);
