@@ -15,8 +15,19 @@ function conDist(L,x,y,h){const fx=h==null?0:Math.sin(h*Math.PI/180),fy=h==null?
  NE.forEach((e,i)=>{if(!TWP[i].has(L))return;for(let k=1;k<e.pts.length;k++){const P=e.pts[k-1],Q=e.pts[k],n=Math.max(1,Math.ceil(Math.hypot(Q[0]-P[0],Q[1]-P[1])/8));for(let s=0;s<=n;s++){const px=P[0]+(Q[0]-P[0])*s/n,py=P[1]+(Q[1]-P[1])*s/n,dx=px-x,dy=py-y;if(h!=null&&dx*fx+dy*fy<=0)continue;const d=Math.hypot(dx,dy);if(d<best)best=d}}});return best}
 function pickConn(p){if(p.kind==='ARR'){const s=D.stands.find(z=>z[0]===p.std);if(!s)return null;let b=null,bd=1e9;for(const L of CONN){const d=conDist(L,s[1],s[2]);if(d<bd){bd=d;b=L}}return b}
  let b=null,bd=1e9;for(const L of CONN){const d=conDist(L,p.x,p.y,p.hdg);if(d<bd){bd=d;b=L}}if(b)return b;for(const L of CONN){const d=conDist(L,p.x,p.y);if(d<bd){bd=d;b=L}}return b}
-function stdTaxi(p){const L=pickConn(p);if(!L)return false;
- if(p.kind==='ARR')exec({act:'taxi',stand:p.std,via:['Y',L],p,raw:'',found:true});else exec({act:'taxi',hp:'Y',hpDef:true,rwy:rwyDep,via:[L,'Z'],p,raw:'',found:true});return true}
+function stdTaxi(p){
+ if(p.kind==='ARR'){const L=pickConn(p);if(!L)return false;exec({act:'taxi',stand:p.std,via:['Y',L],p,raw:'',found:true});return true}
+ /* departures: connectors ahead of the aircraft, nearest first; after a pushback the first leg must go the way the nose points */
+ const h=p.pushH!=null?p.pushH:p.hdg,fx=Math.sin(h*Math.PI/180),fy=Math.cos(h*Math.PI/180);
+ let L=CONN.map(c=>[c,conDist(c,p.x,p.y,h)]).filter(x=>x[1]<1e8).sort((a,b)=>a[1]-b[1]).map(x=>x[0]);
+ if(!L.length)L=CONN.map(c=>[c,conDist(c,p.x,p.y)]).sort((a,b)=>a[1]-b[1]).map(x=>x[0]);
+ const sv=[p.route,p.last,p.wt,p.pend];
+ for(const c of L){p.route=[];p.last=null;exec({act:'taxi',hp:'Y',hpDef:true,rwy:rwyDep,via:[c,'Z'],p,raw:'',found:true});
+  const r0=p.route[0],f=r0&&p.route.find(q=>Math.hypot(q[0]-r0[0],q[1]-r0[1])>8);
+  if(!p.pushed||!f||((f[0]-r0[0])*fx+(f[1]-r0[1])*fy)>-3)return true;
+  p.route=sv[0];p.last=sv[1];p.wt=sv[2];p.pend=sv[3]}
+ /* nothing satisfied the direction: fall back to the nearest connector */
+ exec({act:'taxi',hp:'Y',hpDef:true,rwy:rwyDep,via:[L[0],'Z'],p,raw:'',found:true});return true}
 /* manual taxi route: left click = add node (route follows the ground network), right click = finish at the last node */
 let MAN=null;
 function manPreview(){if(!MAN||!MAN.w)return;const A=MAN.last||snap(MAN.p.x,MAN.p.y),B=snap(MAN.w[0],MAN.w[1]);MAN.pv=null;if(!A||!B||B.d>80)return;const r=findRoute(A,B);if(r&&r.length){MAN.pv=r;MAN.pvB=B}}

@@ -59,7 +59,7 @@ function startPush(p,dir){const h=p.hdg*Math.PI/180,rx=-Math.sin(h),ry=-Math.cos
   const t=((P[0]-p.x)*ey-(P[1]-p.y)*ex)/den,u=((P[0]-p.x)*ry-(P[1]-p.y)*rx)/den;if(t>3&&t<250&&u>=0&&u<=1&&(!best||t<best.t))best={t,ex,ey}}});
  let tx,ty,eh;if(best){tx=p.x+rx*best.t;ty=p.y+ry*best.t;eh=Math.atan2(best.ex,best.ey)*180/Math.PI}else{tx=p.x+rx*60;ty=p.y+ry*60;eh=SCR_RIGHT}
  const north=nrm(eh-SCR_RIGHT),face=Math.abs(north)<=90?(eh+360)%360:(eh+180)%360,fh=dir==='north'?face:(face+180)%360;
- p.pb={tx,ty,fh,ph:0};p.route=[];p.last=null;p.pend=null;p.hold=false;p.vhold=false;p.pbAsk=false;p.pushed=true}
+ p.pb={tx,ty,fh,ph:0};p.pushH=fh;p.pushDir=dir;p.route=[];p.last=null;p.pend=null;p.hold=false;p.vhold=false;p.pbAsk=false;p.pushed=true}
 function pushStep(p,dt){const b=p.pb;
  if(b.ph===0){const m=5*.5144*dt,dx=b.tx-p.x,dy=b.ty-p.y,d=Math.hypot(dx,dy);p.spd=5;
   if(d<=m){p.x=b.tx;p.y=b.ty;b.ph=1;p.spd=0}else{const h=p.hdg*Math.PI/180;p.x-=Math.sin(h)*m;p.y-=Math.cos(h)*m}}
