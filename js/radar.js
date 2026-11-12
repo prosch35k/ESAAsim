@@ -33,5 +33,5 @@ function draw(){g.setTransform(1,0,0,1,0,0);g.fillStyle=C.COLOR_Terrain1;g.fillR
   const tc=hv?'#fff':(p.adep==='ESGG'?'rgb(64,255,255)':p.ades==='ESGG'?'rgb(255,255,0)':'#fff');g.strokeStyle=tc;g.lineWidth=1;g.beginPath();g.moveTo(q[0],q[1]);g.lineTo(q[0]+p.la[0],by+pad+lh);g.stroke();
   if(hv){g.fillStyle='rgba(108,108,111,0.8)';g.fillRect(bx,by,bw,bh);g.strokeStyle='rgba(0,0,0,.9)';g.lineWidth=1;g.strokeRect(bx+.5,by+.5,bw-1,bh-1)}
   
-  L_.forEach((s,i)=>{g.fillStyle=(p.alert&&s.startsWith('!!')?C.COLOR_Stopbar:tc);g.fillText(s,bx+pad,by+pad+11+i*lh)})
+  L_.forEach((s,i)=>{g.fillStyle=((p.alert&&s.startsWith('!!'))||(p._r0&&i===0)?C.COLOR_Stopbar:tc);g.fillText(s,bx+pad,by+pad+11+i*lh)})
   }}

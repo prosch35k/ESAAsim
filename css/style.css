@@ -175,3 +175,10 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 #gmenu .gh{border-top:0;margin-top:0;color:#1c1c3c;font-size:12px;padding:3px 10px 2px 6px;white-space:nowrap}
 #gmenu .gi .gv{margin-left:auto;min-width:34px;text-align:right;padding:0 3px;border:1px solid #7d7d7d;background:#c9c9c9;color:#1c1c3c}
 #grb{transition:transform .15s,opacity .15s}#grb.hid:not(:hover):not(.pk){opacity:0}
+
+/* bar hidden: a thin grey strip stays visible below the main bar, no animation */
+#grb,#grb.hid{transition:none}#grb.hid{transform:translateY(-16px)}#grb.hid:hover,#grb.hid.pk{transform:none}#grb.hid:not(:hover):not(.pk){opacity:1}
+/* safety net buttons: light bevel + black frame */
+#gsn b{border:1px solid #000;box-shadow:inset 1px 1px 0 #b8ffb8,inset -1px -1px 0 #009a00;background:#00ff00}
+#gsn b.off{border:1px solid #000;box-shadow:inset 1px 1px 0 #fff,inset -1px -1px 0 #7a7a7a;background:#c7c7c7}
+#tb{background:#242428}

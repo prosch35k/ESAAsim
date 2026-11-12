@@ -54,6 +54,6 @@ $('pend').onclick=ev=>{const b=ev.target.closest('.pk,.pd,.pm');if(!b)return;con
  if(b.classList.contains('pd'))exec({act:'pushback',dir:b.dataset.d,p,raw:'',found:true});
  else if(r.k==='taxi')stdTaxi(p);
  else if(r.k==='start'){p.pushed=true;p.pbT=T+Math.random()*60;log(p.cs+' start-up approved')/* taxi request follows 60-120 s later */}
- else if(p.rules!=='V'&&p.pushReqAt==null)p.pushReqAt=T+60;/* clearance done = readback correct: push request follows */
+ else{if(r.k==='clr'&&p.sqAt==null)p.sqAt=T+3+Math.random()*7;/* plane sets the assigned squawk 3-10 s after the clearance is acknowledged */if(p.rules!=='V'&&p.pushReqAt==null)p.pushReqAt=T+60}/* clearance done = readback correct: push request follows */
  pendRender();list()};
 pendRender();

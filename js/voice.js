@@ -108,7 +108,7 @@ function exec(c){const p=c.p;
  case'contact':{const n=nextOf(p),ct=CTRL.find(x=>x.id===n),nm=/approach|departure/.test(c.raw||'')||(ct&&ct.cs==='ESGG_E_APP')?'approach':'tower';t='Contact '+nm+(c.freq?' '+c.freq:'')+', '+cs;break}
  case'clearance':{if(p.kind!=='DEP'||air){t='Unable, '+cs;break}
   const sid=c.sid||p.sid,al=c.alt||p.cfl||initCfl(p,sid),n=parseInt(al),sq=c.sq||p.sq;
-  if(p.rules!=='V'&&MP.role!=='host')p.pushReqAt=T+60;p.vclr=true;t='Cleared to '+p.ades+(sid?' via '+sid+' departure':'')+(c.alt?', climb '+(n<=50?n*100+' feet':'flight level '+n):'')+(sq?', squawk '+sq:'')+', '+cs;break}
+  if(p.rules!=='V'&&MP.role!=='host')p.pushReqAt=T+60;if(MP.role!=='host'&&p.sqAt==null)p.sqAt=T+3+Math.random()*7;p.vclr=true;t='Cleared to '+p.ades+(sid?' via '+sid+' departure':'')+(c.alt?', climb '+(n<=50?n*100+' feet':'flight level '+n):'')+(sq?', squawk '+sq:'')+', '+cs;break}
  default:t='Say again, '+cs}
  list();pilot(p,t)}
 async function viaClaude(text){if(!SMP)return null;

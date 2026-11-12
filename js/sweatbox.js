@@ -18,7 +18,7 @@ function spawnFlight(f){const keep=sel,gnd=f.adep==='ESGG'&&f.la,xy=f.la?LL(f.la
  else{$('cs').value='';return}
  p.type=f.type||p.type;p.w=WTC[p.type]||ACDIM[p.type]?.wtc||(/^(P28R|TRIN|SR22|C172)$/.test(p.type)?'L':'M');
  p.adep=f.adep;p.ades=f.ades;p.tas=f.tas;p.alt_=f.alt==='ESGG'&&f.ades==='ESGG'?'':(f.alt||'');p.rules=f.rules;p.remarks=f.remarks||'';p.route_=f.route;
- if(/^\d{4}$/.test(f.sq||''))p.sq=f.sq;
+ if(/^\d{4}$/.test(f.sq||'')){p.sq=f.sq;if(p.kind==='ARR')p.tsq=f.sq}
  if(p.kind==='DEP'){p.eobt=/^\d{4}$/.test(f.eobt)?f.eobt:p.eobt;const c=f.cruise;p.xfl=c?(c<=5000?'A'+String(Math.round(c/100)).padStart(2,'0'):String(Math.round(c/100)).padStart(3,'0')):'';applyRoute(p)}
  else{p.std=autoStand(p)||p.std}
  sel=keep;$('cs').value='';log(p.cs+' appeared ('+p.kind+')')}

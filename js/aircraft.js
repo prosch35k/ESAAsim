@@ -18,7 +18,7 @@ function mkPlane(kind,x,y,hdg,spd,std){
  p.cs=cs||rnd(AIRL)+(100+Math.random()*899|0);p.type=$('ty').value;p.w=WTC[p.type]||'M';p.rwy=p.kind==='ARR'?rwyArr:rwyDep;
  p.sq='';if(kind==='DEP'&&/^(42|44)$/.test(String(p.std)))p.hdg=parkH();
  if(kind==='DEP'){p.adep='ESGG';p.ades=rnd(OTHER.filter(a=>a!=='ESGG'));const s=bestSid(rwyDep,p.ades,p.type)||rnd(D.sids[rwyDep]);p.sid=s[0];p.copx=s[1];p.cfl='';p.xfl='';p.eobt=hhmm(T0+T+Math.random()*600);p.reqClrAt=T+30+Math.random()*15}
- else{p.sq=newSq();p.adep=rnd(OTHER);p.ades='ESGG';p.sid='';p.copx='';p.cfl='';p.xfl='';p.eobt=''}
+ else{p.sq=newSq();p.tsq=p.sq;p.adep=rnd(OTHER);p.ades='ESGG';p.sid='';p.copx='';p.cfl='';p.xfl='';p.eobt=''}
  planes.push(p);sel=p;return p}
 let NOSTS=false;function setSts(p,s){if(NOSTS)return;if(p.kind==='DEP'&&(s==='TXI'||s==='PRK'))return;if(p.kind==='ARR'&&(s!=='TXI'&&s!=='PRK'||p.app||p.air))return;p.sts=s;if(s==='TXO')p.txoT=T}
 function autoTaxi(p){}
@@ -41,7 +41,7 @@ function exitRoll(B,hdg,len){try{let n=-1,bd=1e9;const E=NE[B.e];[E.a,E.b].forEa
  ADJ[n].forEach(([o,i])=>{if(i===B.e||!TWP[i].has('Y'))return;const e=NE[i],P=e.a===n?e.pts.slice():e.pts.slice().reverse(),d=Math.hypot(P[1][0]-P[0][0],P[1][1]-P[0][1])||1,dot=((P[1][0]-P[0][0])*fx+(P[1][1]-P[0][1])*fy)/d;if(!best||dot>best.dot)best={dot,P}});
  if(!best)return[];const out=[];let acc=0;const P=best.P;for(let k=1;k<P.length&&acc<len;k++){const dx=P[k][0]-P[k-1][0],dy=P[k][1]-P[k-1][1],L=Math.hypot(dx,dy);if(acc+L>len){const t=(len-acc)/L;out.push([P[k-1][0]+dx*t,P[k-1][1]+dy*t]);acc=len}else{out.push([P[k][0],P[k][1]]);acc+=L}}return out}catch(e){return[]}}
 function drop(p){planes=planes.filter(q=>q!==p);if(sel===p)sel=null}
-function step(dt){for(const p of planes.slice()){if(p.xfer){p.xt-=dt;if(p.xt<=0){const c=CTRL.find(c_=>c_.id===p.nx);p.xfer=false;if(c&&c.on){p.own=false;p.owner=c.id;p.accT=T;p.nx='';p.nxm='';log(c.cs+' accepted '+p.cs)}else{p.nx='';log('handoff of '+p.cs+' failed')}}}let tg=0;
+function step(dt){for(const p of planes.slice()){if(p.sqAt!=null&&T>=p.sqAt){p.tsq=p.sq||'';p.sqAt=null}if(p.xfer){p.xt-=dt;if(p.xt<=0){const c=CTRL.find(c_=>c_.id===p.nx);p.xfer=false;if(c&&c.on){p.own=false;p.owner=c.id;p.accT=T;p.nx='';p.nxm='';log(c.cs+' accepted '+p.cs)}else{p.nx='';log('handoff of '+p.cs+' failed')}}}let tg=0;
  if(p.wt!=null){if(T<p.wt)continue;p.wt=null}
  if(p.pb){pushStep(p,dt);continue}
  if(p.air){p.spd=Math.min(165,p.spd+3*dt);p.airT+=dt;mv(p,dt);if(p.airT>90)drop(p);continue}
