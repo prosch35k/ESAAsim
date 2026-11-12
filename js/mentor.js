@@ -25,7 +25,7 @@ function manFinish(){const M=MAN;MAN=null;if(!M||!M.pts.length){log('Manual taxi
  p.route=M.pts;p.last=M.last;p.hold=false;p.vhold=false;p.pend=null;if(was0)p.wt=T+10+Math.random()*10;
  for(let i=PEND.length-1;i>=0;i--)if(PEND[i].id===M.pid||(PEND[i].k==='taxi'&&PEND[i].cs===p.cs)){archive(PEND[i]);PEND.splice(i,1)}pendRender();log(p.cs+' taxi (manual route)');list()}
 function manCancel(){if(MAN){MAN=null;log('Manual taxi route cancelled')}}
-function startMan(p,pid){MAN={p,pid,pts:[],nodes:[],last:null,pv:null,w:null};$('side').classList.remove('open');$('sb').classList.remove('on');log(p.cs+': draw the taxi route - left click adds a node, right click finishes, Esc cancels')}
+function startMan(p,pid){MAN={p,pid,pts:[],nodes:[],last:null,pv:null,w:null};log(p.cs+': draw the taxi route - left click adds a node, right click finishes, Esc cancels')}
 function drawMan(){if(!MAN)return;g.save();g.lineWidth=2.5;g.setLineDash([7,4]);g.strokeStyle='#ffd400';const pts=[[MAN.p.rx??MAN.p.x,MAN.p.ry??MAN.p.y]].concat(MAN.pts);
  if(pts.length>1){g.beginPath();pts.forEach((q,k)=>{const w=tr(q[0],q[1]);k?g.lineTo(...w):g.moveTo(...w)});g.stroke()}
  if(MAN.pv){g.strokeStyle='#ffffff';g.beginPath();const a=pts[pts.length-1],s=tr(a[0],a[1]);g.moveTo(...s);MAN.pv.forEach(q=>g.lineTo(...tr(q[0],q[1])));g.stroke()}
