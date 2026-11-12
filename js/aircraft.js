@@ -29,6 +29,11 @@ const AIMP=400;
 function pickExit(p){const nm=p.rwy==='03'?'EXIT 03 E':(Math.random()<.5?'EXIT 21 C':'EXIT 21 D'),E=NE.find(e=>e.n===nm),off=q=>Math.abs((q[0]-rw[0])*rdy-(q[1]-rw[1])*rdx)/rl;
  if(!E){return{d:1700,e:[p.x,p.y]}}const P=NET.n[E.a],Q=NET.n[E.b],st=off(P)<off(Q)?P:Q,Y=NE.find(e=>e.n==={E:'E/Y-HPE21',C:'C/Y-HPC03',D:'D/Y-HPD0321'}[nm.slice(-1)]),yp=Y?[NET.n[Y.a],NET.n[Y.b]].sort((u,v)=>off(v)-off(u))[0]:(st===P?Q:P);return{d:Math.hypot(st[0]-p.th[0],st[1]-p.th[1]),e:yp,n:nm}}
 function alongTh(p){const h=p.hdg*Math.PI/180;return(p.x-p.th[0])*Math.sin(h)+(p.y-p.th[1])*Math.cos(h)}
+/* roll a little further along taxiway Y past the exit junction so the aircraft does not stop right on the crossing */
+function exitRoll(B,hdg,len){try{let n=-1,bd=1e9;const E=NE[B.e];[E.a,E.b].forEach(k=>{const d=Math.hypot(NET.n[k][0]-B.x,NET.n[k][1]-B.y);if(d<bd){bd=d;n=k}});if(n<0)return[];
+ const fx=Math.sin(hdg*Math.PI/180),fy=Math.cos(hdg*Math.PI/180);let best=null;
+ ADJ[n].forEach(([o,i])=>{if(i===B.e||!TWP[i].has('Y'))return;const e=NE[i],P=e.a===n?e.pts.slice():e.pts.slice().reverse(),d=Math.hypot(P[1][0]-P[0][0],P[1][1]-P[0][1])||1,dot=((P[1][0]-P[0][0])*fx+(P[1][1]-P[0][1])*fy)/d;if(!best||dot>best.dot)best={dot,P}});
+ if(!best)return[];const out=[];let acc=0;const P=best.P;for(let k=1;k<P.length&&acc<len;k++){const dx=P[k][0]-P[k-1][0],dy=P[k][1]-P[k-1][1],L=Math.hypot(dx,dy);if(acc+L>len){const t=(len-acc)/L;out.push([P[k-1][0]+dx*t,P[k-1][1]+dy*t]);acc=len}else{out.push([P[k][0],P[k][1]]);acc+=L}}return out}catch(e){return[]}}
 function drop(p){planes=planes.filter(q=>q!==p);if(sel===p)sel=null}
 function step(dt){for(const p of planes.slice()){if(p.xfer){p.xt-=dt;if(p.xt<=0){const c=CTRL.find(c_=>c_.id===p.nx);p.xfer=false;if(c&&c.on){p.own=false;p.owner=c.id;p.accT=T;p.nx='';p.nxm='';log(c.cs+' accepted '+p.cs)}else{p.nx='';log('handoff of '+p.cs+' failed')}}}let tg=0;
  if(p.wt!=null){if(T<p.wt)continue;p.wt=null}
@@ -38,7 +43,7 @@ function step(dt){for(const p of planes.slice()){if(p.xfer){p.xt-=dt;if(p.xt<=0)
  if(p.app){p.spd+=Math.max(-2*dt,Math.min(2*dt,135-p.spd));mv(p,dt);if(alongTh(p)>=0){p.app=false;p.land=true;p.vx=pickExit(p);p.da=0;log(p.cs+' touchdown')}continue}
  if(p.land){const x=p.vx,a=alongTh(p);
   if(a<AIMP)tg=p.spd;else{if(!p.da){const v0=p.spd*.5144,v1=22*.5144,dd=Math.max(300,x.d-AIMP);p.da=Math.max(.6,(v0*v0-v1*v1)/(2*dd))/.5144}tg=22}
-  if(a>=x.d){p.land=false;p.landed=true;p.vx=null;if(!p.route.length){const A=snap(p.x,p.y),B=snap(x.e[0],x.e[1]),rt=A&&B&&findRoute(A,B);if(rt){p.route=rt;p.last=B}}}}
+  if(a>=x.d){p.land=false;p.landed=true;p.vx=null;if(!p.route.length){const A=snap(p.x,p.y),B=snap(x.e[0],x.e[1]),rt=A&&B&&findRoute(A,B);if(rt){const ex=exitRoll(B,p.hdg,45);if(ex.length)rt.push(...ex);p.route=rt;p.last=ex.length?snap(ex[ex.length-1][0],ex[ex.length-1][1]):B}}}}
  if(!p.land&&p.route.length&&!p.hold&&!p.vhold){const t=p.route[0],dx=t[0]-p.x,dy=t[1]-p.y,d=Math.hypot(dx,dy),df=nrm(Math.atan2(dx,dy)*180/Math.PI-p.hdg);
   p.hdg=(p.hdg+Math.max(-30*dt,Math.min(30*dt,df))+360)%360;const bs=t[2]||15;tg=Math.abs(df)>35||(p.route.length==1&&d<30)?Math.min(5,bs):bs;if(d<(p.route.length>1?6:3)){p.route.shift()}}
  p.spd+=Math.max(-(p.land?(p.da||5):3)*dt,Math.min(2*dt,tg-p.spd));if(p.spd<0)p.spd=0;
