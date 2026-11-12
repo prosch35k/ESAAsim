@@ -22,7 +22,8 @@ function mkPlane(kind,x,y,hdg,spd,std){
  planes.push(p);sel=p;return p}
 let NOSTS=false;function setSts(p,s){if(NOSTS)return;if(p.kind==='DEP'&&(s==='TXI'||s==='PRK'))return;if(p.kind==='ARR'&&(s!=='TXI'&&s!=='PRK'||p.app||p.air))return;p.sts=s;if(s==='TXO')p.txoT=T}
 function autoTaxi(p){}
-function addTo(p,w,sn){const B=sn||snap(w[0],w[1]);if(!B||B.d>80){log('Click closer to a taxiway');return false}const A=p.last||snap(p.x,p.y),r=findRoute(A,B);if(!r){log(p.cs+': no route');return false}p.route.push(...r);p.last=B;autoTaxi(p);return true}
+let STARTPT=null;/* optional route start (snap object) for stands whose exit link is not connected to the stand edge */
+function addTo(p,w,sn){const B=sn||snap(w[0],w[1]);if(!B||B.d>80){log('Click closer to a taxiway');return false}const A=p.last||STARTPT||snap(p.x,p.y),r=findRoute(A,B);if(!r){log(p.cs+': no route');return false}p.route.push(...r);p.last=B;autoTaxi(p);return true}
 /* shorten a route by len metres from its end (holding points are placed 20 m before the stop line) */
 function trimTail(r,len){let acc=0;while(r.length>1){const a=r[r.length-2],b=r[r.length-1],L=Math.hypot(b[0]-a[0],b[1]-a[1]);if(acc+L>len){const t=(len-acc)/L;r[r.length-1]=[b[0]+(a[0]-b[0])*t,b[1]+(a[1]-b[1])*t,b[2]];return}acc+=L;r.pop()}}
 function go(p,d){p.route=[];p.last=null;p.hold=false;p.pend=null;if(!addTo(p,null,snap(d[1],d[2])))return;if(d[3]==1&&p.route.length){trimTail(p.route,20);const e=p.route[p.route.length-1];p.last=snap(e[0],e[1])}if(d[3]==2)p.pend='xLU';else if(d[3]==0&&p.kind==='ARR')p.pend='PRK';log(p.cs+' taxi to '+d[0])}

@@ -15,7 +15,12 @@ function conDist(L,x,y,h){const fx=h==null?0:Math.sin(h*Math.PI/180),fy=h==null?
  NE.forEach((e,i)=>{if(!TWP[i].has(L))return;for(let k=1;k<e.pts.length;k++){const P=e.pts[k-1],Q=e.pts[k],n=Math.max(1,Math.ceil(Math.hypot(Q[0]-P[0],Q[1]-P[1])/8));for(let s=0;s<=n;s++){const px=P[0]+(Q[0]-P[0])*s/n,py=P[1]+(Q[1]-P[1])*s/n,dx=px-x,dy=py-y;if(h!=null&&dx*fx+dy*fy<=0)continue;const d=Math.hypot(dx,dy);if(d<best)best=d}}});return best}
 function pickConn(p){if(p.kind==='ARR'){const s=D.stands.find(z=>z[0]===p.std);if(!s)return null;let b=null,bd=1e9;for(const L of CONN){const d=conDist(L,s[1],s[2]);if(d<bd){bd=d;b=L}}return b}
  let b=null,bd=1e9;for(const L of CONN){const d=conDist(L,p.x,p.y,p.hdg);if(d<bd){bd=d;b=L}}if(b)return b;for(const L of CONN){const d=conDist(L,p.x,p.y);if(d<bd){bd=d;b=L}}return b}
+/* stands 42/44 taxi straight out on their own link towards HPC3Z / Z (no pushback) */
+const STDLINK={'42':'S42-HPC3Z','44':'S44-HPC3Z'};
+function linkStart(p){const nm=STDLINK[String(p.std)];if(!nm)return null;const i=NE.findIndex(e=>e.n===nm);if(i<0)return null;const E=NE[i];let b=null;
+ for(let k=1;k<E.pts.length;k++){const P=E.pts[k-1],Q=E.pts[k],dx=Q[0]-P[0],dy=Q[1]-P[1],L2=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((p.x-P[0])*dx+(p.y-P[1])*dy)/L2)),px=P[0]+t*dx,py=P[1]+t*dy,d=Math.hypot(p.x-px,p.y-py);if(!b||d<b.d)b={e:i,s:E.cum[k-1]+t*Math.sqrt(L2),x:px,y:py,d}}return b}
 function stdTaxi(p){
+ if(p.kind==='DEP'&&p.pushH==null){const W=linkStart(p);if(W){STARTPT=W;try{exec({act:'taxi',hp:'Y',hpDef:true,rwy:rwyDep,via:null,p,raw:'',found:true})}finally{STARTPT=null}return true}}
  if(p.kind==='ARR'){const L=pickConn(p);if(!L)return false;exec({act:'taxi',stand:p.std,via:['Y',L],p,raw:'',found:true});return true}
  /* departures: connectors ahead of the aircraft, nearest first; after a pushback the first leg must go the way the nose points */
  const h=p.pushH!=null?p.pushH:p.hdg,fx=Math.sin(h*Math.PI/180),fy=Math.cos(h*Math.PI/180);
@@ -48,7 +53,7 @@ $('pend').onclick=ev=>{const b=ev.target.closest('.pk,.pd,.pm');if(!b)return;con
  archive(r);PEND.splice(i,1);
  if(b.classList.contains('pd'))exec({act:'pushback',dir:b.dataset.d,p,raw:'',found:true});
  else if(r.k==='taxi')stdTaxi(p);
- else if(r.k==='start'){p.pushed=true;p.pbT=T-40;log(p.cs+' start-up approved')}
+ else if(r.k==='start'){p.pushed=true;p.pbT=T+Math.random()*60;log(p.cs+' start-up approved')/* taxi request follows 60-120 s later */}
  else if(p.rules!=='V'&&p.pushReqAt==null)p.pushReqAt=T+60;/* clearance done = readback correct: push request follows */
  pendRender();list()};
 pendRender();
