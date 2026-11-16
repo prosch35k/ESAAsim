@@ -30,7 +30,7 @@ menu.onclick=ev=>{const g=ev.target.closest('.gi');if(!g)return;const it=reg[+g.
  const ck=g.querySelector('.ck');if(it.chk){if(it.chk()){if(!ck)g.insertAdjacentHTML('afterbegin','<span class="ck">&#10003;</span>')}else if(ck)ck.remove()}else close()};
 addEventListener('pointerdown',ev=>{if(!ev.target.closest('#gmenu,#grb .gm,#ghi'))close()});
 bar.addEventListener('pointerenter',()=>{GRFILTOFF=true});bar.addEventListener('pointerleave',()=>{GRFILTOFF=false});
-$('hsim').onclick=()=>goHome(false);$('htr').onclick=()=>{window.trainingOpen&&window.trainingOpen()};
+$('hsim').onclick=()=>goHome(false);$('hlk').onclick=()=>goHome(true);$('hlg').onclick=()=>{window.trainingClose&&window.trainingClose()};$('htr').onclick=()=>{window.trainingOpen&&window.trainingOpen()};
 /* pin */
 $('grp').onclick=()=>{const on=$('grp').classList.toggle('on');bar.classList.toggle('hid',!on);clampWins()};
 /* alerts: filled when at least one alert is active, hollow otherwise */

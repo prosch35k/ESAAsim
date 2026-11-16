@@ -234,3 +234,18 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 #tdoc .cz{background:#3a3a42;padding:0 6px;border:1px solid #5a5a60}
 #tdoc .qm td{vertical-align:top}
 #tdoc .gi2{margin-top:10px;padding:8px 12px;border-left:3px solid #6a6a72;background:#242428}
+
+#tb #hlk{background:transparent;border:0;color:#e6e6e2;font:15px ui-monospace,Menlo,monospace;letter-spacing:.04em;padding:0 10px;cursor:pointer}
+#tb #hlk:hover{background:#3a3a42}
+#hlg{cursor:pointer}
+
+#tdoc .qf{list-style:none;padding-left:0;margin:8px 0 0}#tdoc .qf li{margin:4px 0}
+#tdoc select,#tdoc input[data-k],#tdoc textarea{background:#3a3a42;color:#e6e6e2;border:1px solid #6a6a72;border-radius:0;font:13px ui-monospace,Menlo,monospace;padding:3px 6px;max-width:100%}
+#tdoc textarea{width:100%;box-sizing:border-box}
+#tdoc .qo{padding-left:22px}#tdoc .qo li{margin:4px 0}#tdoc .qo button{padding:0 6px;font-size:10px;margin-right:3px}
+#tdoc .dg{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}#tdoc .dg span{border:1px solid #5a5a60;padding:2px 6px;background:#242428}#tdoc .dg img{vertical-align:middle;max-height:40px}
+
+/* Roboto for the home screen / training material UI (not the simulator) */
+#home,#home *,#tb #hlk{font-family:Roboto,'Segoe UI',system-ui,sans-serif !important}
+#hlg{font-size:21px}
+#hhd button,#tnav,#tnav *,#tdoc .qh,#tdoc .qn,#tdoc .tmeta,#tdoc select,#tdoc input[data-k],#tdoc textarea,#tdoc .tpg button{font-size:13px}
