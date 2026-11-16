@@ -69,7 +69,7 @@ function netEdits(){if(!(MP.on&&MP.role==='student'))return;for(const p of plane
   if(Object.keys(d).length)MP.send({t:'patch',id:p.id,f:d})}}
 /* ---- connect dialog ---- */
 /* login always goes to this server; after login the user may pick any server that shares its SESSION_SECRET */
-const AUTH_SERVER=NLS.get('esaasim.authserver','ws://localhost:8080');
+const AUTH_SERVER='wss://esaasim.onrender.com'; /* the one and only server */
 /* TEMPORARY: auto-login until the VATSIM organization is approved. Set to false to use the real VATSIM login. */
 const DEV_AUTOLOGIN=true,DEV_USER={name:'Rey',cid:'0',rating:5,rn:'C1'};
 let ncEl=null;const httpOf=u=>netUrl(u).replace(/^ws/i,'http').replace(/\/$/,'');
@@ -77,9 +77,7 @@ const authGet=()=>NLS.get('esaasim.auth1',null),authSet=(b,v)=>NLS.set('esaasim.
 function netDialog(){if(ncEl){ncEl.remove();ncEl=null;return}const cfg=NLS.get('esaasim.net',{servers:[AUTH_SERVER],last:{}}),L=cfg.last||{};
  const e=document.createElement('div');e.className='fpl';ncEl=e;e.style.width='440px';e.style.left='160px';e.style.top='40px';const ST={req:true,poll:0};
  e.innerHTML=`<div class="th"><b>Connect to session</b><span id="nx">✕</span></div><div class="bd" style="grid-template-columns:auto 1fr">
-  <label class="gt">Server</label><select id="ns" class="gt"></select>
-  <label class="gt">Address</label><input class="gt" id="nu" placeholder="wss://your-server.onrender.com" value="${L.url||AUTH_SERVER}">
-  <div class="gt"></div><div class="gt" style="display:flex;gap:6px"><button id="nsv">Save to list</button><button id="ndl">Remove</button></div>
+  <input id="nu" type="hidden" value="${AUTH_SERVER}">
   <label>VATSIM</label><div id="nlg" style="display:flex;gap:8px;align-items:center"></div>
   <label id="nrl" class="gt">Role</label><div class="gt" id="nrd" style="display:flex;flex-direction:column;gap:3px"><label style="text-align:left" id="nrh"><input type="radio" name="nrole" value="host"> Mentor (runs the simulation)</label><label style="text-align:left"><input type="radio" name="nrole" value="student"> Student</label></div>
   <label id="nswl" class="gt">Simulation</label><div class="gt" id="nswd" style="display:flex;gap:8px;align-items:center"><button id="nsw">Import Sweatbox</button><span id="nsc"></span></div>
@@ -89,8 +87,6 @@ function netDialog(){if(ncEl){ncEl.remove();ncEl=null;return}const cfg=NLS.get('
   <div class="bt gt"><button id="ngo">Connect</button><button id="nds">Disconnect</button></div></div>`;
  $('map').appendChild(e);
  const base=()=>httpOf(AUTH_SERVER),me=()=>DEV_AUTOLOGIN?{token:'',user:DEV_USER}:authGet(),user=()=>{const a=me();return a&&a.user},isMentor=()=>e.querySelector('input[name=nrole]:checked').value==='host',setSt=t=>{$('nst').textContent=t};
- const fill=()=>{$('ns').innerHTML=cfg.servers.map(s=>`<option>${s}</option>`).join('')+'<option value="">(other…)</option>'};fill();
- if(L.url&&cfg.servers.includes(L.url))$('ns').value=L.url;
  const render=()=>{const u=user(),ok=!ST.req||!!u,canM=!ST.req||(u&&u.rating>=3);
   $('nlg').innerHTML=!ST.req?'<i>This server does not require login</i>':u?`<span>${u.name.replace(/</g,'&lt;')} · ${u.cid} · <b>${u.rn}</b>${DEV_AUTOLOGIN?' <i>(temporary auto-login)</i>':''}</span>${DEV_AUTOLOGIN?'':'<button id="nlo">Log out</button>'}`:'<button id="nli">Login with VATSIM</button>';
   if($('nli'))$('nli').onclick=doLogin;if($('nlo'))$('nlo').onclick=()=>{authSet(base(),null);render()};
@@ -103,13 +99,10 @@ function netDialog(){if(ncEl){ncEl.remove();ncEl=null;return}const cfg=NLS.get('
   const url=b+'/auth/login?sid='+sid;clearInterval(ST.poll);window.open(url,'_blank');
   $('nst').innerHTML='Waiting for VATSIM login… <a href="'+url+'" target="_blank">open the login page</a>';const t0=Date.now();
   ST.poll=setInterval(async()=>{if(!ncEl||Date.now()-t0>300000){clearInterval(ST.poll);return}try{const j=await fetch(b+'/auth/poll?sid='+sid).then(r=>r.json());if(j.ok){clearInterval(ST.poll);authSet(b,{token:j.token,user:j.user});setSt('Logged in');render()}}catch(x){}},1500)};
- $('ns').onchange=()=>{if($('ns').value)$('nu').value=$('ns').value};
- $('nsv').onclick=()=>{const u=$('nu').value.trim();if(u&&!cfg.servers.includes(u)){cfg.servers.push(u);NLS.set('esaasim.net',cfg);fill();$('ns').value=u}};
- $('ndl').onclick=()=>{const u=$('ns').value;cfg.servers=cfg.servers.filter(s=>s!==u);NLS.set('esaasim.net',cfg);fill()};
  $('ng').onclick=()=>{$('nc').value=Array.from({length:6},()=>'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[Math.random()*31|0]).join('')};
  e.querySelectorAll('input[name=nrole]').forEach(r=>r.onchange=render);
  $('nsw').onclick=()=>sbf.click();sbf.addEventListener('change',()=>setTimeout(()=>{if(ncEl)render()},600));
- $('ngo').onclick=()=>{const u=user(),role=isMentor()&&(!ST.req||u&&u.rating>=3)?'host':'student',url=$('nu').value.trim(),code=$('nc').value.trim().toUpperCase(),name=$('nn').value.trim()||(role==='host'?'Mentor':'Student');
+ $('ngo').onclick=()=>{const u=user(),role=isMentor()&&(!ST.req||u&&u.rating>=3)?'host':'student',url=AUTH_SERVER,code=$('nc').value.trim().toUpperCase(),name=$('nn').value.trim()||(role==='host'?'Mentor':'Student');
   if(!url){setSt('Enter a server address');return}if(code.length<4){setSt('Session code must be at least 4 characters');return}
   cfg.last={url,role,code,name};if(!cfg.servers.includes(url))cfg.servers.push(url);NLS.set('esaasim.net',cfg);netConnect({url,role,code,name,token:me()?me().token:''})};
  $('nds').onclick=()=>{netDisconnect()};$('nx').onclick=()=>{clearInterval(ST.poll);e.remove();ncEl=null};
