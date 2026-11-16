@@ -29,8 +29,8 @@ async function show(id,sub){const it=MDATA[id],nd=byId[id];if(!it)return;cur=id;
   doc(head+(it.intro?fixHtml(it.intro):'')+(pg.length>1?'<div class="tpg">'+pg.map((x,i)=>`<button data-c="${i}" class="${i===k?'cur':''}">${esc(x.title)}</button>`).join('')+'</div>':'')+(p?`<h2>${esc(p.title)}</h2>`+fixHtml(p.html):'')+(p&&p.answers.length?'<div class="ans">Answer options: '+p.answers.map(esc).join(' / ')+'</div>':''));
   document.querySelectorAll('#tdoc [data-c]').forEach(b=>b.onclick=()=>show(id,+b.dataset.c))}
  else if(it.type==='quiz'){if(att&&att.id!==id){clearInterval(att.iv);att=null}const qs=it.questions||[];await need(it.intro+JSON.stringify(qs));let n=0;
-  doc(head+'<div class="tmeta">Quiz'+(it.limit?' &middot; time limit '+it.limit+' min':'')+(qs.length?' &middot; '+qs.filter(x=>x.t!=='description').length+' questions &middot; '+fmt(qs.reduce((a,q)=>a+(q.t==='description'?0:q.mm),0))+' points':'')+'</div>'+fixHtml(it.intro)+(qs.length?'<div class="tpg"><button id="tst">Start test</button><button id="tsa">'+(showAns?'Hide answers':'Show answers')+'</button></div>'+(showAns?qs.map(q=>qRender(q,q.t==='description'?0:++n,true)).join(''):''):''));
-  const b=$('tsa');if(b)b.onclick=()=>{showAns=!showAns;show(id)};const st=$('tst');if(st)st.onclick=()=>startAttempt(id)}
+  doc(head+'<div class="tmeta">Quiz'+(it.limit?' &middot; time limit '+it.limit+' min':'')+(qs.length?' &middot; '+qs.filter(x=>x.t!=='description').length+' questions &middot; '+fmt(qs.reduce((a,q)=>a+(q.t==='description'?0:q.mm),0))+' points':'')+'</div>'+fixHtml(it.intro)+(qs.length?'<div class="tpg"><button id="tst">Start test</button></div>':''));
+  const st=$('tst');if(st)st.onclick=()=>startAttempt(id)}
  else doc(head)}
 
 let showAns=false;
@@ -41,7 +41,7 @@ function qRender(q,n,sa){let b='';const T=q.t;
  let txt=fixHtml(q.text);
  if(T==='multianswer'){txt=txt.replace(/\{#(\d+)\}/g,(m,i)=>{const s=q.subs[+i-1];if(!s)return'[ ]';return'<span class="cz">'+(sa?s.a.filter(x=>ok(x.f)).map(x=>esc(x.t)).join(' / '):s.t==='multichoice'?'['+s.a.map(x=>esc(x.t)).join(' | ')+']':'[ ____ ]')+'</span>'})}
  else if(T==='ddwtos'){txt=txt.replace(/\[\[(\d+)\]\]/g,(m,i)=>'<span class="cz">'+(sa?esc(q.a[+i-1]||''):'[ ____ ]')+'</span>')}
- b+=`<div class="qq"><div class="qn">Question ${n} &middot; ${esc(q.name)}</div><div class="qt">${txt}</div>`;
+ b+=`<div class="qq"><div class="qn">Question ${n}</div><div class="qt">${txt}</div>`;
  if(T==='multichoice')b+='<ul class="qa">'+q.a.map(x=>li(x.t,x.f,sa,1)).join('')+'</ul><div class="qh">'+(q.single?'Select one':'Select one or more')+'</div>';
  else if(T==='truefalse')b+='<ul class="qa">'+q.a.map(x=>li(x.t,x.f,sa)).join('')+'</ul>';
  else if(T==='shortanswer'||T==='numerical'){if(sa)b+='<ul class="qa">'+q.a.filter(x=>x.f>0).map(x=>li(x.t,1,1)).join('')+'</ul>';else b+='<div class="qh">'+(T==='numerical'?'Numerical answer':'Short answer')+'</div>'}
@@ -65,12 +65,12 @@ const clearZ=z=>{const qq=z.closest('.qq'),v=z.dataset.v;if(v){const c=qq.queryS
 function placeZ(z,n,html){const qq=z.closest('.qq');qq.querySelectorAll('.zone').forEach(o=>{if(o.dataset.v===n)clearZ(o)});if(z.dataset.v)clearZ(z);z.dataset.v=n;z.innerHTML=html;z.classList.add('fill');const c=qq.querySelector('.chip[data-n="'+n+'"]');if(c)c.classList.add('used')}
 function ddInit(){const d=$('tdoc');
  d.onpointerdown=e=>{if(!e.target.closest('#tqs'))return;const c=e.target.closest('.chip'),z=e.target.closest('.zone');
-  if(c&&!c.classList.contains('used'))dg={n:c.dataset.n,html:c.innerHTML,from:null,x:e.clientX,y:e.clientY,moved:false,chip:c};
-  else if(z&&z.dataset.v)dg={n:z.dataset.v,html:z.innerHTML,from:z,x:e.clientX,y:e.clientY,moved:false};
+  if(c&&!c.classList.contains('used')){const r=c.getBoundingClientRect();dg={n:c.dataset.n,html:c.innerHTML,from:null,x:e.clientX,y:e.clientY,ox:e.clientX-r.left,oy:e.clientY-r.top,w:r.width,h:r.height,moved:false,chip:c}}
+  else if(z&&z.dataset.v){const r=z.getBoundingClientRect();dg={n:z.dataset.v,html:z.innerHTML,from:z,x:e.clientX,y:e.clientY,ox:e.clientX-r.left,oy:e.clientY-r.top,w:r.width,h:r.height,moved:false}}
   else if(z&&selc){placeZ(z,selc.n,selc.html);selc.chip.classList.remove('sel');selc=null;return}
   if(dg)e.preventDefault()};
- addEventListener('pointermove',e=>{if(!dg)return;if(!dg.moved&&Math.hypot(e.clientX-dg.x,e.clientY-dg.y)>4){dg.moved=true;dg.g=document.createElement('div');dg.g.className='ghost';dg.g.innerHTML=dg.html;document.body.appendChild(dg.g);if(dg.from)clearZ(dg.from);if(selc){selc.chip.classList.remove('sel');selc=null}}
-  if(dg.g){dg.g.style.left=e.clientX+14+'px';dg.g.style.top=e.clientY+14+'px'}});
+ addEventListener('pointermove',e=>{if(!dg)return;if(!dg.moved&&Math.hypot(e.clientX-dg.x,e.clientY-dg.y)>4){dg.moved=true;dg.g=document.createElement('div');dg.g.className='ghost';dg.g.innerHTML=dg.html;dg.g.style.minWidth=dg.w+'px';dg.g.style.height=dg.h+'px';document.body.appendChild(dg.g);if(dg.from)clearZ(dg.from);if(selc){selc.chip.classList.remove('sel');selc=null}}
+  if(dg.g){dg.g.style.left=e.clientX-dg.ox+'px';dg.g.style.top=e.clientY-dg.oy+'px'}});
  addEventListener('pointerup',e=>{if(!dg)return;const o=dg;dg=null;if(o.g)o.g.remove();
   if(o.moved){const t=document.elementFromPoint(e.clientX,e.clientY),z=t&&t.closest&&t.closest('.zone');const qq=o.from?null:o.chip.closest('.qq');if(z&&z.closest('#tqs')&&(!qq||z.closest('.qq')===qq))placeZ(z,o.n,o.html);else if(z&&o.from&&z.closest('.qq')===o.from.closest('.qq'))placeZ(z,o.n,o.html)}
   else if(o.chip){if(selc)selc.chip.classList.remove('sel');selc={n:o.n,html:o.html,chip:o.chip};o.chip.classList.add('sel')}
@@ -84,7 +84,7 @@ function qForm(q,n){const T=q.t;if(T==='description')return qRender(q,0,false);
  let txt=fixHtml(q.text),b='';
  if(T==='multianswer')txt=txt.replace(/\{#(\d+)\}/g,(m,i)=>{const s=q.subs[+i-1];if(!s)return'';return s.t==='multichoice'?sel('s'+i,s.a.map((x,j)=>[j,x.t])):`<input data-k="s${i}" size="10">`});
  else if(T==='ddwtos')txt=txt.replace(/\[\[(\d+)\]\]/g,(m,i)=>`<span class="zone zi" data-e="${i}"></span>`);
- b=`<div class="qq" data-n="${n}"><div class="qn">Question ${n} &middot; ${esc(q.name)} &middot; ${q.mm} p</div><div class="qt">${txt}</div>`;
+ b=`<div class="qq" data-n="${n}"><div class="qn">Question ${n} &middot; ${q.mm} p</div><div class="qt">${txt}</div>`;
  if(T==='multichoice')b+='<ul class="qf">'+q.a.map((x,j)=>`<li><label><input type="${q.single?'radio':'checkbox'}" name="q${n}" value="${j}"> ${x.t}</label></li>`).join('')+'</ul>';
  else if(T==='truefalse')b+='<ul class="qf">'+q.a.map((x,j)=>`<li><label><input type="radio" name="q${n}" value="${j}"> ${esc(x.t)}</label></li>`).join('')+'</ul>';
  else if(T==='shortanswer'||T==='numerical')b+=`<input data-k="v" size="30">`;
@@ -109,7 +109,7 @@ function startAttempt(id){const it=MDATA[id],qs=it.questions;att={id,t0:Date.now
  let n=0;doc('<h1>'+esc(it.name)+'</h1><div class="tmeta" id="tclk"></div><div id="tqs">'+qs.map(q=>qForm(q,q.t==='description'?0:++n)).join('')+'</div><div class="tpg"><button id="tfin">Finish attempt</button><button id="tcan">Cancel</button></div>');
  posZones($('tdoc'));$('tdoc').querySelectorAll('.ddi img').forEach(im=>{if(!im.complete)im.onload=()=>posZones($('tdoc'))});$('tdoc').querySelectorAll('.qo').forEach(ol=>ol.onclick=e=>{const b=e.target.closest('button'),li=e.target.closest('li');if(!b||!li)return;if(b.classList.contains('up')&&li.previousElementSibling)ol.insertBefore(li,li.previousElementSibling);else if(b.classList.contains('dn')&&li.nextElementSibling)ol.insertBefore(li.nextElementSibling,li)});
  const upd=()=>{if(!att||att.id!==id){clearInterval(att&&att.iv);return}const e=$('tclk');if(!e){clearInterval(att.iv);return}if(att.end){const l=Math.max(0,att.end-Date.now()),m=Math.floor(l/60000),s=Math.floor(l%60000/1000);e.textContent='Time left '+m+':'+String(s).padStart(2,'0');if(!l)finish(id)}else e.textContent='Attempt in progress'};
- upd();att.iv=setInterval(upd,1000);$('tfin').onclick=()=>{if(confirm('Finish the attempt and see your score?'))finish(id)};$('tcan').onclick=()=>{clearInterval(att.iv);att=null;show(id)}}
+ upd();att.iv=setInterval(upd,1000);$('tfin').onclick=()=>finish(id);$('tcan').onclick=()=>{clearInterval(att.iv);att=null;show(id)}}
 function finish(id){const it=MDATA[id],qs=it.questions;clearInterval(att&&att.iv);const els=[...$('tdoc').querySelectorAll('#tqs .qq')];
  let got=0,max=0,man=0,n=0;const res=[];let ei=0;
  qs.forEach(q=>{if(q.t==='description'){res.push(null);return}const el=els[ei++];const r=qGrade(q,el);n++;if(r.s===null){man+=q.mm;res.push({r:r.r,man:1})}else{got+=r.s*q.mm;max+=q.mm;res.push({s:r.s,r:r.r})}});
