@@ -6,9 +6,9 @@ const NA='Not available in ESAAsim';
 const na=(t,sub)=>({t,dis:true,sub});
 /* menu trees follow the plugin manual (3.2 - 3.4); only entries that exist in ESAAsim are active */
 const listsToggle=()=>order.map(n=>({t:n,chk:()=>WIN[n].vis,fn:()=>{const w=WIN[n];w.vis=!w.vis;w.el.style.display=w.vis?'':'none';if(w.vis)w.el.style.zIndex=++zTop}}));
-const goHome=v=>{$('home').style.display=v?'':'none';if(v){$('hmsg').style.display='none'}};
+window.goHome=v=>{$('home').style.display=v?'':'none';if(v){$('hmsg').style.display='none'}};const goHome=window.goHome;
 const TREE={
- settings:[{t:'Home',fn:()=>goHome(true)},{t:'Units',sub:[na('Altitude'),na('- reference'),na('Flight level'),na('Distance'),na('Speed')]},
+ settings:[{t:'Units',sub:[na('Altitude'),na('- reference'),na('Flight level'),na('Distance'),na('Speed')]},
   {t:'Display',sub:[{hdr:'Surveillance------'},na('Pro mode'),{hdr:'Tracks------------'},{t:'Display',dis:true,chk:()=>true},{t:'History',dis:true,val:'5'},na('HDG line'),{t:'AltFilter',dis:true,val:'050'},{hdr:'Label Filters-----'}].concat(['Stby','SqError','NoState','OnFreq','Parked'].map(n=>({t:n,chk:()=>GRFILT[n],fn:()=>{GRFILT[n]=!GRFILT[n]}})))},
   {t:'Labels',sub:[{hdr:'Position---'},{t:'X',dis:true,val:'15'},{t:'Y',dis:true,val:'15'},{hdr:'Fields------'}].concat(['ATYP','DEP','RMK','STAND','WTC'].map(n=>({t:n,chk:()=>GRFLD[n],fn:()=>{GRFLD[n]=!GRFLD[n]}})))},
   {t:'Lists',sub:['Alerts','ARR','DEP','Dep Timer','Maps','Stands','TTT'].map(n=>na(n))},
