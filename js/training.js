@@ -18,7 +18,7 @@ function tree(nodes,d){return nodes.filter(x=>showHid||!x.hidden).map(x=>{
  return`<div class="ti${x.hidden?' hid':''}${cur===x.id?' cur':''}" style="${pad}" data-i="${x.id}"><span class="tk"></span><span class="ty">${ico[x.type]||x.type}</span>${esc(x.name)}</div>`}).join('')}
 function drawNav(){const n=$('tnav');const st=n.scrollTop;n.innerHTML='<label><input type="checkbox" id="thd"'+(showHid?' checked':'')+'> Show hidden items</label>'+tree(MTREE,0);n.scrollTop=st;
  $('thd').onchange=e=>{showHid=e.target.checked;drawNav()}}
-const doc=h=>{$('tdoc').innerHTML=h;$('tmain').scrollTop=0};
+const doc=h=>{$('tdoc').innerHTML=h;$('tmain').scrollTop=0;$('tdoc').querySelectorAll('.ddi img').forEach(im=>{const f=()=>posZones($('tdoc'));if(im.complete)f();else im.onload=f})};
 async function show(id,sub){const it=MDATA[id],nd=byId[id];if(!it)return;cur=id;for(let p=nd&&nd.par;p;p=p.par)p._o=true;drawNav();
  const head=`<h1>${esc(it.name)}</h1>`+(it.hidden?'<div class="tmeta">Hidden in Moodle</div>':'');
  if(it.type==='page'){await need(it.html);doc(head+fixHtml(it.html))}
@@ -48,12 +48,33 @@ function qRender(q,n,sa){let b='';const T=q.t;
  else if(T==='match')b+='<table class="qm">'+q.pairs.map(p=>`<tr><td>${fixHtml(p[0])}</td><td>${sa?'<span class="ok">'+esc(p[1])+'</span>':'&nbsp;'}</td></tr>`).join('')+'</table>'+(sa?'':'<div class="qh">Choices: '+q.pairs.map(p=>esc(p[1])).sort().join(' | ')+'</div>');
  else if(T==='ordering')b+=(sa?'<ol class="qa">'+q.a.map(x=>li(x,1,1)).join('')+'</ol>':'<div class="qh">Put in order: '+q.a.slice().sort().map(esc).join(' | ')+'</div>');
  else if(T==='ddwtos'&&!sa)b+='<div class="qh">Choices: '+q.a.map(esc).join(' | ')+'</div>';
- else if(T==='ddimageortext'){if(q.bg)b+=`<img src="${fixHtml(q.bg)}">`;b+='<div class="qh">Drop zones: '+q.drops.map(esc).join(' | ')+'</div>'}
+ else if(T==='ddimageortext'){if(q.bg)b+=ddi(q,sa);if(!sa)b+='<div class="qh">Draggable items: '+q.drags.map(d=>esc(d.l)).join(' | ')+'</div>'}
  else if(T==='essay'){b+='<div class="qh">Free-text answer'+'</div>';if(sa&&q.gi)b+='<div class="gi2"><div class="qh">Grader information</div>'+fixHtml(q.gi)+'</div>'}
  if(sa&&q.gf)b+='<div class="gi2">'+fixHtml(q.gf)+'</div>';
  return b+'</div>'}
 
 /* ---- quiz attempt with scoring ---- */
+
+const chipH=(n,l,img)=>`<span class="chip" data-n="${esc(n)}">${img?`<img src="${fixHtml(img)}">`:esc(l)}</span>`;
+function ddi(q,fill){const lab=n=>{const d=q.drags.find(x=>x.n===n);return d?(d.img?`<img src="${fixHtml(d.img)}">`:esc(d.l)):''};
+ return`<div class="ddi"><img src="${fixHtml(q.bg)}">`+q.drops.map((d,i)=>`<span class="zone${fill?' fill':''}" data-z="${i}" data-e="${esc(d.c)}" data-x="${d.x}" data-y="${d.y}"${fill?` data-v="${esc(d.c)}"`:''}>${fill?lab(d.c):''}</span>`).join('')+'</div>'}
+function posZones(root){(root||document).querySelectorAll('.ddi').forEach(w=>{const im=w.querySelector('img');if(!im||!im.naturalWidth)return;const k=im.clientWidth/im.naturalWidth;w.querySelectorAll('.zone').forEach(z=>{z.style.left=z.dataset.x*k+'px';z.style.top=z.dataset.y*k+'px'})})}
+addEventListener('resize',()=>posZones($('tdoc')));
+let dg=null,selc=null;
+const clearZ=z=>{const qq=z.closest('.qq'),v=z.dataset.v;if(v){const c=qq.querySelector('.chip[data-n="'+v+'"]');if(c)c.classList.remove('used')}z.dataset.v='';z.innerHTML='';z.classList.remove('fill')};
+function placeZ(z,n,html){const qq=z.closest('.qq');qq.querySelectorAll('.zone').forEach(o=>{if(o.dataset.v===n)clearZ(o)});if(z.dataset.v)clearZ(z);z.dataset.v=n;z.innerHTML=html;z.classList.add('fill');const c=qq.querySelector('.chip[data-n="'+n+'"]');if(c)c.classList.add('used')}
+function ddInit(){const d=$('tdoc');
+ d.onpointerdown=e=>{if(!e.target.closest('#tqs'))return;const c=e.target.closest('.chip'),z=e.target.closest('.zone');
+  if(c&&!c.classList.contains('used'))dg={n:c.dataset.n,html:c.innerHTML,from:null,x:e.clientX,y:e.clientY,moved:false,chip:c};
+  else if(z&&z.dataset.v)dg={n:z.dataset.v,html:z.innerHTML,from:z,x:e.clientX,y:e.clientY,moved:false};
+  else if(z&&selc){placeZ(z,selc.n,selc.html);selc.chip.classList.remove('sel');selc=null;return}
+  if(dg)e.preventDefault()};
+ addEventListener('pointermove',e=>{if(!dg)return;if(!dg.moved&&Math.hypot(e.clientX-dg.x,e.clientY-dg.y)>4){dg.moved=true;dg.g=document.createElement('div');dg.g.className='ghost';dg.g.innerHTML=dg.html;document.body.appendChild(dg.g);if(dg.from)clearZ(dg.from);if(selc){selc.chip.classList.remove('sel');selc=null}}
+  if(dg.g){dg.g.style.left=e.clientX+14+'px';dg.g.style.top=e.clientY+14+'px'}});
+ addEventListener('pointerup',e=>{if(!dg)return;const o=dg;dg=null;if(o.g)o.g.remove();
+  if(o.moved){const t=document.elementFromPoint(e.clientX,e.clientY),z=t&&t.closest&&t.closest('.zone');const qq=o.from?null:o.chip.closest('.qq');if(z&&z.closest('#tqs')&&(!qq||z.closest('.qq')===qq))placeZ(z,o.n,o.html);else if(z&&o.from&&z.closest('.qq')===o.from.closest('.qq'))placeZ(z,o.n,o.html)}
+  else if(o.chip){if(selc)selc.chip.classList.remove('sel');selc={n:o.n,html:o.html,chip:o.chip};o.chip.classList.add('sel')}
+  else if(o.from)clearZ(o.from)})}
 let att=null;
 const shuf=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const sel=(nm,opts)=>`<select data-k="${nm}"><option value="">&nbsp;</option>${opts.map(([v,t])=>`<option value="${v}">${esc(t)}</option>`).join('')}</select>`;
@@ -62,14 +83,15 @@ const wild=(p,v)=>new RegExp('^'+norm(p).replace(/[.+?^${}()|[\]\\]/g,'\\$&').re
 function qForm(q,n){const T=q.t;if(T==='description')return qRender(q,0,false);
  let txt=fixHtml(q.text),b='';
  if(T==='multianswer')txt=txt.replace(/\{#(\d+)\}/g,(m,i)=>{const s=q.subs[+i-1];if(!s)return'';return s.t==='multichoice'?sel('s'+i,s.a.map((x,j)=>[j,x.t])):`<input data-k="s${i}" size="10">`});
- else if(T==='ddwtos')txt=txt.replace(/\[\[(\d+)\]\]/g,(m,i)=>sel('d'+i,q.a.map((x,j)=>[j+1,x])));
+ else if(T==='ddwtos')txt=txt.replace(/\[\[(\d+)\]\]/g,(m,i)=>`<span class="zone zi" data-e="${i}"></span>`);
  b=`<div class="qq" data-n="${n}"><div class="qn">Question ${n} &middot; ${esc(q.name)} &middot; ${q.mm} p</div><div class="qt">${txt}</div>`;
  if(T==='multichoice')b+='<ul class="qf">'+q.a.map((x,j)=>`<li><label><input type="${q.single?'radio':'checkbox'}" name="q${n}" value="${j}"> ${x.t}</label></li>`).join('')+'</ul>';
  else if(T==='truefalse')b+='<ul class="qf">'+q.a.map((x,j)=>`<li><label><input type="radio" name="q${n}" value="${j}"> ${esc(x.t)}</label></li>`).join('')+'</ul>';
  else if(T==='shortanswer'||T==='numerical')b+=`<input data-k="v" size="30">`;
  else if(T==='match'){const o=[...new Set(q.pairs.map(p=>p[1]))].sort();b+='<table class="qm">'+q.pairs.map((p,i)=>`<tr><td>${fixHtml(p[0])}</td><td>${sel('m'+i,o.map(x=>[x,x]))}</td></tr>`).join('')+'</table>'}
  else if(T==='ordering')b+='<div class="qh">Use the arrows to put the items in the correct order</div><ol class="qo">'+shuf(q.a.map((x,i)=>i)).map(i=>`<li data-i="${i}"><button class="up">&#9650;</button><button class="dn">&#9660;</button> ${esc(q.a[i])}</li>`).join('')+'</ol>';
- else if(T==='ddimageortext'){if(q.bg)b+=`<img src="${fixHtml(q.bg)}">`;b+='<div class="qh">Draggable items</div><div class="dg">'+q.drags.map(d=>`<span>${esc(d.n)}${d.img?`<img src="${fixHtml(d.img)}">`:' '+esc(d.l)}</span>`).join('')+'</div><table class="qm">'+q.drops.map((d,i)=>`<tr><td>${esc(d.l)}</td><td>${sel('p'+i,q.drags.map(x=>[x.n,x.n+' '+(x.img?'':x.l)]))}</td></tr>`).join('')+'</table>'}
+ else if(T==='ddimageortext'){if(q.bg)b+=ddi(q,false);b+='<div class="qh">Drag the items onto the picture (or click an item, then a box)</div><div class="dg">'+q.drags.map(d=>chipH(d.n,d.l,d.img)).join('')+'</div>'}
+ else if(T==='ddwtos')b+='<div class="qh">Drag the items into the gaps (or click an item, then a gap)</div><div class="dg">'+q.a.map((x,j)=>chipH(j+1,x)).join('')+'</div>';
  else if(T==='essay')b+='<textarea data-k="e" rows="8"></textarea><div class="qh">Graded manually - not part of the score</div>';
  return b+'</div>'}
 function qGrade(q,el){const T=q.t,g=k=>{const e=el.querySelector('[data-k="'+k+'"]');return e?e.value:''};
@@ -78,15 +100,14 @@ function qGrade(q,el){const T=q.t,g=k=>{const e=el.querySelector('[data-k="'+k+'
  if(T==='shortanswer'||T==='numerical'){const v=g('v');let f=0;if(v!==''){for(const a of q.a){if(T==='numerical'?(parseFloat(String(v).replace(',','.'))===parseFloat(a.t)):wild(a.t,v)){f=a.f;break}}}return{s:Math.max(0,f),r:v}}
  if(T==='match'){let c=0,rs=[];q.pairs.forEach((p,i)=>{const v=g('m'+i);rs.push(v);if(v===p[1])c++});return{s:c/q.pairs.length,r:rs.join(' | ')}}
  if(T==='ordering'){const cur=[...el.querySelectorAll('.qo li')].map(x=>+x.dataset.i);let c=0;cur.forEach((x,i)=>{if(x===i)c++});return{s:c/q.a.length,r:cur.map(i=>q.a[i]).join(' > ')}}
- if(T==='ddwtos'){const m=(q.text.match(/\[\[(\d+)\]\]/g)||[]);let c=0;m.forEach(x=>{const i=x.replace(/\D/g,'');if(g('d'+i)===i)c++});return{s:m.length?c/m.length:0,r:''}}
- if(T==='ddimageortext'){let c=0;q.drops.forEach((d,i)=>{if(g('p'+i)===d.c)c++});return{s:q.drops.length?c/q.drops.length:0,r:''}}
+ if(T==='ddwtos'||T==='ddimageortext'){const zs=[...el.querySelectorAll('.zone')];let c=0;zs.forEach(z=>{if(z.dataset.v&&z.dataset.v===z.dataset.e)c++});return{s:zs.length?c/zs.length:0,r:zs.map(z=>z.textContent.trim()||'-').join(' | ')}}
  if(T==='multianswer'){let c=0;q.subs.forEach((sub,i)=>{const v=g('s'+(i+1));if(sub.t==='multichoice'){if(v!==''&&sub.a[+v]&&sub.a[+v].f>0)c++}else{for(const a of sub.a){if(a.f>0&&(sub.t==='numerical'?parseFloat(v)===parseFloat(a.t):wild(a.t,v))){c++;break}}}});return{s:q.subs.length?c/q.subs.length:0,r:''}}
  if(T==='essay')return{s:null,r:g('e')};
  return{s:null,r:''}}
 const fmt=n=>(Math.round(n*100)/100).toString();
 function startAttempt(id){const it=MDATA[id],qs=it.questions;att={id,t0:Date.now(),end:it.limit?Date.now()+it.limit*60000:0};
  let n=0;doc('<h1>'+esc(it.name)+'</h1><div class="tmeta" id="tclk"></div><div id="tqs">'+qs.map(q=>qForm(q,q.t==='description'?0:++n)).join('')+'</div><div class="tpg"><button id="tfin">Finish attempt</button><button id="tcan">Cancel</button></div>');
- $('tdoc').querySelectorAll('.qo').forEach(ol=>ol.onclick=e=>{const b=e.target.closest('button'),li=e.target.closest('li');if(!b||!li)return;if(b.classList.contains('up')&&li.previousElementSibling)ol.insertBefore(li,li.previousElementSibling);else if(b.classList.contains('dn')&&li.nextElementSibling)ol.insertBefore(li.nextElementSibling,li)});
+ posZones($('tdoc'));$('tdoc').querySelectorAll('.ddi img').forEach(im=>{if(!im.complete)im.onload=()=>posZones($('tdoc'))});$('tdoc').querySelectorAll('.qo').forEach(ol=>ol.onclick=e=>{const b=e.target.closest('button'),li=e.target.closest('li');if(!b||!li)return;if(b.classList.contains('up')&&li.previousElementSibling)ol.insertBefore(li,li.previousElementSibling);else if(b.classList.contains('dn')&&li.nextElementSibling)ol.insertBefore(li.nextElementSibling,li)});
  const upd=()=>{if(!att||att.id!==id){clearInterval(att&&att.iv);return}const e=$('tclk');if(!e){clearInterval(att.iv);return}if(att.end){const l=Math.max(0,att.end-Date.now()),m=Math.floor(l/60000),s=Math.floor(l%60000/1000);e.textContent='Time left '+m+':'+String(s).padStart(2,'0');if(!l)finish(id)}else e.textContent='Attempt in progress'};
  upd();att.iv=setInterval(upd,1000);$('tfin').onclick=()=>{if(confirm('Finish the attempt and see your score?'))finish(id)};$('tcan').onclick=()=>{clearInterval(att.iv);att=null;show(id)}}
 function finish(id){const it=MDATA[id],qs=it.questions;clearInterval(att&&att.iv);const els=[...$('tdoc').querySelectorAll('#tqs .qq')];
@@ -101,6 +122,7 @@ async function open(){if(!loaded){body.innerHTML='<div id="tnav"></div><div id="
   await loadScript('training/tree.js?v='+(window.TRV||''));if(!window.MTREE){$('tdoc').innerHTML='Training material could not be loaded.';return}
   walk(MTREE,null);loaded=true;
   $('tnav').onclick=e=>{const s=e.target.closest('.ts'),i=e.target.closest('.ti');if(s)toSection(s.dataset.s);else if(i)show(i.dataset.i)};
+  ddInit();
   $('tdoc').onclick=e=>{const a=e.target.closest('a');if(!a)return;const h=a.getAttribute('href')||'';const m=h.match(/^#m(\d+)$/);if(m){e.preventDefault();if(MDATA[m[1]])show(m[1])}else if(h.startsWith('#'))e.preventDefault()};
   MTREE[0]._o=true;drawNav();const f=MTREE[0].children.find(x=>x.type!=='section');if(f)show(f.id);else $('tdoc').innerHTML=''}
  body.classList.remove('nov')}
