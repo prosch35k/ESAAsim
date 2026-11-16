@@ -197,3 +197,31 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 #hhd button{background:#4a4a52;color:#e6e6e2;border:1px solid #6a6a72;border-radius:0;padding:6px 16px;font:13px ui-monospace,Menlo,monospace;cursor:pointer}
 #hhd button:hover{background:#5a5a64}
 #hbd{padding:24px;font:13px ui-monospace,Menlo,monospace;color:#b8b8b4}
+/* training material viewer */
+#home{display:flex;flex-direction:column}
+#hbd{flex:1;min-height:0;padding:0;display:flex;color:#e6e6e2}
+#hbd:empty,#hbd.nov{display:none}
+#tnav{width:310px;flex:none;overflow:auto;background:#2c2c31;border-right:1px solid #5a5a60;padding:6px 0;font:13px ui-monospace,Menlo,monospace}
+#tnav label{display:block;padding:4px 10px;color:#b8b8b4;cursor:pointer}
+#tnav .ts{padding:3px 10px;cursor:pointer;color:#e6e6e2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tnav .ts:hover,#tnav .ti:hover{background:#3a3a42}
+#tnav .ti{padding:3px 10px;cursor:pointer;color:#c8c8c4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#tnav .ti.cur{background:#4a4a52;color:#fff}
+#tnav .hid{opacity:.5}
+#tnav .tk{display:inline-block;width:12px;color:#9a9aa0}
+#tnav .ty{display:inline-block;width:34px;color:#8a8a90;font-size:10px;text-transform:uppercase}
+#tmain{flex:1;overflow:auto;padding:20px 28px;background:#242428}
+#tdoc{max-width:860px;margin:0 auto;font:15px/1.6 'Segoe UI',system-ui,sans-serif;color:#dcdcd8}
+#tdoc h1{font:22px 'Segoe UI',system-ui,sans-serif;margin:0 0 14px;color:#fff;font-weight:400}
+#tdoc h2,#tdoc h3,#tdoc h4,#tdoc h5{color:#fff;font-weight:400;margin:18px 0 6px}
+#tdoc img{max-width:100%;height:auto}
+#tdoc a{color:#8ec0ff}
+#tdoc table{border-collapse:collapse;max-width:100%}#tdoc td,#tdoc th{border:1px solid #5a5a60;padding:4px 8px}
+#tdoc iframe,#tdoc video{max-width:100%}
+#tdoc .tmeta{color:#9a9aa0;font:12px ui-monospace,Menlo,monospace;margin:-8px 0 14px}
+#tdoc .tpg{display:flex;gap:6px;margin:0 0 14px;flex-wrap:wrap}
+#tdoc .tpg button,#tdoc .tpgb button{background:#4a4a52;color:#e6e6e2;border:1px solid #6a6a72;border-radius:0;padding:3px 10px;font:12px ui-monospace,Menlo,monospace;cursor:pointer}
+#tdoc .tpg button.cur{background:#6a6a72}
+#tdoc .tpgb{display:flex;gap:6px;margin-top:22px}
+#tdoc .ans{color:#9a9aa0;font-size:13px}
+@media(max-width:700px){#hbd{flex-direction:column}#tnav{width:auto;max-height:40%;border-right:0;border-bottom:1px solid #5a5a60}}

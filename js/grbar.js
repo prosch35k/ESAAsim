@@ -6,7 +6,7 @@ const NA='Not available in ESAAsim';
 const na=(t,sub)=>({t,dis:true,sub});
 /* menu trees follow the plugin manual (3.2 - 3.4); only entries that exist in ESAAsim are active */
 const listsToggle=()=>order.map(n=>({t:n,chk:()=>WIN[n].vis,fn:()=>{const w=WIN[n];w.vis=!w.vis;w.el.style.display=w.vis?'':'none';if(w.vis)w.el.style.zIndex=++zTop}}));
-window.goHome=v=>{$('home').style.display=v?'':'none';if(v){$('hmsg').style.display='none'}};const goHome=window.goHome;
+window.goHome=v=>{$('home').style.display=v?'':'none'};const goHome=window.goHome;
 const TREE={
  settings:[{t:'Units',sub:[na('Altitude'),na('- reference'),na('Flight level'),na('Distance'),na('Speed')]},
   {t:'Display',sub:[{hdr:'Surveillance------'},na('Pro mode'),{hdr:'Tracks------------'},{t:'Display',dis:true,chk:()=>true},{t:'History',dis:true,val:'5'},na('HDG line'),{t:'AltFilter',dis:true,val:'050'},{hdr:'Label Filters-----'}].concat(['Stby','SqError','NoState','OnFreq','Parked'].map(n=>({t:n,chk:()=>GRFILT[n],fn:()=>{GRFILT[n]=!GRFILT[n]}})))},
@@ -30,7 +30,7 @@ menu.onclick=ev=>{const g=ev.target.closest('.gi');if(!g)return;const it=reg[+g.
  const ck=g.querySelector('.ck');if(it.chk){if(it.chk()){if(!ck)g.insertAdjacentHTML('afterbegin','<span class="ck">&#10003;</span>')}else if(ck)ck.remove()}else close()};
 addEventListener('pointerdown',ev=>{if(!ev.target.closest('#gmenu,#grb .gm,#ghi'))close()});
 bar.addEventListener('pointerenter',()=>{GRFILTOFF=true});bar.addEventListener('pointerleave',()=>{GRFILTOFF=false});
-$('hsim').onclick=()=>goHome(false);$('htr').onclick=()=>{$('hmsg').style.display=''};
+$('hsim').onclick=()=>goHome(false);$('htr').onclick=()=>{window.trainingOpen&&window.trainingOpen()};
 /* pin */
 $('grp').onclick=()=>{const on=$('grp').classList.toggle('on');bar.classList.toggle('hid',!on);clampWins()};
 /* alerts: filled when at least one alert is active, hollow otherwise */
