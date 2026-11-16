@@ -22,9 +22,9 @@ const fixHtml=h=>h.replace(/mimg:([0-9a-f]+)/g,(m,k)=>packs[k]||'data:,')
  .replace(/https?:\/\/moodle\.vatsim-scandinavia\.org\/mod\/(?:page|book|lesson|quiz|subsection)\/view\.php\?id=(\d+)[^"']*/g,'#m$1')
  .replace(/<a /g,'<a rel="noopener" ');
 function tree(nodes,d){return nodes.filter(x=>showHid||!x.hidden).map(x=>{
- const pad=`padding-left:${10+d*14}px`;
- if(x.type==='section'){const open=x._o?'v':'>';return`<div class="ts${x.hidden?' hid':''}" style="${pad}" data-s="${x.id}"><span class="tk">${open}</span>${esc(x.name)}</div>`+(x._o?tree(x.children,d+1):'')}
- return`<div class="ti${x.hidden?' hid':''}${cur===x.id?' cur':''}" style="${pad}" data-i="${x.id}"><span class="tk"></span><span class="ty">${ico[x.type]||x.type}</span>${esc(x.name)}</div>`}).join('')}
+ const pad=`padding-left:${12+d*16}px`;
+ if(x.type==='section')return`<div class="ts${x.hidden?' hid':''}${x._o?' open':''}" style="${pad}" data-s="${x.id}"><span class="tk"></span>${esc(x.name)}</div><div class="tg${x._o?'':' shut'}" data-g="${x.id}"><div class="tgi">${tree(x.children,d+1)}</div></div>`;
+ return`<div class="ti${x.hidden?' hid':''}${cur===x.id?' cur':''}" style="${pad}" data-i="${x.id}"><span class="tk"></span>${esc(x.name)}</div>`}).join('')}
 function drawNav(){const n=$('tnav');const st=n.scrollTop;n.innerHTML='<label><input type="checkbox" id="thd"'+(showHid?' checked':'')+'> Show hidden items</label>'+tree(MTREE,0);n.scrollTop=st;
  $('thd').onchange=e=>{showHid=e.target.checked;drawNav()}}
 const doc=h=>{$('tdoc').innerHTML=h;$('tmain').scrollTop=0;$('tdoc').querySelectorAll('.ddi img').forEach(im=>{const f=()=>posZones($('tdoc'));if(im.complete)f();else im.onload=f})};
@@ -198,7 +198,7 @@ async function qEdit(id){const it=MDATA[id];const qs=JSON.parse(JSON.stringify(q
  root.addEventListener('mousedown',e=>{if(e.target.closest('.qebar button'))e.preventDefault()});
  $('tfm').onchange=e=>{const v=e.target.value;if(!v)return;document.execCommand('formatBlock',false,v==='p'?'<p>':'<'+v+'>');e.target.value=''}}
 const confirmDel=q=>true;
-function toSection(id){const nd=byId[id];nd._o=!nd._o;drawNav()}
+function toSection(id){const nd=byId[id];nd._o=!nd._o;const n=$('tnav'),h=n.querySelector('.ts[data-s="'+id+'"]'),g=n.querySelector('.tg[data-g="'+id+'"]');if(h)h.classList.toggle('open',nd._o);if(g)g.classList.toggle('shut',!nd._o)}
 async function open(){if(!loaded){body.innerHTML='<div id="tnav"></div><div id="tmain"><div id="tdoc"><div class="tmeta">Loading...</div></div></div>';
   await loadScript('training/tree.js?v='+(window.TRV||''));if(!window.MTREE){$('tdoc').innerHTML='Training material could not be loaded.';return}
   walk(MTREE,null);loaded=true;

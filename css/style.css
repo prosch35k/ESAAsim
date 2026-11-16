@@ -302,3 +302,16 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 #tdoc .qar input.qtx,#tdoc .qar input.qpl,#tdoc .qar input.qpr,#tdoc .qpt{background:#3a3a42;color:#e6e6e2;border:1px solid #6a6a72;padding:4px 8px;font-size:13px;flex:1}
 #tdoc .qsl{display:block;margin-top:8px;font-size:13px;color:#9a9aa0}
 #tdoc .qebar{z-index:6}
+
+/* nav: animated sections, no type labels */
+#tnav .ty{display:none}
+#tnav .tk{width:14px;color:#9a9aa0;transition:transform .22s ease}
+#tnav .ts .tk::before{content:'\25B8'}
+#tnav .ts.open .tk{transform:rotate(90deg)}
+#tnav .tg{display:grid;grid-template-rows:1fr;transition:grid-template-rows .26s ease,opacity .26s ease;opacity:1}
+#tnav .tg.shut{grid-template-rows:0fr;opacity:0}
+#tnav .tgi{overflow:hidden;min-height:0}
+#tnav .ts .tk{display:inline-block;width:14px;text-align:center;font-size:11px;line-height:1;vertical-align:1px;transform-origin:50% 50%}
+#tnav .ts{display:flex;align-items:baseline}
+#tnav .ts .tk{flex:none;margin-right:6px}
+#tnav .ti .tk{display:inline-block;width:14px}
