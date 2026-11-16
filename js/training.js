@@ -1,3 +1,12 @@
+/* ---------- login on the home page (temporary: guest / admin, VATSIM login will replace it) ---------- */
+window.ESA=(()=>{let role=null;try{role=localStorage.getItem('esaasim.role')}catch(e){}if(role!=='admin'&&role!=='guest')role=null;
+ const o={role,user:null,subs:[],admin:()=>o.role==='admin',
+  set(r){o.role=r;try{r?localStorage.setItem('esaasim.role',r):localStorage.removeItem('esaasim.role')}catch(e){}o.upd();o.subs.forEach(f=>f())},
+  upd(){o.user=o.role==='admin'?{name:'Admin',cid:'0',rating:5,rn:'C1'}:o.role==='guest'?{name:'Guest',cid:'0',rating:0,rn:'OBS'}:null;
+   const e=document.getElementById('hlin');if(!e)return;
+   e.innerHTML=o.role?`<div class="hwho">Signed in as ${o.role==='admin'?'admin':'guest'}</div><div class="hbs"><button id="hout">Log out</button></div>`+(o.role==='guest'?'<div class="hnote">Guests can read the training material and take the quizzes.</div>':'<div class="hnote">Admins can also edit the training material and the quizzes.</div>'):`<div class="hbs"><button id="hgu">Log in as guest</button><button id="had">Log in as admin</button></div><div class="hnote">VATSIM login will be added here.</div>`;
+   const b=(i,f)=>{const x=document.getElementById(i);if(x)x.onclick=f};b('hgu',()=>o.set('guest'));b('had',()=>o.set('admin'));b('hout',()=>o.set(null))}};
+ o.upd();return o})();
 /* ---------- Training Material: offline copy of the Moodle course (structure + content) ---------- */
 (()=>{
 let loaded=false,cur=null,showHid=false;const packs={},ld={};
@@ -24,7 +33,10 @@ const doc=h=>{$('tdoc').innerHTML=h;$('tmain').scrollTop=0;$('tdoc').querySelect
 const OVK='esaasim.tm.ov';let OV={};try{OV=JSON.parse(localStorage.getItem(OVK))||{}}catch(e){}
 const ovSave=()=>{try{localStorage.setItem(OVK,JSON.stringify(OV))}catch(e){}};
 const cont=(key,orig)=>OV[key]!==undefined?OV[key]:orig;
-const edBlock=(key,orig)=>'<div class="tedbar" id="tedbar"><button id="ted">Edit</button>'+(OV[key]!==undefined?'<button id="trs">Reset to original</button><span class="tmeta">Edited by you</span>':'')+'</div><div class="tc" id="tc">'+fixHtml(cont(key,orig))+'</div>';
+const QOK='esaasim.tm.qov';let QOV={};try{QOV=JSON.parse(localStorage.getItem(QOK))||{}}catch(e){}
+const qovSave=()=>{try{localStorage.setItem(QOK,JSON.stringify(QOV))}catch(e){}};
+const qsOf=id=>QOV[id]||MDATA[id].questions||[];
+const edBlock=(key,orig)=>'<div class="tedbar" id="tedbar">'+(ESA.admin()?'<button id="ted">Edit</button>'+(OV[key]!==undefined?'<button id="trs">Reset to original</button>':''):'')+(OV[key]!==undefined?'<span class="tmeta">Edited</span>':'')+'</div><div class="tc" id="tc">'+fixHtml(cont(key,orig))+'</div>';
 let rev=null;
 const unfix=h=>{if(!rev){rev=new Map();for(const k in packs)rev.set(packs[k],k)}return h.replace(/src="(data:image\/[^"]+)"/g,(m,u)=>{const k=rev.get(u);return k?'src="mimg:'+k+'"':m})};
 function edInit(key,orig,id,sub){const ted=$('ted');if(!ted)return;const tc=$('tc'),bar=$('tedbar');
@@ -53,9 +65,10 @@ async function show(id,sub){const it=MDATA[id],nd=byId[id];if(!it)return;cur=id;
  else if(it.type==='lesson'){const k=sub||0,pg=it.pages;const p=pg[k];await need(p?cont(id+':'+k,p.html):'');
   doc(head+(it.intro?fixHtml(it.intro):'')+(pg.length>1?'<div class="tpg">'+pg.map((x,i)=>`<button data-c="${i}" class="${i===k?'cur':''}">${esc(x.title)}</button>`).join('')+'</div>':'')+(p?`<h2>${esc(p.title)}</h2>`+edBlock(id+':'+k,p.html):'')+(p&&p.answers.length?'<div class="ans">Answer options: '+p.answers.map(esc).join(' / ')+'</div>':''));
   document.querySelectorAll('#tdoc .tpg [data-c]').forEach(b=>b.onclick=()=>show(id,+b.dataset.c));if(p)edInit(id+':'+k,p.html,id,k)}
- else if(it.type==='quiz'){if(att&&att.id!==id){clearInterval(att.iv);att=null}const qs=it.questions||[];await need(it.intro+JSON.stringify(qs));let n=0;
-  doc(head+'<div class="tmeta">Quiz'+(it.limit?' &middot; time limit '+it.limit+' min':'')+(qs.length?' &middot; '+qs.filter(x=>x.t!=='description').length+' questions &middot; '+fmt(qs.reduce((a,q)=>a+(q.t==='description'?0:q.mm),0))+' points':'')+'</div>'+fixHtml(it.intro)+(qs.length?'<div class="tpg"><button id="tst">Start test</button></div>':''));
-  const st=$('tst');if(st)st.onclick=()=>startAttempt(id)}
+ else if(it.type==='quiz'){if(att&&att.id!==id){clearInterval(att.iv);att=null}const qs=qsOf(id),ik=id+':i';await need(cont(ik,it.intro)+JSON.stringify(qs));let n=0;
+  doc(head+'<div class="tmeta">Quiz'+(it.limit?' &middot; time limit '+it.limit+' min':'')+(qs.length?' &middot; '+qs.filter(x=>x.t!=='description').length+' questions &middot; '+fmt(qs.reduce((a,q)=>a+(q.t==='description'?0:q.mm),0))+' points':'')+(QOV[id]?' &middot; questions edited':'')+'</div>'+edBlock(ik,it.intro)+'<div class="tpg">'+(qs.length?'<button id="tst">Start test</button>':'')+(ESA.admin()?'<button id="tqe">Edit questions</button>'+(QOV[id]?'<button id="tqr">Reset questions</button>':''):'')+'</div>');
+  edInit(ik,it.intro,id,sub);
+  const st=$('tst');if(st)st.onclick=()=>startAttempt(id);const qe=$('tqe');if(qe)qe.onclick=()=>qEdit(id);const qr=$('tqr');if(qr)qr.onclick=()=>{delete QOV[id];qovSave();show(id)}}
  else doc(head)}
 
 let showAns=false;
@@ -130,18 +143,61 @@ function qGrade(q,el){const T=q.t,g=k=>{const e=el.querySelector('[data-k="'+k+'
  if(T==='essay')return{s:null,r:g('e')};
  return{s:null,r:''}}
 const fmt=n=>(Math.round(n*100)/100).toString();
-function startAttempt(id){const it=MDATA[id],qs=it.questions;att={id,t0:Date.now(),end:it.limit?Date.now()+it.limit*60000:0};
+function startAttempt(id){const it=MDATA[id],qs=qsOf(id);att={id,t0:Date.now(),end:it.limit?Date.now()+it.limit*60000:0};
  let n=0;doc('<h1>'+esc(it.name)+'</h1><div class="tmeta" id="tclk"></div><div id="tqs">'+qs.map(q=>qForm(q,q.t==='description'?0:++n)).join('')+'</div><div class="tpg"><button id="tfin">Finish attempt</button><button id="tcan">Cancel</button></div>');
  posZones($('tdoc'));$('tdoc').querySelectorAll('.ddi img').forEach(im=>{if(!im.complete)im.onload=()=>posZones($('tdoc'))});$('tdoc').querySelectorAll('.qo').forEach(ol=>ol.onclick=e=>{const b=e.target.closest('button'),li=e.target.closest('li');if(!b||!li)return;if(b.classList.contains('up')&&li.previousElementSibling)ol.insertBefore(li,li.previousElementSibling);else if(b.classList.contains('dn')&&li.nextElementSibling)ol.insertBefore(li.nextElementSibling,li)});
  const upd=()=>{if(!att||att.id!==id){clearInterval(att&&att.iv);return}const e=$('tclk');if(!e){clearInterval(att.iv);return}if(att.end){const l=Math.max(0,att.end-Date.now()),m=Math.floor(l/60000),s=Math.floor(l%60000/1000);e.textContent='Time left '+m+':'+String(s).padStart(2,'0');if(!l)finish(id)}else e.textContent='Attempt in progress'};
  upd();att.iv=setInterval(upd,1000);$('tfin').onclick=()=>finish(id);$('tcan').onclick=()=>{clearInterval(att.iv);att=null;show(id)}}
-function finish(id){const it=MDATA[id],qs=it.questions;clearInterval(att&&att.iv);const els=[...$('tdoc').querySelectorAll('#tqs .qq')];
+function finish(id){const it=MDATA[id],qs=qsOf(id);clearInterval(att&&att.iv);const els=[...$('tdoc').querySelectorAll('#tqs .qq')];
  let got=0,max=0,man=0,n=0;const res=[];let ei=0;
  qs.forEach(q=>{if(q.t==='description'){res.push(null);return}const el=els[ei++];const r=qGrade(q,el);n++;if(r.s===null){man+=q.mm;res.push({r:r.r,man:1})}else{got+=r.s*q.mm;max+=q.mm;res.push({s:r.s,r:r.r})}});
  att=null;const pct=max?got/max*100:0;let k=0;
  doc('<h1>'+esc(it.name)+'</h1><div class="qq"><div class="qn">Result</div><div class="qt">Score: '+fmt(got)+' / '+fmt(max)+' points ('+fmt(pct)+'%)'+(man?'<br>'+fmt(man)+' points are graded manually and not included.':'')+'<br>'+(pct>=80?'<span class="ok">Passed (80% required)</span>':'Not passed (80% required)')+'</div></div><div class="tpg"><button id="tag">Try again</button><button id="tbk">Back to the test</button></div>'+
   qs.map((q,i)=>{if(q.t==='description')return'';k++;const r=res[i];return qRender(q,k,true).replace(/<\/div>$/,'')+`<div class="gi2"><div class="qh">Your answer${r.r?': '+esc(r.r):' not given'}</div>${r.man?'<div class="qh">Graded manually (max '+fmt(q.mm)+' p)</div>':`<div class="${r.s>=1?'ok':''}">${fmt(r.s*q.mm)} / ${fmt(q.mm)} p</div>`}</div></div>`}).join(''));
  $('tag').onclick=()=>startAttempt(id);$('tbk').onclick=()=>show(id)}
+
+/* ---- quiz question editor (admin) ---- */
+const QTN={multichoice:'Multiple choice',truefalse:'True / false',shortanswer:'Short answer',numerical:'Numerical',essay:'Essay',match:'Matching',ordering:'Ordering',ddwtos:'Drag words',ddimageortext:'Drag onto image',multianswer:'Embedded answers',description:'Information'};
+async function qEdit(id){const it=MDATA[id];const qs=JSON.parse(JSON.stringify(qsOf(id)));await need(JSON.stringify(qs));
+ const redraw=()=>{const sc=$('tmain').scrollTop;
+  $('tdoc').innerHTML='<h1>'+esc(it.name)+'</h1><div class="tedbar qebar"><select id="tfm"><option value="">Style</option><option value="p">Paragraph</option><option value="h3">Heading</option><option value="h4">Sub heading</option></select><button data-c="bold"><b>B</b></button><button data-c="italic"><i>I</i></button><button data-c="underline"><u>U</u></button><button data-c="insertUnorderedList">&bull; List</button><button data-c="insertOrderedList">1. List</button><button data-c="removeFormat">Clear</button><span class="sp"></span><button id="qsv">Save</button><button id="qcn">Cancel</button></div>'+
+  qs.map((q,i)=>`<div class="qq qe" data-i="${i}"><div class="qn">${q.t==='description'?'Information':'Question '+(qs.slice(0,i).filter(x=>x.t!=='description').length+1)} &middot; ${QTN[q.t]||q.t}${q.t!=='description'?` &middot; points <input class="qpt" type="number" min="0" step="0.5" value="${q.mm}">`:''}<span class="sp"></span><button class="qup">&#9650;</button><button class="qdn">&#9660;</button><button class="qdl">Delete</button></div><div class="qed" data-f="text" contenteditable="true">${fixHtml(q.text)}</div>`+qeBody(q)+'</div>').join('')+'<div class="tpg"><button id="qaq">Add multiple choice question</button><button id="qat">Add true / false</button><button id="qae">Add essay</button></div>';
+  $('tmain').scrollTop=sc};
+ const qeBody=q=>{const T=q.t;
+  if(T==='multichoice')return'<div class="qh">Tick the correct answer'+(q.single?'':'s')+'</div>'+q.a.map((x,j)=>`<div class="qar" data-j="${j}"><input type="${q.single?'radio':'checkbox'}" class="qok" name="r${qs.indexOf(q)}" ${x.f>0?'checked':''}><div class="qed" data-f="a" contenteditable="true">${fixHtml(x.t)}</div><button class="qad">x</button></div>`).join('')+'<button class="qaa">Add answer</button><label class="qsl"><input type="checkbox" class="qsg" '+(q.single?'checked':'')+'> Only one correct answer</label>';
+  if(T==='truefalse')return q.a.map((x,j)=>`<div class="qar" data-j="${j}"><input type="radio" class="qok" name="r${qs.indexOf(q)}" ${x.f>0?'checked':''}><span>${esc(x.t)}</span></div>`).join('');
+  if(T==='shortanswer'||T==='numerical')return'<div class="qh">Accepted answers (use * as wildcard in short answers)</div>'+q.a.map((x,j)=>`<div class="qar" data-j="${j}"><input class="qtx" value="${esc(x.t)}"><button class="qad">x</button></div>`).join('')+'<button class="qaa">Add answer</button>';
+  if(T==='essay')return'<div class="qh">Grader information</div><div class="qed" data-f="gi" contenteditable="true">'+fixHtml(q.gi||'')+'</div>';
+  if(T==='match')return'<div class="qh">Pairs</div>'+q.pairs.map((p,j)=>`<div class="qar" data-j="${j}"><input class="qpl" value="${esc(p[0].replace(/<[^>]*>/g,''))}"><input class="qpr" value="${esc(p[1])}"><button class="qad">x</button></div>`).join('')+'<button class="qaa">Add pair</button>';
+  if(T==='ordering')return'<div class="qh">Items in the correct order</div>'+q.a.map((x,j)=>`<div class="qar" data-j="${j}"><input class="qtx" value="${esc(x)}"><button class="qad">x</button></div>`).join('')+'<button class="qaa">Add item</button>';
+  if(T==='ddwtos'||T==='ddimageortext'||T==='multianswer')return'<div class="qh">The structure of this question type (gaps, zones, answers) can not be edited here, only the text and points.</div>';return''};
+ redraw();
+ const root=$('tdoc'),qi=e=>+e.closest('.qe').dataset.i;
+ const normFr=q=>{if(q.t!=='multichoice')return;const c=q.a.filter(x=>x.f>0).length;q.a.forEach(x=>{if(x.f>0)x.f=q.single?1:1/c;else x.f=0})};
+ root.addEventListener('input',e=>{const el=e.target,qe=el.closest('.qe');if(!qe)return;const q=qs[qi(el)];
+  if(el.classList.contains('qed')){const f=el.dataset.f,v=unfix(el.innerHTML);if(f==='text')q.text=v;else if(f==='gi')q.gi=v;else if(f==='a')q.a[+el.closest('.qar').dataset.j].t=v}
+  else if(el.classList.contains('qpt'))q.mm=Math.max(0,parseFloat(el.value)||0);
+  else if(el.classList.contains('qtx')){const j=+el.closest('.qar').dataset.j;if(q.t==='ordering')q.a[j]=el.value;else q.a[j].t=el.value}
+  else if(el.classList.contains('qpl')||el.classList.contains('qpr')){const p=q.pairs[+el.closest('.qar').dataset.j];if(el.classList.contains('qpl'))p[0]=esc(el.value);else p[1]=el.value}});
+ root.addEventListener('change',e=>{const el=e.target,qe=el.closest('.qe');if(!qe)return;const q=qs[qi(el)];
+  if(el.classList.contains('qok')){const j=+el.closest('.qar').dataset.j;if(q.t==='truefalse'||q.single){q.a.forEach((x,k)=>x.f=k===j?1:0)}else{q.a[j].f=el.checked?1:0;normFr(q)}if(q.t==='multichoice'&&!q.single)normFr(q);redraw()}
+  else if(el.classList.contains('qsg')){q.single=el.checked;if(q.single){let f=false;q.a.forEach(x=>{if(x.f>0&&!f){x.f=1;f=true}else x.f=0})}else normFr(q);redraw()}});
+ root.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.c){document.execCommand(b.dataset.c);return}
+  if(b.id==='qcn'){show(id);return}
+  if(b.id==='qsv'){QOV[id]=JSON.parse(JSON.stringify(qs));qovSave();show(id);return}
+  if(b.id==='qaq'){qs.push({t:'multichoice',name:'New question',text:'<p>New question</p>',mm:1,single:true,a:[1,0,0,0].map((f,i)=>({t:'<p>Answer '+(i+1)+'</p>',f}))});redraw();return}
+  if(b.id==='qat'){qs.push({t:'truefalse',name:'New question',text:'<p>New statement</p>',mm:1,a:[{t:'True',f:1},{t:'False',f:0}]});redraw();return}
+  if(b.id==='qae'){qs.push({t:'essay',name:'New question',text:'<p>New question</p>',mm:1,gi:''});redraw();return}
+  const qe=b.closest('.qe');if(!qe)return;const i=qi(b),q=qs[i];
+  if(b.classList.contains('qdl')){if(confirmDel(q)){qs.splice(i,1);redraw()}return}
+  if(b.classList.contains('qup')&&i>0){[qs[i-1],qs[i]]=[qs[i],qs[i-1]];redraw();return}
+  if(b.classList.contains('qdn')&&i<qs.length-1){[qs[i+1],qs[i]]=[qs[i],qs[i+1]];redraw();return}
+  if(b.classList.contains('qad')){const j=+b.closest('.qar').dataset.j;if(q.pairs)q.pairs.splice(j,1);else q.a.splice(j,1);redraw();return}
+  if(b.classList.contains('qaa')){if(q.pairs)q.pairs.push(['','']);else if(q.t==='ordering')q.a.push('');else q.a.push({t:q.t==='multichoice'?'<p></p>':'',f:0});redraw()}});
+ root.addEventListener('mousedown',e=>{if(e.target.closest('.qebar button'))e.preventDefault()});
+ $('tfm').onchange=e=>{const v=e.target.value;if(!v)return;document.execCommand('formatBlock',false,v==='p'?'<p>':'<'+v+'>');e.target.value=''}}
+const confirmDel=q=>true;
 function toSection(id){const nd=byId[id];nd._o=!nd._o;drawNav()}
 async function open(){if(!loaded){body.innerHTML='<div id="tnav"></div><div id="tmain"><div id="tdoc"><div class="tmeta">Loading...</div></div></div>';
   await loadScript('training/tree.js?v='+(window.TRV||''));if(!window.MTREE){$('tdoc').innerHTML='Training material could not be loaded.';return}
@@ -151,5 +207,6 @@ async function open(){if(!loaded){body.innerHTML='<div id="tnav"></div><div id="
   $('tdoc').onclick=e=>{const a=e.target.closest('a');if(!a)return;const h=a.getAttribute('href')||'';const m=h.match(/^#m(\d+)$/);if(m){e.preventDefault();if(MDATA[m[1]])show(m[1])}else if(h.startsWith('#'))e.preventDefault()};
   MTREE[0]._o=true;drawNav();const f=MTREE[0].children.find(x=>x.type!=='section');if(f)show(f.id);else $('tdoc').innerHTML=''}
  body.classList.remove('nov')}
+ESA.subs.push(()=>{if(loaded&&cur)show(cur)});
 window.trainingOpen=open;window.trainingClose=()=>body.classList.add('nov');
 })();

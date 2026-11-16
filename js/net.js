@@ -86,9 +86,9 @@ function netDialog(){if(ncEl){ncEl.remove();ncEl=null;return}const cfg=NLS.get('
   <div class="full" id="nst" style="min-height:16px;color:#333">${MP.status}</div>
   <div class="bt gt"><button id="ngo">Connect</button><button id="nds">Disconnect</button></div></div>`;
  $('map').appendChild(e);
- const base=()=>httpOf(AUTH_SERVER),me=()=>DEV_AUTOLOGIN?{token:'',user:DEV_USER}:authGet(),user=()=>{const a=me();return a&&a.user},isMentor=()=>e.querySelector('input[name=nrole]:checked').value==='host',setSt=t=>{$('nst').textContent=t};
+ const base=()=>httpOf(AUTH_SERVER),me=()=>DEV_AUTOLOGIN?(window.ESA&&ESA.user?{token:'',user:ESA.user}:null):authGet(),user=()=>{const a=me();return a&&a.user},isMentor=()=>e.querySelector('input[name=nrole]:checked').value==='host',setSt=t=>{$('nst').textContent=t};
  const render=()=>{const u=user(),ok=!ST.req||!!u,canM=!ST.req||(u&&u.rating>=3);
-  $('nlg').innerHTML=!ST.req?'<i>This server does not require login</i>':u?`<span>${u.name.replace(/</g,'&lt;')} · ${u.cid} · <b>${u.rn}</b>${DEV_AUTOLOGIN?' <i>(temporary auto-login)</i>':''}</span>${DEV_AUTOLOGIN?'':'<button id="nlo">Log out</button>'}`:'<button id="nli">Login with VATSIM</button>';
+  $('nlg').innerHTML=!ST.req?'<i>This server does not require login</i>':(DEV_AUTOLOGIN&&!u)?'<i>Log in on the home page first</i>':u?`<span>${u.name.replace(/</g,'&lt;')} · ${u.cid} · <b>${u.rn}</b>${DEV_AUTOLOGIN?' <i>(from the home page)</i>':''}</span>${DEV_AUTOLOGIN?'':'<button id="nlo">Log out</button>'}`:'<button id="nli">Login with VATSIM</button>';
   if($('nli'))$('nli').onclick=doLogin;if($('nlo'))$('nlo').onclick=()=>{authSet(base(),null);render()};
   e.querySelectorAll('.gt').forEach(x=>x.style.display=ok?'':'none');$('ngo').disabled=MP.on;$('nds').disabled=!MP.on;$('nrh').style.display=canM?'':'none';
   const rs=[...e.querySelectorAll('input[name=nrole]')];if(!canM)rs[1].checked=true;else if(!rs.some(r=>r.checked))rs[L.role==='host'?0:1].checked=true;

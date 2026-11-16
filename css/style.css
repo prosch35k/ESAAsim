@@ -281,3 +281,24 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 #tdoc .tedbar input{background:#3a3a42}
 #tdoc .tedbar .sp{flex:1}
 #tdoc .tc.ing{outline:1px solid #8ec0ff;padding:10px 14px;background:#2a2a2f;min-height:200px}
+
+/* home landing */
+#hland{flex:1;display:flex;align-items:center;justify-content:center;font-family:Roboto,sans-serif}
+#hbd:not(.nov)~#hland{display:none}
+#hlc{text-align:center;margin-top:-6vh}
+#hbig{font-size:64px;letter-spacing:.06em;color:#e6e6e2;margin-bottom:28px}
+.hwho{font-size:16px;color:#c8c8c4;margin-bottom:14px}
+.hbs{display:flex;gap:12px;justify-content:center}
+.hbs button{background:#4a4a52;color:#e6e6e2;border:1px solid #6a6a72;border-radius:0;padding:10px 24px;font-size:15px;cursor:pointer}
+.hbs button:hover{background:#5a5a64}
+.hnote{margin-top:16px;font-size:13px;color:#8a8a90}
+/* quiz editor */
+#tdoc .qe .qn{display:flex;align-items:center;gap:8px}#tdoc .qe .sp{flex:1}
+#tdoc .qe .qn button,#tdoc .qaa,#tdoc .qad{background:#4a4a52;color:#e6e6e2;border:1px solid #6a6a72;border-radius:0;padding:2px 8px;font-size:12px;cursor:pointer}
+#tdoc .qpt{width:60px}
+#tdoc .qed{border:1px solid #4a4a52;background:#2a2a2f;padding:6px 10px;margin:6px 0;min-height:24px}
+#tdoc .qed:focus{outline:1px solid #8ec0ff}
+#tdoc .qar{display:flex;gap:8px;align-items:center;margin:4px 0}#tdoc .qar .qed{flex:1;margin:0}
+#tdoc .qar input.qtx,#tdoc .qar input.qpl,#tdoc .qar input.qpr,#tdoc .qpt{background:#3a3a42;color:#e6e6e2;border:1px solid #6a6a72;padding:4px 8px;font-size:13px;flex:1}
+#tdoc .qsl{display:block;margin-top:8px;font-size:13px;color:#9a9aa0}
+#tdoc .qebar{z-index:6}
