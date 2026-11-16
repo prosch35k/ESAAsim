@@ -225,3 +225,12 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 #tdoc .tpgb{display:flex;gap:6px;margin-top:22px}
 #tdoc .ans{color:#9a9aa0;font-size:13px}
 @media(max-width:700px){#hbd{flex-direction:column}#tnav{width:auto;max-height:40%;border-right:0;border-bottom:1px solid #5a5a60}}
+
+#tdoc .qq{border:1px solid #4a4a52;background:#2c2c31;padding:12px 16px;margin:0 0 14px}
+#tdoc .qn{color:#9a9aa0;font:12px ui-monospace,Menlo,monospace;margin-bottom:6px}
+#tdoc .qa{margin:8px 0 0;padding-left:22px}#tdoc .qa li{margin:3px 0}
+#tdoc .ok,#tdoc li.ok{color:#8fd48f}
+#tdoc .qh{color:#9a9aa0;font:12px ui-monospace,Menlo,monospace;margin-top:8px}
+#tdoc .cz{background:#3a3a42;padding:0 6px;border:1px solid #5a5a60}
+#tdoc .qm td{vertical-align:top}
+#tdoc .gi2{margin-top:10px;padding:8px 12px;border-left:3px solid #6a6a72;background:#242428}
