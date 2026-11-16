@@ -4,7 +4,7 @@ let loaded=false,cur=null,showHid=false;const packs={},ld={};
 window.MPACK=o=>Object.assign(packs,o);
 const body=$('hbd'),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const byId={};
-const walk=(n,par)=>n.forEach(x=>{byId[x.id]=x;x.par=par;if(x.children)walk(x.children,x)});
+const walk=(n,par)=>n.forEach(x=>{byId[x.id]=x;x.par=par;if(x.children){x._o=true;walk(x.children,x)}});
 const ico={page:'page',book:'book',lesson:'less',quiz:'quiz',section:''};
 function loadScript(src){return new Promise(r=>{const s=document.createElement('script');s.src=src;s.onload=s.onerror=()=>r();document.head.appendChild(s)})}
 async function need(html){const ids=new Set();(html.match(/mimg:[0-9a-f]+/g)||[]).forEach(m=>{const i=MPIDX[m.slice(5)];if(i!=null&&!ld[i])ids.add(i)});
@@ -19,15 +19,40 @@ function tree(nodes,d){return nodes.filter(x=>showHid||!x.hidden).map(x=>{
 function drawNav(){const n=$('tnav');const st=n.scrollTop;n.innerHTML='<label><input type="checkbox" id="thd"'+(showHid?' checked':'')+'> Show hidden items</label>'+tree(MTREE,0);n.scrollTop=st;
  $('thd').onchange=e=>{showHid=e.target.checked;drawNav()}}
 const doc=h=>{$('tdoc').innerHTML=h;$('tmain').scrollTop=0;$('tdoc').querySelectorAll('.ddi img').forEach(im=>{const f=()=>posZones($('tdoc'));if(im.complete)f();else im.onload=f})};
+
+/* ---- WYSIWYG editing (edits are kept in this browser) ---- */
+const OVK='esaasim.tm.ov';let OV={};try{OV=JSON.parse(localStorage.getItem(OVK))||{}}catch(e){}
+const ovSave=()=>{try{localStorage.setItem(OVK,JSON.stringify(OV))}catch(e){}};
+const cont=(key,orig)=>OV[key]!==undefined?OV[key]:orig;
+const edBlock=(key,orig)=>'<div class="tedbar" id="tedbar"><button id="ted">Edit</button>'+(OV[key]!==undefined?'<button id="trs">Reset to original</button><span class="tmeta">Edited by you</span>':'')+'</div><div class="tc" id="tc">'+fixHtml(cont(key,orig))+'</div>';
+let rev=null;
+const unfix=h=>{if(!rev){rev=new Map();for(const k in packs)rev.set(packs[k],k)}return h.replace(/src="(data:image\/[^"]+)"/g,(m,u)=>{const k=rev.get(u);return k?'src="mimg:'+k+'"':m})};
+function edInit(key,orig,id,sub){const ted=$('ted');if(!ted)return;const tc=$('tc'),bar=$('tedbar');
+ const rs=$('trs');if(rs)rs.onclick=()=>{delete OV[key];ovSave();show(id,sub)};
+ ted.onclick=()=>{tc.contentEditable='true';tc.classList.add('ing');let rg=null;
+  bar.innerHTML='<select id="tfm"><option value="">Style</option><option value="p">Paragraph</option><option value="h2">Heading 1</option><option value="h3">Heading 2</option><option value="h4">Heading 3</option><option value="h5">Heading 4</option><option value="blockquote">Quote</option></select>'+
+   '<button data-c="bold" title="Bold">B</button><button data-c="italic" title="Italic"><i>I</i></button><button data-c="underline" title="Underline"><u>U</u></button><button data-c="strikeThrough" title="Strikethrough"><s>S</s></button>'+
+   '<button data-c="insertUnorderedList" title="Bullet list">&bull; List</button><button data-c="insertOrderedList" title="Numbered list">1. List</button><button data-c="outdent" title="Outdent">&lt;</button><button data-c="indent" title="Indent">&gt;</button>'+
+   '<button data-c="justifyLeft" title="Left">Left</button><button data-c="justifyCenter" title="Center">Center</button>'+
+   '<input id="tlk" placeholder="https://..." size="16"><button id="tlb">Link</button><button data-c="unlink">Unlink</button><button data-c="removeFormat" title="Clear formatting">Clear</button>'+
+   '<button data-c="undo">Undo</button><button data-c="redo">Redo</button><span class="sp"></span><button id="tsv">Save</button><button id="tcn">Cancel</button>';
+  document.addEventListener('selectionchange',()=>{const s=getSelection();if(s.rangeCount&&tc.contains(s.anchorNode))rg=s.getRangeAt(0).cloneRange()});
+  bar.onmousedown=e=>{if(!e.target.closest('input,select'))e.preventDefault()};
+  bar.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.c){tc.focus();document.execCommand(b.dataset.c)}};
+  $('tfm').onchange=e=>{const v=e.target.value;if(!v)return;tc.focus();if(rg){const s=getSelection();s.removeAllRanges();s.addRange(rg)}document.execCommand('formatBlock',false,v==='p'?'<p>':'<'+v+'>');e.target.value=''};
+  $('tlb').onclick=()=>{const u=$('tlk').value.trim();if(!u||!rg)return;tc.focus();const s=getSelection();s.removeAllRanges();s.addRange(rg);document.execCommand('createLink',false,u)};
+  $('tlk').onkeydown=e=>e.stopPropagation();
+  $('tsv').onclick=()=>{tc.contentEditable='false';OV[key]=unfix(tc.innerHTML);ovSave();show(id,sub)};
+  $('tcn').onclick=()=>show(id,sub);tc.focus()}}
 async function show(id,sub){const it=MDATA[id],nd=byId[id];if(!it)return;cur=id;for(let p=nd&&nd.par;p;p=p.par)p._o=true;drawNav();
  const head=`<h1>${esc(it.name)}</h1>`+(it.hidden?'<div class="tmeta">Hidden in Moodle</div>':'');
- if(it.type==='page'){await need(it.html);doc(head+fixHtml(it.html))}
- else if(it.type==='book'){const k=sub||0,ch=it.chapters,c=ch[k];await need(c?c.html:'');
-  doc(head+(it.intro?fixHtml(it.intro):'')+'<div class="tpg">'+ch.map((x,i)=>`<button data-c="${i}" class="${i===k?'cur':''}">${i+1}. ${esc(x.title)}</button>`).join('')+'</div>'+(c?`<h2>${esc(c.title)}</h2>`+fixHtml(c.html):'')+`<div class="tpgb">${k>0?`<button data-c="${k-1}">&lt; Previous</button>`:''}${k<ch.length-1?`<button data-c="${k+1}">Next &gt;</button>`:''}</div>`);
-  document.querySelectorAll('#tdoc [data-c]').forEach(b=>b.onclick=()=>show(id,+b.dataset.c))}
- else if(it.type==='lesson'){const k=sub||0,pg=it.pages;const p=pg[k];await need(p?p.html:'');
-  doc(head+(it.intro?fixHtml(it.intro):'')+(pg.length>1?'<div class="tpg">'+pg.map((x,i)=>`<button data-c="${i}" class="${i===k?'cur':''}">${esc(x.title)}</button>`).join('')+'</div>':'')+(p?`<h2>${esc(p.title)}</h2>`+fixHtml(p.html):'')+(p&&p.answers.length?'<div class="ans">Answer options: '+p.answers.map(esc).join(' / ')+'</div>':''));
-  document.querySelectorAll('#tdoc [data-c]').forEach(b=>b.onclick=()=>show(id,+b.dataset.c))}
+ if(it.type==='page'){await need(cont(id,it.html));doc(head+edBlock(id,it.html));edInit(id,it.html,id,sub)}
+ else if(it.type==='book'){const k=sub||0,ch=it.chapters,c=ch[k];await need(c?cont(id+':'+k,c.html):'');
+  doc(head+(it.intro?fixHtml(it.intro):'')+'<div class="tpg">'+ch.map((x,i)=>`<button data-c="${i}" class="${i===k?'cur':''}">${i+1}. ${esc(x.title)}</button>`).join('')+'</div>'+(c?`<h2>${esc(c.title)}</h2>`+edBlock(id+':'+k,c.html):'')+`<div class="tpgb">${k>0?`<button data-c="${k-1}">&lt; Previous</button>`:''}${k<ch.length-1?`<button data-c="${k+1}">Next &gt;</button>`:''}</div>`);
+  document.querySelectorAll('#tdoc .tpg [data-c],#tdoc .tpgb [data-c]').forEach(b=>b.onclick=()=>show(id,+b.dataset.c));if(c)edInit(id+':'+k,c.html,id,k)}
+ else if(it.type==='lesson'){const k=sub||0,pg=it.pages;const p=pg[k];await need(p?cont(id+':'+k,p.html):'');
+  doc(head+(it.intro?fixHtml(it.intro):'')+(pg.length>1?'<div class="tpg">'+pg.map((x,i)=>`<button data-c="${i}" class="${i===k?'cur':''}">${esc(x.title)}</button>`).join('')+'</div>':'')+(p?`<h2>${esc(p.title)}</h2>`+edBlock(id+':'+k,p.html):'')+(p&&p.answers.length?'<div class="ans">Answer options: '+p.answers.map(esc).join(' / ')+'</div>':''));
+  document.querySelectorAll('#tdoc .tpg [data-c]').forEach(b=>b.onclick=()=>show(id,+b.dataset.c));if(p)edInit(id+':'+k,p.html,id,k)}
  else if(it.type==='quiz'){if(att&&att.id!==id){clearInterval(att.iv);att=null}const qs=it.questions||[];await need(it.intro+JSON.stringify(qs));let n=0;
   doc(head+'<div class="tmeta">Quiz'+(it.limit?' &middot; time limit '+it.limit+' min':'')+(qs.length?' &middot; '+qs.filter(x=>x.t!=='description').length+' questions &middot; '+fmt(qs.reduce((a,q)=>a+(q.t==='description'?0:q.mm),0))+' points':'')+'</div>'+fixHtml(it.intro)+(qs.length?'<div class="tpg"><button id="tst">Start test</button></div>':''));
   const st=$('tst');if(st)st.onclick=()=>startAttempt(id)}
