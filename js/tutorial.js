@@ -12,6 +12,7 @@ const rowRect=()=>rectOf(firstRow('as'));
 const rowRect0=()=>rectOf(rows()[0]);
 const adesCell=()=>{const t=firstRow('un')||rows()[0];return t?rectOf(t.querySelector('td[data-c="ADES"]')):null};
 const clrCell=()=>{const t=firstRow('un')||rows()[0];return t?rectOf(t.querySelector('td[data-c="CLR"]')):null};
+const clOk=()=>rectOf($('c_ok')),isCleared=()=>planes.some(p=>p.clr);
 const clEl=()=>document.getElementById('cl'),clRect=()=>rectOf(clEl());
 const fplEl=()=>document.querySelector('.fpl'),fplRect=()=>rectOf(fplEl());
 const fld=n=>()=>{const d=fplEl();if(!d)return null;const l=[...d.querySelectorAll('label')].find(x=>!x.closest('span')&&x.textContent.trim()===n);if(!l)return null;const u=union(rectOf(l),rectOf(l.nextElementSibling));return u&&{left:u.left-2,top:u.top-2,right:u.right+2,bottom:u.bottom+2,width:u.width+4,height:u.height+4}};
@@ -65,8 +66,13 @@ const STEPS=[
  {t:'DEP CLEARANCE',r:clRect,at:clRect,gate:1,until:()=>!clEl(),x:'Opening the dialog fills in the CFL and the ASSR for the aircraft. Close the dialog by clicking Cancel.'},
  {t:'Flight plan checked',r:()=>union(col('CFL')(),col('ASSR')()),x:'The CFL and the ASSR are now filled in. When they are filled in, it is an indicator that the flight plan has been checked.'},
  {t:'Aircraft calling',r:rowRect0,audio:'audio/sim01/01-LOT84R.mp3',x:'Listen: LOT84R calls up on frequency.<div class="tut-q">LOT84R: &ldquo;Ground, good evening, Lot eight four romeo, stand one niner, information Yankee onboard, request clearance to Warsaw.&rdquo;</div><div class="tut-pg"><i></i></div>'},
- {t:'Assume an aircraft',r:csCell,at:()=>win('STUP'),until:()=>planes.some(p=>p.own),x:'Try it yourself: left-click the callsign in the strip and choose assume in the small menu that opens.'},
+ {t:'Assume an aircraft',r:csCell,at:()=>win('STUP'),gate:1,until:()=>planes.some(p=>p.own),x:'Try it yourself: left-click the callsign in the strip and choose assume in the small menu that opens.'},
  {t:'Assumed',r:rowRect,x:'The strip is now white. A white strip means that you have assumed the aircraft; grey strips belong to aircraft you have not assumed.'},
+ {t:'Read the clearance',r:clrCell,at:()=>win('STUP'),gate:1,until:()=>!!clEl(),x:'LOT84R has requested clearance. Click the CLR column again to open the DEP CLEARANCE dialog. The clearance is read from it.'},
+ {t:'Clearance',r:clRect,at:clRect,x:'Read the clearance to the pilot from the dialog: the SID, the CFL (the initial climb altitude) and the ASSR (the squawk). For example:<div class="tut-q">GND: &ldquo;Lot eight four romeo, Landvetter Ground, good evening, cleared to Warsaw via TOPLA three juliett departure, altitude five thousand feet, squawk four four seven one.&rdquo;</div>'},
+ {t:'Readback',r:clRect,at:clRect,audio:'audio/sim01/02-LOT84R.mp3',x:'The pilot reads back the clearance. Listen and check that it is correct.<div class="tut-q">LOT84R: &ldquo;Cleared to Warzaw runway 21 via TOPLA three juliett departure climb initial five thousand feet QNH niner niner seven, squawk four four seven one for Lot eight four romeo.&rdquo;</div><div class="tut-pg"><i></i></div>'},
+ {t:'Click Ok',r:clOk,at:clRect,gate:1,until:isCleared,x:'The readback is correct. Click Ok in the dialog to clear the aircraft.'},
+ {t:'Cleared',r:()=>{const t=firstRow('as')||rows()[0];return t?rectOf(t.querySelector('td[data-c="CLR"]')):null},x:'The aircraft is now cleared, as shown by OK in the CLR column.'},
  {t:'Simulation clock',r:()=>rectOf($('simc')),x:'The simulation clock. It is controlled by the tutorial, so you cannot change it for now. The simulation is paused.'},
  {t:'Top bar',r:()=>rectOf($('tb')),x:'Scenario loads another exercise. Next to it you see your position (ESGG_GND), the UTC clock and the ATIS box. QUICK SET shows or hides the lists, the runway button opens the active runway selector (this exercise uses runway 21).'},
  {t:'Menu bar',r:()=>rectOf($('grb')),x:'The Ground Radar menu bar. SETTINGS has label filters and label fields, WINDOW switches the lists on and off, FUNCTIONS holds extra tools. On the right: alerts, QNH, LVP toggle and the safety nets (green = on, yellow = switched off).'},

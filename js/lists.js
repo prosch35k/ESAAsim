@@ -79,7 +79,7 @@ const rwFocus=r=>r==='03'?'025':'205';
 const sidOpts=(p,rwy)=>(D.sids[rwy]||[]).filter(x=>!/^VFR/.test(x[0])).map(x=>[`<span>${x[0]}</span><span>${rwy}</span>`,x[0]]);
 const rwOpts=()=>[['03','03'],['21','21']];
 function openClr(p,e){if(clEl){clEl.remove();clEl=null}closeAp();const d=document.createElement('div');d.id='cl';clEl=d;
- const o0={rwy:p.rwy,sid:p.sid};let st={rwy:p.rwy,sid:p.sid,ahdg:p.ahdg||'',cfl:p.cfl||initCfl(p,p.sid),sq:p.sq||newSq()};
+ const o0={rwy:p.rwy,sid:p.sid};let st={rwy:p.rwy,sid:p.sid,ahdg:p.ahdg||'',cfl:p.cfl||initCfl(p,p.sid),sq:p.sq||(window.FORCE_SQ||{})[p.cs]||newSq()};
  d.innerHTML=`<div class="ct">DEP CLEARANCE</div><div id="cb"></div>`;const ct=d.querySelector('.ct');let dr=null;
  ct.onpointerdown=ev=>{if(ev.button!==2)return;ct.setPointerCapture(ev.pointerId);dr=[ev.clientX-d.offsetLeft,ev.clientY-d.offsetTop]};ct.onpointermove=ev=>{if(dr){d.style.left=Math.max(0,ev.clientX-dr[0])+'px';d.style.top=Math.max(0,ev.clientY-dr[1])+'px'}};ct.onpointerup=()=>{dr=null};
  const apply=()=>{const oc=fmtAlt(p.cfl);if(!p.xfl||p.xfl===oc)p.xfl=fmtAlt(st.cfl);p.cfl=st.cfl;p.sq=st.sq;
