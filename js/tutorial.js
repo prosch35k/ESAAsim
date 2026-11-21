@@ -16,6 +16,7 @@ const STEPS=[
  {t:'Your radar screen',r:smr,x:'This is your radar screen: the Surface Movement Radar (SMR) picture of Gothenburg Landvetter. It shows the runway, the taxiways, the aprons and the stands. Aircraft on the airport are drawn on top of it.'},
  {t:'Radar position symbol',r:plane,x:'This is a radar position symbol (RPS). It shows that there is an aircraft here, parked at its stand.'},
  {t:'STUP list',r:()=>win('STUP'),x:'This is the start-up list (STUP). It shows flight strips of the aircraft that are on their stand, starting up or pushing back. It is used to keep track of each aircraft\'s status and of which clearances have been issued to it. Next we go through the columns one by one.'},
+ {t:'Aircraft with a flight plan',r:rowRect0,x:'In the list we can see that there is one aircraft currently connected with a flight plan: LOT84R.'},
  {t:'Ground state',r:col('STS'),x:'The ground state of the aircraft. The states are:<br>FRQ - On Frequency<br>RDY - Ready<br>S/U - Start-up approved<br>S/P - Push-back approved<br>TXO - Taxiing Out<br>xLU - Lined Up<br>xTO - Taking Off'},
  {t:'Callsign',r:col('C/S'),x:'The callsign of the aircraft.'},
  {t:'Next controller',r:col('SI'),x:'Every controller has their own sector indicator (SI), a short code, for example GG for ESGG_TWR and GE for ESGG_E_APP. The column shows the indicator of the controller who will get the aircraft next, or of the controller who has it now.'},
