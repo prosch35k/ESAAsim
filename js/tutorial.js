@@ -17,9 +17,10 @@ const STEPS=[
  {t:'Giving instructions',r:()=>rectOf($('sb')),x:'The M button opens the manual control menu. Select an aircraft (on the map or in a list), then use the state buttons, Clearance, Taxi to (a holding point or stand), Hold short, Continue and Takeoff. The Taxi route mode lets you click out a route on the taxiways. In the lists, right-click a callsign for Hold short and Taxi to assigned stand.'},
  {t:'A typical departure',x:'1. Select the aircraft and read the clearance (CLR in the STUP list).  2. Set the state: FRQ, then S/U (start-up) and S/P (push-back) as you approve them.  3. Taxi it to the holding point (Taxi to): state TXO.  4. Line up (xLU), then take-off (xTO).  5. Hand the aircraft off with Trans in the tag menu. Arrivals: after landing they appear in TAXIIN (TXI); taxi them to the stand and set PRK. Watch for conflicts: the alert triangle in the menu bar turns red.'},
  {t:'You are ready',x:'Press 1× and start working. You can open this tour again any time from the gear menu (Settings > Tutorial).'}];
-let i=-1,ring,card,tm=null;
+let i=-1,ring,card,dim,tm=null;
 const place=()=>{if(i<0)return;const s=STEPS[i],r=s.r&&s.r();
  if(r){const pad=4;ring.style.cssText=`display:block;left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`}else ring.style.display='none';
+ dim.style.display=r?'none':'block';
  const cw=card.offsetWidth,ch=card.offsetHeight,vw=innerWidth,vh=innerHeight,g=14;let x,y;
  if(!r){x=(vw-cw)/2;y=(vh-ch)/2}
  else{const opts=[[r.left,r.bottom+g],[r.left,r.top-ch-g],[r.right+g,r.top],[r.left-cw-g,r.top]];const ok=opts.find(([a,b])=>a>=8&&b>=8&&a+cw<=vw-8&&b+ch<=vh-8);[x,y]=ok||[vw-cw-16,vh-ch-16]}
@@ -27,9 +28,9 @@ const place=()=>{if(i<0)return;const s=STEPS[i],r=s.r&&s.r();
 const render=()=>{const s=STEPS[i],last=i===STEPS.length-1;
  card.innerHTML=`<div class="tut-h"><b>${s.t}</b><span class="tut-n">${i+1} / ${STEPS.length}</span></div><div class="tut-x">${s.x}</div><div class="tut-b"><button data-a="skip">${last?'':'Skip tutorial'}</button><span></span><button data-a="back"${i?'':' disabled'}>Back</button><button data-a="next" class="pri">${last?'Finish':'Next'}</button></div>`;
  card.querySelector('[data-a=skip]').style.visibility=last?'hidden':'';place()};
-const stop=()=>{i=-1;clearInterval(tm);if(ring)ring.remove();if(card)card.remove();ring=card=null;document.removeEventListener('keydown',key,true)};
+const stop=()=>{i=-1;clearInterval(tm);if(ring)ring.remove();if(card)card.remove();if(dim)dim.remove();ring=card=dim=null;document.removeEventListener('keydown',key,true)};
 const key=e=>{if(e.key==='Escape'){stop();e.stopPropagation()}};
-window.startTutorial=()=>{stop();ring=document.createElement('div');ring.className='tut-ring';card=document.createElement('div');card.className='tut-card';document.body.append(ring,card);
+window.startTutorial=()=>{stop();ring=document.createElement('div');ring.className='tut-ring';card=document.createElement('div');card.className='tut-card';dim=document.createElement('div');dim.className='tut-dim';document.body.append(dim,ring,card);
  card.onclick=e=>{const a=e.target.dataset.a;if(!a)return;if(a==='skip')stop();else if(a==='back'){i--;render()}else if(i>=STEPS.length-1)stop();else{i++;render()}};
  card.onpointerdown=e=>e.stopPropagation();document.addEventListener('keydown',key,true);i=0;render();tm=setInterval(place,250)};
 })();
