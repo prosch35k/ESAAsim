@@ -9,26 +9,26 @@ const smr=()=>{const c=cv.getBoundingClientRect(),g=$('grb').getBoundingClientRe
 const STEPS=[
  {t:'Welcome to ESAAsim',x:'ESAAsim is a replica of how EuroScope works. It lets you familiarise yourself with the workflows and tools before you start practical training with a mentor.'},
  {t:'Your radar screen',r:smr,x:'This is your radar screen: the Surface Movement Radar (SMR) picture of Gothenburg Landvetter. It shows the runway, the taxiways, the aprons and the stands. Aircraft on the airport are drawn on top of it.'},
- {t:'Radar position symbol',r:plane,x:'This is a radar position symbol (RPS). It shows that there is an aircraft here, parked at its stand. You do not see a label next to it yet: aircraft that have no ground state get no label. The aircraft is still listed in the STUP list.'},
- {t:'STUP list',r:()=>win('STUP'),x:'This is the start-up list (STUP). It shows the aircraft that are on their stand, starting up or pushing back, sorted by their expected off-block time. Next we go through the columns one by one.'},
- {t:'Ground state',r:col('STS'),x:'The ground state of the aircraft: FRQ, RDY, S/U, S/P, TXO, xLU, xTO for departures. It is empty until you set it. Click the cell to choose a state. The state is never changed automatically.'},
- {t:'Callsign',r:col('C/S'),x:'The callsign. A grey row means you have not assumed the aircraft yet. Left-click the callsign to assume it. Right-click for more: Free, Transfer, Flight plan, Hold short, Taxi to assigned stand and Delete aircraft.'},
+ {t:'Radar position symbol',r:plane,x:'This is a radar position symbol (RPS). It shows that there is an aircraft here, parked at its stand.'},
+ {t:'STUP list',r:()=>win('STUP'),x:'This is the start-up list (STUP). It shows flight strips of the aircraft that are on their stand, starting up or pushing back. It is used to keep track of each aircraft\'s status and of which clearances have been issued to it. Next we go through the columns one by one.'},
+ {t:'Ground state',r:col('STS'),x:'The ground state of the aircraft. It is empty until a state is set. The states are:<br>FRQ: on frequency<br>RDY: ready<br>S/U: start-up approved<br>S/P: push-back approved<br>TXO: taxiing out<br>xLU: lined up on the runway<br>xTO: taking off<br>TXI: taxiing in (arrivals)<br>PRK: parked (arrivals)'},
+ {t:'Callsign',r:col('C/S'),x:'The callsign of the aircraft. A grey row means that you have not assumed the aircraft yet.'},
  {t:'Next controller',r:col('SI'),x:'Every controller has their own sector indicator (SI), a short code, for example GG for ESGG_TWR and GE for ESGG_E_APP. The column shows the indicator of the controller who will get the aircraft next, or of the controller who has it now.'},
  {t:'Flight rules',r:col('R'),x:'Flight rules: V for VFR. IFR flights are left blank.'},
  {t:'Aircraft type',r:col('ATYP'),x:'The ICAO aircraft type, for example A20N or B738.'},
  {t:'Wake turbulence category',r:col('W'),x:'The wake turbulence category of the aircraft: L (light), M (medium) or H (heavy).'},
  {t:'Stand',r:col('STD'),x:'The stand the aircraft is parked at.'},
  {t:'Departure airport',r:col('ADEP'),x:'The departure airport. Departures in this list all start at ESGG.'},
- {t:'Destination airport',r:col('ADES'),x:'The destination airport from the flight plan. Click it to open the full flight plan.'},
- {t:'Departure runway',r:col('DRWY'),x:'The runway the aircraft will depart from. It follows the active runway selector, and you can click the cell to assign another runway.'},
- {t:'Route or heading',r:col('RTE/AHD'),x:'The assigned SID (standard instrument departure) or, if you have given one, a heading. Left-click to assign a SID, right-click to assign a heading.'},
- {t:'Cleared flight level',r:col('CFL'),x:'The level the aircraft is cleared to climb to. Click to set it.'},
- {t:'Exit flight level',r:col('XFL'),x:'The flight level at which the aircraft is expected to leave your airspace, at the exit point. Click to change it.'},
- {t:'Exit point',r:col('COPX'),x:'The coordination point where the aircraft exits the sector. Changing it selects a matching SID.'},
- {t:'Assigned squawk',r:col('ASSR'),x:'The transponder code assigned to the aircraft. Click to open the squawk keypad and set or generate a new code.'},
- {t:'Clearance',r:col('CLR'),x:'Shows OK once the departure clearance has been given. Click the cell to open the DEP CLEARANCE dialog.'},
- {t:'Remarks',r:col('RMK'),x:'A free text remark that is also shown in the radar label. Click to edit it.'},
- {t:'Estimated off-block time',r:col('EOBT'),x:'The time the aircraft expects to leave the stand (HHMM). The list is sorted by it. Click to edit.'},
+ {t:'Destination airport',r:col('ADES'),x:'The destination airport from the flight plan.'},
+ {t:'Departure runway',r:col('DRWY'),x:'The runway the aircraft will depart from. It follows the active runway selector.'},
+ {t:'Route or heading',r:col('RTE/AHD'),x:'The assigned SID (standard instrument departure) or, if one has been given, a heading.'},
+ {t:'Cleared flight level',r:col('CFL'),x:'The cleared flight level: the level the aircraft is cleared to climb to.'},
+ {t:'Exit flight level',r:col('XFL'),x:'The exit flight level: the level at which the aircraft is expected to leave the airspace, at the exit point.'},
+ {t:'Exit point',r:col('COPX'),x:'The coordination point where the aircraft exits the sector.'},
+ {t:'Assigned squawk',r:col('ASSR'),x:'The assigned squawk: the transponder code given to the aircraft.'},
+ {t:'Clearance',r:col('CLR'),x:'Shows OK once the departure clearance has been given.'},
+ {t:'Remarks',r:col('RMK'),x:'A free text remark. It is also shown in the radar label.'},
+ {t:'Estimated off-block time',r:col('EOBT'),x:'The estimated off-block time (HHMM): when the aircraft expects to leave the stand. The list is sorted by it.'},
  {t:'Simulation clock',r:()=>rectOf($('simc')),x:'The simulation starts paused. Press 1× to run it in real time, or 2× / 4× to speed it up. Aircraft appear on the map at the START times given in the scenario file; the first one is already here.'},
  {t:'Top bar',r:()=>rectOf($('tb')),x:'Scenario loads another exercise. Next to it you see your position (ESGG_GND), the UTC clock and the ATIS box. QUICK SET shows or hides the lists, the runway button opens the active runway selector (this exercise uses runway 21).'},
  {t:'Menu bar',r:()=>rectOf($('grb')),x:'The Ground Radar menu bar. SETTINGS has label filters and label fields, WINDOW switches the lists on and off, FUNCTIONS holds extra tools. On the right: alerts, QNH, LVP toggle and the safety nets (green = on, yellow = switched off).'},
@@ -45,7 +45,7 @@ const place=()=>{if(i<0)return;const s=STEPS[i],r=s.r&&s.r();
  dim.style.display=r?'none':'block';
  const cw=card.offsetWidth,ch=card.offsetHeight,vw=innerWidth,vh=innerHeight,g=14;let x,y;
  if(!r){x=(vw-cw)/2;y=(vh-ch)/2}
- else{const opts=[[r.left,r.bottom+g],[r.left,r.top-ch-g],[r.right+g,r.top],[r.left-cw-g,r.top]];const ok=opts.find(([a,b])=>a>=8&&b>=8&&a+cw<=vw-8&&b+ch<=vh-8);[x,y]=ok||[vw-cw-16,vh-ch-16]}
+ else{const lx=Math.min(Math.max(8,r.left),vw-cw-8),opts=[[lx,r.bottom+g],[lx,r.top-ch-g],[r.right+g,r.top],[r.left-cw-g,r.top]];const ok=opts.find(([a,b])=>a>=8&&b>=8&&a+cw<=vw-8&&b+ch<=vh-8);[x,y]=ok||[vw-cw-16,vh-ch-16]}
  card.style.left=Math.max(8,Math.min(x,vw-cw-8))+'px';card.style.top=Math.max(8,Math.min(y,vh-ch-8))+'px'};
 const render=()=>{const s=STEPS[i],last=i===STEPS.length-1;
  card.innerHTML=`<div class="tut-h"><b>${s.t}</b><span class="tut-n">${i+1} / ${STEPS.length}</span></div><div class="tut-x">${s.x}</div><div class="tut-b"><button data-a="skip">${last?'':'Skip tutorial'}</button><span></span><button data-a="back"${i?'':' disabled'}>Back</button><button data-a="next" class="pri">${last?'Finish':'Next'}</button></div>`;
