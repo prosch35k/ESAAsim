@@ -195,3 +195,16 @@ html,html *{cursor:default !important}
 #scb{cursor:default}
 .sdl{width:260px;left:240px;top:80px;z-index:60}.sdl .sb{display:flex;flex-direction:column;gap:6px;padding:12px}.sdl .sb button{padding:6px 10px;background:#e1e1e1;color:#000;border:1px solid #adadad;border-radius:0;font:13px system-ui,sans-serif;text-align:left}.sdl .sb button:hover{background:#cfe4fa;border-color:#0078d7}.sdl .sb hr{border:0;border-top:1px solid #b0b0b0;margin:2px 0}
 .sdl .sl{display:flex;flex-direction:column;gap:6px}
+/* tutorial */
+.tut-ring{position:fixed;z-index:480;border:2px solid #ffd400;box-shadow:0 0 0 4px rgba(255,212,0,.25);pointer-events:none;display:none}
+.tut-card{position:fixed;z-index:490;width:360px;max-width:calc(100vw - 16px);box-sizing:border-box;background:#2c2c31;color:#e6e6e2;border:1px solid #6a6a72;box-shadow:0 6px 24px rgba(0,0,0,.55);font:14px/1.5 system-ui,'Segoe UI',sans-serif;padding:14px 16px}
+.tut-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:8px}.tut-h b{font-size:16px;font-weight:500;color:#fff}.tut-n{font-size:12px;color:#8a8a90}
+.tut-x{color:#c8c8c4}
+.tut-b{display:flex;gap:8px;margin-top:14px;align-items:center}.tut-b span{flex:1}
+.tut-b button{background:#4a4a52;color:#e6e6e2;border:1px solid #6a6a72;border-radius:0;padding:5px 14px;font:13px system-ui,sans-serif}.tut-b button:hover:not(:disabled){background:#5a5a64}.tut-b button:disabled{opacity:.4}
+.tut-b button.pri{background:#e6c200;color:#000;border-color:#b89b00}.tut-b button.pri:hover{background:#f2d000!important}
+.tut-b button[data-a=skip]{background:transparent;border-color:transparent;color:#9a9aa0;padding-left:0}
+/* standalone (not connected): clock/speed buttons and the manual control menu are available */
+body:not(.host):not(.student) #simc{display:flex!important}
+body:not(.host):not(.student) #tb #sb{display:flex!important}
+body:not(.host):not(.student) #side.open{display:block!important}
