@@ -10,6 +10,11 @@ const firstRow=cls=>rows().find(t=>t.classList.contains(cls))||rows()[0];
 const csCell=()=>{const t=firstRow('un');return t?rectOf(t.querySelector('td[data-c="C/S"]')):null};
 const rowRect=()=>rectOf(firstRow('as'));
 const rowRect0=()=>rectOf(rows()[0]);
+const adesCell=()=>{const t=firstRow('un')||rows()[0];return t?rectOf(t.querySelector('td[data-c="ADES"]')):null};
+const fplEl=()=>document.querySelector('.fpl'),fplRect=()=>rectOf(fplEl());
+const fld=n=>()=>{const d=fplEl();if(!d)return null;const l=[...d.querySelectorAll('label')].find(x=>!x.closest('span')&&x.textContent.trim()===n);if(!l)return null;const u=union(rectOf(l),rectOf(l.nextElementSibling));return u&&{left:u.left-2,top:u.top-2,right:u.right+2,bottom:u.bottom+2,width:u.width+4,height:u.height+4}};
+const fq=sel=>()=>{const d=fplEl();return d?rectOf(d.querySelector(sel)):null};
+const fp=(t,r,x)=>({t,r,at:fplRect,x});
 const smr=()=>{const c=cv.getBoundingClientRect(),g=$('grb').getBoundingClientRect(),t=Math.max(g.bottom,c.top);return{left:c.left+8,top:t+8,right:c.right-8,bottom:c.bottom-8,width:c.width-16,height:c.bottom-t-16}};
 const STEPS=[
  {t:'Welcome to ESAAsim',x:'ESAAsim is a replica of how EuroScope works. It lets you familiarise yourself with the workflows and tools before you start practical training with a mentor.'},
@@ -37,6 +42,24 @@ const STEPS=[
  {t:'Estimated off-block time',r:col('EOBT'),x:'The estimated off-block time (HHMM): when the aircraft expects to leave the stand. The list is sorted by it.'},
  {t:'Assuming an aircraft',r:col('C/S'),x:'Aircraft that have not been assumed are shown in grey or dark green. You assume an aircraft only when it calls up on frequency.'},
  {t:'Aircraft calling',r:rowRect0,audio:'audio/sim01/01-LOT84R.mp3',x:'Listen: LOT84R calls up on frequency.<div class="tut-q">LOT84R: &ldquo;Ground, good evening, Lot eight four romeo, stand one niner, information Yankee onboard, request clearance to Warsaw.&rdquo;</div><div class="tut-pg"><i></i></div>'},
+ {t:'Checking the flight plan',x:'When the aircraft calls up, we will issue an IFR clearance. However, we first need to check that the pilot\'s flight plan is correctly filed.'},
+ {t:'Open the flight plan',r:adesCell,at:()=>win('STUP'),until:()=>!!fplEl(),x:'Click the aircraft\'s ADES to open the flight plan dialog.'},
+ fp('Callsign',fld('Callsign'),'The callsign of the aircraft. Check that it is the same as the pilot used on the frequency.'),
+ fp('Flight rules',fq('.bd>span.full'),'The flight rules, IFR or VFR. LOT84R is filed as IFR, so it will get an IFR clearance.'),
+ fp('Aircraft data',fld('AP data'),'The aircraft data: the aircraft type, the wake turbulence category and the equipment.'),
+ fp('Origin',fld('Origin'),'The departure airport. For all departures in this exercise it is ESGG.'),
+ fp('Destination',fld('Destination'),'The destination airport. Check that it is the destination the pilot asked for. LOT84R is going to EPWA, Warsaw.'),
+ fp('Alternate',fld('Alternate'),'The alternate airport, if one has been filed.'),
+ fp('TAS',fld('TAS'),'The true airspeed of the aircraft that is filed in the flight plan, in knots.'),
+ fp('Altitude',fld('Altitude'),'The cruising altitude that is filed in the flight plan, in feet.'),
+ fp('Squawk',fld('Squawk'),'The squawk code (transponder code) of the aircraft. It is empty until the aircraft has been given one.'),
+ fp('Departure estimate',fld('Dep. EST'),'The estimated departure time.'),
+ fp('Actual',fld('Actual'),'The actual departure time. It is empty until the aircraft has departed.'),
+ fp('Temporary altitude',fld('Temp alt'),'A temporary altitude that can be assigned to the aircraft. It is empty for now.'),
+ fp('Route',fld('Route'),'The filed route. For a departure it starts with the SID and ends at the destination. Check that it is correct for the runway in use.'),
+ fp('Waypoints',fq('.wp'),'The waypoints of the route, with the airway, a comment and the estimated time over each waypoint (ETA).'),
+ fp('Remarks',fld('Remarks'),'The remarks of the flight plan, for example the flight rules marker and anything else the pilot has filed.'),
+ {t:'Close the dialog',r:fplRect,at:fplRect,until:()=>!fplEl(),x:'The flight plan is correct. Close the dialog with Cancel.'},
  {t:'Assume an aircraft',r:csCell,at:()=>win('STUP'),until:()=>planes.some(p=>p.own),x:'Try it yourself: left-click the callsign in the strip and choose assume in the small menu that opens.'},
  {t:'Assumed',r:rowRect,x:'The strip is now white. A white strip means that you have assumed the aircraft; grey strips belong to aircraft you have not assumed.'},
  {t:'Simulation clock',r:()=>rectOf($('simc')),x:'The simulation clock. It is controlled by the tutorial, so you cannot change it for now. The simulation is paused.'},
