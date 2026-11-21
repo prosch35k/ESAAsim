@@ -53,7 +53,10 @@ const place=()=>{if(i<0)return;const s=STEPS[i];if(s.until&&s.until()){i++;rende
  const cw=card.offsetWidth,ch=card.offsetHeight,vw=innerWidth,vh=innerHeight,g=14;let x,y;
  if(!r){x=(vw-cw)/2;y=(vh-ch)/2}
  else{const pr=(s.at&&s.at())||r,lx=Math.min(Math.max(8,r.left),vw-cw-8),opts=s.at&&pr?[[pr.right+g,pr.top],[lx,pr.bottom+g]]:[[lx,r.bottom+g],[lx,r.top-ch-g],[r.right+g,r.top],[r.left-cw-g,r.top]];const ok=opts.find(([a,b])=>a>=8&&b>=8&&a+cw<=vw-8&&b+ch<=vh-8);[x,y]=ok||[vw-cw-16,vh-ch-16]}
- card.style.left=Math.max(8,Math.min(x,vw-cw-8))+'px';card.style.top=Math.max(8,Math.min(y,vh-ch-8))+'px'};
+ x=Math.max(8,Math.min(x,vw-cw-8));y=Math.max(8,Math.min(y,vh-ch-8));
+ /* never cover an open menu (assume menu, state menu, ...): move the card below or above it */
+ for(const m of document.querySelectorAll('.ap,.tm,#pm')){const q=m.getBoundingClientRect();if(!q.width)continue;if(x<q.right+6&&x+cw>q.left-6&&y<q.bottom+6&&y+ch>q.top-6){if(q.bottom+g+ch<=vh-8)y=q.bottom+g;else if(q.top-g-ch>=8)y=q.top-g-ch;else x=q.right+g<=vw-cw-8?q.right+g:Math.max(8,q.left-g-cw)}}
+ card.style.left=x+'px';card.style.top=y+'px'};
 const render=()=>{const s=STEPS[i],last=i===STEPS.length-1;if(s.sim!=null)setSim(s.sim);
  card.innerHTML=`<div class="tut-h"><b>${s.t}</b><span class="tut-n">${i+1} / ${STEPS.length}</span></div><div class="tut-x">${s.x}</div><div class="tut-b"><button data-a="skip">${last?'':'Skip tutorial'}</button><span></span><button data-a="back"${i?'':' disabled'}>Back</button><button data-a="next" class="pri">${last?'Finish':'Next'}</button></div>`;
  card.querySelector('[data-a=skip]').style.visibility=last?'hidden':'';place()};
