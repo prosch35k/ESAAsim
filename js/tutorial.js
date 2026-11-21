@@ -33,8 +33,8 @@ const STEPS=[
  {t:'Clearance',r:col('CLR'),x:'Shows OK once the departure clearance has been given.'},
  {t:'Remarks',r:col('RMK'),x:'A free text remark. It is also shown in the radar label.'},
  {t:'Estimated off-block time',r:col('EOBT'),x:'The estimated off-block time (HHMM): when the aircraft expects to leave the stand. The list is sorted by it.'},
- {t:'Assuming an aircraft',r:col('C/S'),x:'Aircraft that nobody has assumed yet are shown in grey. Before you can work with an aircraft you have to assume it, which means that you take responsibility for it.'},
- {t:'Assume an aircraft',r:csCell,until:()=>planes.some(p=>p.own),x:'Try it yourself: left-click the callsign in the strip and choose assume in the small menu that opens.'},
+ {t:'Assuming an aircraft',r:col('C/S'),x:'Aircraft that have not been assumed are shown in grey or dark green. You assume an aircraft only when it calls up on frequency.'},
+ {t:'Assume an aircraft',r:csCell,at:()=>win('STUP'),until:()=>planes.some(p=>p.own),x:'Try it yourself: left-click the callsign in the strip and choose assume in the small menu that opens.'},
  {t:'Assumed',r:rowRect,x:'The strip is now white. A white strip means that you have assumed the aircraft; grey strips belong to aircraft you have not assumed.'},
  {t:'Simulation clock',r:()=>rectOf($('simc')),x:'The simulation clock. It is controlled by the tutorial, so you cannot change it for now. The simulation is paused.'},
  {t:'Top bar',r:()=>rectOf($('tb')),x:'Scenario loads another exercise. Next to it you see your position (ESGG_GND), the UTC clock and the ATIS box. QUICK SET shows or hides the lists, the runway button opens the active runway selector (this exercise uses runway 21).'},
@@ -52,7 +52,7 @@ const place=()=>{if(i<0)return;const s=STEPS[i];if(s.until&&s.until()){i++;rende
  dim.style.display=r?'none':'block';
  const cw=card.offsetWidth,ch=card.offsetHeight,vw=innerWidth,vh=innerHeight,g=14;let x,y;
  if(!r){x=(vw-cw)/2;y=(vh-ch)/2}
- else{const lx=Math.min(Math.max(8,r.left),vw-cw-8),opts=[[lx,r.bottom+g],[lx,r.top-ch-g],[r.right+g,r.top],[r.left-cw-g,r.top]];const ok=opts.find(([a,b])=>a>=8&&b>=8&&a+cw<=vw-8&&b+ch<=vh-8);[x,y]=ok||[vw-cw-16,vh-ch-16]}
+ else{const pr=(s.at&&s.at())||r,lx=Math.min(Math.max(8,r.left),vw-cw-8),opts=s.at&&pr?[[pr.right+g,pr.top],[lx,pr.bottom+g]]:[[lx,r.bottom+g],[lx,r.top-ch-g],[r.right+g,r.top],[r.left-cw-g,r.top]];const ok=opts.find(([a,b])=>a>=8&&b>=8&&a+cw<=vw-8&&b+ch<=vh-8);[x,y]=ok||[vw-cw-16,vh-ch-16]}
  card.style.left=Math.max(8,Math.min(x,vw-cw-8))+'px';card.style.top=Math.max(8,Math.min(y,vh-ch-8))+'px'};
 const render=()=>{const s=STEPS[i],last=i===STEPS.length-1;if(s.sim!=null)setSim(s.sim);
  card.innerHTML=`<div class="tut-h"><b>${s.t}</b><span class="tut-n">${i+1} / ${STEPS.length}</span></div><div class="tut-x">${s.x}</div><div class="tut-b"><button data-a="skip">${last?'':'Skip tutorial'}</button><span></span><button data-a="back"${i?'':' disabled'}>Back</button><button data-a="next" class="pri">${last?'Finish':'Next'}</button></div>`;
