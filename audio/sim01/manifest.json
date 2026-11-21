@@ -1,0 +1,218 @@
+[
+ {
+  "n": 1,
+  "file": "01-LOT84R.mp3",
+  "callsign": "LOT84R",
+  "text": "Ground, good evening, Lot eight four romeo, stand one niner information Yankee onboard request clearance to Warzaw.",
+  "start": 90.42,
+  "end": 97.08
+ },
+ {
+  "n": 2,
+  "file": "02-LOT84R.mp3",
+  "callsign": "LOT84R",
+  "text": "Cleared to Warzaw runway 21 via TOPLA three juliett departure climb initial five thousand feet QNH niner niner seven, squawk four four seven one for Lot eight four romeo.",
+  "start": 125.96,
+  "end": 137.37
+ },
+ {
+  "n": 3,
+  "file": "03-LOT84R.mp3",
+  "callsign": "LOT84R",
+  "text": "Lot eight four romeo, we are ready to push and start.",
+  "start": 210.39,
+  "end": 213.25
+ },
+ {
+  "n": 4,
+  "file": "04-LOT84R.mp3",
+  "callsign": "LOT84R",
+  "text": "Push and start approved face north for Lot eight four romeo.",
+  "start": 224.03,
+  "end": 227.52
+ },
+ {
+  "n": 5,
+  "file": "05-SAS918.mp3",
+  "callsign": "SAS918",
+  "text": "Landvetter Ground, hallå, go kväll, Scandinavian niner one eight taxiing on Yankee requesting taxi stand one seven.",
+  "start": 382.15,
+  "end": 392.99
+ },
+ {
+  "n": 6,
+  "file": "06-SAS918.mp3",
+  "callsign": "SAS918",
+  "text": "Via Yankee and Hotell stand one seven, Scandinavian niner one eight.",
+  "start": 405.45,
+  "end": 409.95
+ },
+ {
+  "n": 7,
+  "file": "07-CFG778.mp3",
+  "callsign": "CFG778",
+  "text": "Landvetter Ground, good evening, Condor seven seven eight stand at gate one six with information Zulu QNH niner niner seven request IFR to Zürich.",
+  "start": 437.18,
+  "end": 449.08
+ },
+ {
+  "n": 8,
+  "file": "08-CFG778.mp3",
+  "callsign": "CFG778",
+  "text": "Eh…, could you please confirm the departure please.",
+  "start": 473.62,
+  "end": 477.62
+ },
+ {
+  "n": 9,
+  "file": "09-CFG778.mp3",
+  "callsign": "CFG778",
+  "text": "VADIN three juliett departure and climb via SID five thousand feet and squawking six one five seven.",
+  "start": 491.23,
+  "end": 499.4
+ },
+ {
+  "n": 10,
+  "file": "10-LOT84R.mp3",
+  "callsign": "LOT84R",
+  "text": "Lot eight four romeo we are ready to taxi.",
+  "start": 660.19,
+  "end": 663.01
+ },
+ {
+  "n": 11,
+  "file": "11-LOT84R.mp3",
+  "callsign": "LOT84R",
+  "text": "Holding point two one via Hotel and Zulu, Lot eight four romeo.",
+  "start": 674.32,
+  "end": 678.64
+ },
+ {
+  "n": 12,
+  "file": "12-NOZ7W.mp3",
+  "callsign": "NOZ7W",
+  "text": "Göteborg Ground, good evening Nordic seven whiskey stand two zero type seven three seven eight hundred with Yankee onboard request clearance to Helsingfors.",
+  "start": 690.93,
+  "end": 701.22
+ },
+ {
+  "n": 13,
+  "file": "13-NOZ7W.mp3",
+  "callsign": "NOZ7W",
+  "text": "Yankee correct and QNH niner niner seven and cleared to Helsinki via LABAN four juliett out of runway two one initial climb five thousand feet and squawk five three four seven Nordic seven whiskey.",
+  "start": 724.95,
+  "end": 736.43
+ },
+ {
+  "n": 14,
+  "file": "14-CFG778.mp3",
+  "callsign": "CFG778",
+  "text": "Condor seven seven eight is fully ready and request push and start, please.",
+  "start": 750.79,
+  "end": 755.39
+ },
+ {
+  "n": 15,
+  "file": "15-CFG778.mp3",
+  "callsign": "CFG778",
+  "text": "Push and start approved facing north.",
+  "start": 764.2,
+  "end": 766.88
+ },
+ {
+  "n": 16,
+  "file": "16-SAS334.mp3",
+  "callsign": "SAS334",
+  "text": "Landvetter Ground, Scandinavian three three four requesting taxi to parking.",
+  "start": 840.34,
+  "end": 845.44
+ },
+ {
+  "n": 17,
+  "file": "17-SAS334.mp3",
+  "callsign": "SAS334",
+  "text": "Taxi to stand one niner via Kilo and Juliett, Scandinavia three three four.",
+  "start": 866.52,
+  "end": 873.88
+ },
+ {
+  "n": 18,
+  "file": "18-SAS334.mp3",
+  "callsign": "SAS334",
+  "text": "Sorry, Yanke and Juliett stand one niner, Scandinavia three three four.",
+  "start": 888.33,
+  "end": 893.53
+ },
+ {
+  "n": 19,
+  "file": "19-CFG778.mp3",
+  "callsign": "CFG778",
+  "text": "Condor seven seven eight request taxi, please.",
+  "start": 990.54,
+  "end": 993.48
+ },
+ {
+  "n": 20,
+  "file": "20-CFG778.mp3",
+  "callsign": "CFG778",
+  "text": "Can you, please, repeat the holding point? I didn’t get that.",
+  "start": 1008.74,
+  "end": 1011.92
+ },
+ {
+  "n": 21,
+  "file": "21-CFG778.mp3",
+  "callsign": "CFG778",
+  "text": "Taxiing to Yankee north via Hotel and Zulu, Condor seven seven eight.",
+  "start": 1033.89,
+  "end": 1041.12
+ },
+ {
+  "n": 22,
+  "file": "22-DFL12.mp3",
+  "callsign": "DFL12",
+  "text": "Ground, god kväll, Mediflight one two vaccated on Delta.",
+  "start": 1080.18,
+  "end": 1082.8
+ },
+ {
+  "n": 23,
+  "file": "23-DFL12.mp3",
+  "callsign": "DFL12",
+  "text": "Yankee and Hotel, stand five eight, Mediflight one two.",
+  "start": 1093.99,
+  "end": 1096.48
+ },
+ {
+  "n": 24,
+  "file": "24-NOZ7W.mp3",
+  "callsign": "NOZ7W",
+  "text": "Landvetter Ground Nordic seven whiskey stand two zero request push and start.",
+  "start": 1110.67,
+  "end": 1116.23
+ },
+ {
+  "n": 25,
+  "file": "25-NOZ7W.mp3",
+  "callsign": "NOZ7W",
+  "text": "Approved, facing north, seven whiskey.",
+  "start": 1126.93,
+  "end": 1129.84
+ },
+ {
+  "n": 26,
+  "file": "26-NOZ7W.mp3",
+  "callsign": "NOZ7W",
+  "text": "Landvetter Ground, Nordic seven whiskey we are read for taxi and if available we can take Foxtrot.",
+  "start": 1274.92,
+  "end": 1281.78
+ },
+ {
+  "n": 27,
+  "file": "27-NOZ7W.mp3",
+  "callsign": "NOZ7W",
+  "text": "Taxi to holding point Foxtrot runway two one via Juliett and Zulu Nordic seven whiskey.",
+  "start": 1299.34,
+  "end": 1306.64
+ }
+]
