@@ -5,6 +5,10 @@ const union=(...rs)=>{rs=rs.filter(Boolean);if(!rs.length)return null;const l=Ma
 const win=n=>rectOf(WIN[n]&&WIN[n].el);
 const plane=()=>{const p=planes.find(q=>!q.air&&!q.app)||planes[0];if(!p)return null;const c=cv.getBoundingClientRect(),q=tr(p.x,p.y);return{left:c.left+q[0]-26,top:c.top+q[1]-26,right:c.left+q[0]+26,bottom:c.top+q[1]+26,width:52,height:52}};
 const col=(n)=>()=>{const w=WIN.STUP&&WIN.STUP.el;if(!w)return null;const ths=[...w.querySelectorAll('th')],k=ths.findIndex(t=>t.textContent===n);if(k<0)return null;const row=w.querySelector('tbody tr'),td=row&&row.children[k],a=rectOf(ths[k]),b=td?rectOf(td):null;const u=union(a,b);return u&&{left:u.left-1,top:u.top-1,right:u.right+1,bottom:u.bottom+1,width:u.width+2,height:u.height+2}};
+const rows=()=>{const w=WIN.STUP&&WIN.STUP.el;return w?[...w.querySelectorAll('tbody tr')]:[]};
+const firstRow=cls=>rows().find(t=>t.classList.contains(cls))||rows()[0];
+const csCell=()=>{const t=firstRow('un');return t?rectOf(t.querySelector('td[data-c="C/S"]')):null};
+const rowRect=()=>rectOf(firstRow('as'));
 const smr=()=>{const c=cv.getBoundingClientRect(),g=$('grb').getBoundingClientRect(),t=Math.max(g.bottom,c.top);return{left:c.left+8,top:t+8,right:c.right-8,bottom:c.bottom-8,width:c.width-16,height:c.bottom-t-16}};
 const STEPS=[
  {t:'Welcome to ESAAsim',x:'ESAAsim is a replica of how EuroScope works. It lets you familiarise yourself with the workflows and tools before you start practical training with a mentor.'},
@@ -29,7 +33,10 @@ const STEPS=[
  {t:'Clearance',r:col('CLR'),x:'Shows OK once the departure clearance has been given.'},
  {t:'Remarks',r:col('RMK'),x:'A free text remark. It is also shown in the radar label.'},
  {t:'Estimated off-block time',r:col('EOBT'),x:'The estimated off-block time (HHMM): when the aircraft expects to leave the stand. The list is sorted by it.'},
- {t:'Simulation clock',r:()=>rectOf($('simc')),x:'The simulation starts paused. Press 1× to run it in real time, or 2× / 4× to speed it up. Aircraft appear on the map at the START times given in the scenario file; the first one is already here.'},
+ {t:'Assuming an aircraft',r:col('C/S'),x:'Aircraft that nobody has assumed yet are shown in grey. Before you can work with an aircraft you have to assume it, which means that you take responsibility for it.'},
+ {t:'Assume an aircraft',r:csCell,until:()=>planes.some(p=>p.own),x:'Try it yourself: left-click the callsign in the strip and choose assume in the small menu that opens.'},
+ {t:'Assumed',r:rowRect,x:'The strip is now white. A white strip means that you have assumed the aircraft; grey strips belong to aircraft you have not assumed.'},
+ {t:'Simulation clock',r:()=>rectOf($('simc')),x:'The simulation clock. It is controlled by the tutorial, so you cannot change it for now. The simulation is paused.'},
  {t:'Top bar',r:()=>rectOf($('tb')),x:'Scenario loads another exercise. Next to it you see your position (ESGG_GND), the UTC clock and the ATIS box. QUICK SET shows or hides the lists, the runway button opens the active runway selector (this exercise uses runway 21).'},
  {t:'Menu bar',r:()=>rectOf($('grb')),x:'The Ground Radar menu bar. SETTINGS has label filters and label fields, WINDOW switches the lists on and off, FUNCTIONS holds extra tools. On the right: alerts, QNH, LVP toggle and the safety nets (green = on, yellow = switched off).'},
  {t:'TAXIOUT and TAKEOFF',r:()=>union(win('TAXIOUT'),win('TAKEOFF')),x:'TAXIOUT shows departures that are taxiing to the runway, TAKEOFF the ones that are lined up or have started their take-off roll. HS shows the holding point they are heading for.'},
@@ -40,19 +47,19 @@ const STEPS=[
  {t:'A typical departure',x:'1. Select the aircraft and read the clearance (CLR in the STUP list).  2. Set the state: FRQ, then S/U (start-up) and S/P (push-back) as you approve them.  3. Taxi it to the holding point (Taxi to): state TXO.  4. Line up (xLU), then take-off (xTO).  5. Hand the aircraft off with Trans in the tag menu. Arrivals: after landing they appear in TAXIIN (TXI); taxi them to the stand and set PRK. Watch for conflicts: the alert triangle in the menu bar turns red.'},
  {t:'You are ready',x:'Press 1× and start working. You can open this tour again any time from the gear menu (Settings > Tutorial).'}];
 let i=-1,ring,card,dim,tm=null;
-const place=()=>{if(i<0)return;const s=STEPS[i],r=s.r&&s.r();
+const place=()=>{if(i<0)return;const s=STEPS[i];if(s.until&&s.until()){i++;render();return}const r=s.r&&s.r();
  if(r){const pad=4;ring.style.cssText=`display:block;left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`}else ring.style.display='none';
  dim.style.display=r?'none':'block';
  const cw=card.offsetWidth,ch=card.offsetHeight,vw=innerWidth,vh=innerHeight,g=14;let x,y;
  if(!r){x=(vw-cw)/2;y=(vh-ch)/2}
  else{const lx=Math.min(Math.max(8,r.left),vw-cw-8),opts=[[lx,r.bottom+g],[lx,r.top-ch-g],[r.right+g,r.top],[r.left-cw-g,r.top]];const ok=opts.find(([a,b])=>a>=8&&b>=8&&a+cw<=vw-8&&b+ch<=vh-8);[x,y]=ok||[vw-cw-16,vh-ch-16]}
  card.style.left=Math.max(8,Math.min(x,vw-cw-8))+'px';card.style.top=Math.max(8,Math.min(y,vh-ch-8))+'px'};
-const render=()=>{const s=STEPS[i],last=i===STEPS.length-1;
+const render=()=>{const s=STEPS[i],last=i===STEPS.length-1;if(s.sim!=null)setSim(s.sim);
  card.innerHTML=`<div class="tut-h"><b>${s.t}</b><span class="tut-n">${i+1} / ${STEPS.length}</span></div><div class="tut-x">${s.x}</div><div class="tut-b"><button data-a="skip">${last?'':'Skip tutorial'}</button><span></span><button data-a="back"${i?'':' disabled'}>Back</button><button data-a="next" class="pri">${last?'Finish':'Next'}</button></div>`;
  card.querySelector('[data-a=skip]').style.visibility=last?'hidden':'';place()};
-const stop=()=>{i=-1;clearInterval(tm);if(ring)ring.remove();if(card)card.remove();if(dim)dim.remove();ring=card=dim=null;document.removeEventListener('keydown',key,true)};
+const stop=()=>{document.body.classList.remove('tut');i=-1;clearInterval(tm);if(ring)ring.remove();if(card)card.remove();if(dim)dim.remove();ring=card=dim=null;document.removeEventListener('keydown',key,true)};
 const key=e=>{if(e.key==='Escape'){stop();e.stopPropagation()}};
 window.startTutorial=()=>{stop();ring=document.createElement('div');ring.className='tut-ring';card=document.createElement('div');card.className='tut-card';dim=document.createElement('div');dim.className='tut-dim';document.body.append(dim,ring,card);
  card.onclick=e=>{const a=e.target.dataset.a;if(!a)return;if(a==='skip')stop();else if(a==='back'){i--;render()}else if(i>=STEPS.length-1)stop();else{i++;render()}};
- card.onpointerdown=e=>e.stopPropagation();document.addEventListener('keydown',key,true);i=0;render();tm=setInterval(place,250)};
+ card.onpointerdown=e=>e.stopPropagation();document.addEventListener('keydown',key,true);document.body.classList.add('tut');setSim(0);i=0;render();tm=setInterval(place,250)};
 })();
