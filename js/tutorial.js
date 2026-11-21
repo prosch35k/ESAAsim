@@ -41,9 +41,8 @@ const STEPS=[
  {t:'Remarks',r:col('RMK'),x:'A free text remark. It is also shown in the radar label.'},
  {t:'Estimated off-block time',r:col('EOBT'),x:'The estimated off-block time (HHMM): when the aircraft expects to leave the stand. The list is sorted by it.'},
  {t:'Assuming an aircraft',r:col('C/S'),x:'Aircraft that have not been assumed are shown in grey or dark green. You assume an aircraft only when it calls up on frequency.'},
- {t:'Aircraft calling',r:rowRect0,audio:'audio/sim01/01-LOT84R.mp3',x:'Listen: LOT84R calls up on frequency.<div class="tut-q">LOT84R: &ldquo;Ground, good evening, Lot eight four romeo, stand one niner, information Yankee onboard, request clearance to Warsaw.&rdquo;</div><div class="tut-pg"><i></i></div>'},
  {t:'Checking the flight plan',x:'When the aircraft calls up, we will issue an IFR clearance. However, we first need to check that the pilot\'s flight plan is correctly filed.'},
- {t:'Open the flight plan',r:adesCell,at:()=>win('STUP'),until:()=>!!fplEl(),x:'Click the aircraft\'s ADES to open the flight plan dialog.'},
+ {t:'Open the flight plan',r:adesCell,at:()=>win('STUP'),gate:1,until:()=>!!fplEl(),x:'Click the aircraft\'s ADES to open the flight plan dialog.'},
  fp('Callsign',fld('Callsign'),'The callsign of the aircraft. Check that it is the same as the pilot used on the frequency.'),
  fp('Flight rules',fq('.bd>span.full'),'The flight rules, IFR or VFR. LOT84R is filed as IFR, so it will get an IFR clearance.'),
  fp('Aircraft data',fld('AP data'),'The aircraft data: the aircraft type, the wake turbulence category and the equipment.'),
@@ -56,10 +55,11 @@ const STEPS=[
  fp('Departure estimate',fld('Dep. EST'),'The estimated departure time.'),
  fp('Actual',fld('Actual'),'The actual departure time. It is empty until the aircraft has departed.'),
  fp('Temporary altitude',fld('Temp alt'),'A temporary altitude that can be assigned to the aircraft. It is empty for now.'),
- fp('Route',fld('Route'),'The filed route. For a departure it starts with the SID and ends at the destination. Check that it is correct for the runway in use.'),
- fp('Waypoints',fq('.wp'),'The waypoints of the route, with the airway, a comment and the estimated time over each waypoint (ETA).'),
+ fp('Route',fld('Route'),'The filed route. Here we check that there are no STARs or SIDs written in the Route field.'),
+ fp('Waypoints',fq('.wp'),'The waypoints of the route, with the airway, a comment and the estimated time over each waypoint (ETA). The Comment column checks, for example, that the filed route follows the airways in the correct direction. However, it does not tell how logical the route actually is.'),
  fp('Remarks',fld('Remarks'),'The remarks of the flight plan, for example the flight rules marker and anything else the pilot has filed.'),
- {t:'Close the dialog',r:fplRect,at:fplRect,until:()=>!fplEl(),x:'The flight plan is correct. Close the dialog with Cancel.'},
+ {t:'Close the dialog',r:fplRect,at:fplRect,gate:1,until:()=>!fplEl(),x:'The flight plan is correct. Close the dialog by clicking Cancel.'},
+ {t:'Aircraft calling',r:rowRect0,audio:'audio/sim01/01-LOT84R.mp3',x:'Listen: LOT84R calls up on frequency.<div class="tut-q">LOT84R: &ldquo;Ground, good evening, Lot eight four romeo, stand one niner, information Yankee onboard, request clearance to Warsaw.&rdquo;</div><div class="tut-pg"><i></i></div>'},
  {t:'Assume an aircraft',r:csCell,at:()=>win('STUP'),until:()=>planes.some(p=>p.own),x:'Try it yourself: left-click the callsign in the strip and choose assume in the small menu that opens.'},
  {t:'Assumed',r:rowRect,x:'The strip is now white. A white strip means that you have assumed the aircraft; grey strips belong to aircraft you have not assumed.'},
  {t:'Simulation clock',r:()=>rectOf($('simc')),x:'The simulation clock. It is controlled by the tutorial, so you cannot change it for now. The simulation is paused.'},
@@ -96,6 +96,7 @@ const place=()=>{if(i<0)return;const s=STEPS[i];if(s.until&&s.until()){i++;rende
 const render=()=>{const s=STEPS[i],last=i===STEPS.length-1;if(s.sim!=null)setSim(s.sim);
  card.innerHTML=`<div class="tut-h"><b>${s.t}</b><span class="tut-n">${i+1} / ${STEPS.length}</span></div><div class="tut-x">${s.x}</div><div class="tut-b"><button data-a="skip">${last?'':'Skip tutorial'}</button><span></span><button data-a="back"${i?'':' disabled'}>Back</button><button data-a="next" class="pri">${last?'Finish':'Next'}</button></div>`;
  card.querySelector('[data-a=skip]').style.visibility=last?'hidden':'';
+ if(s.gate&&s.until&&!s.until())card.querySelector('[data-a=next]').disabled=true;
  if(s.audio){card.querySelectorAll('[data-a=next],[data-a=back]').forEach(b=>b.disabled=true);playAud(i)}else stopAud();place()};
 const stop=()=>{stopAud();document.body.classList.remove('tut');i=-1;clearInterval(tm);if(ring)ring.remove();if(card)card.remove();if(dim)dim.remove();ring=card=dim=null;document.removeEventListener('keydown',key,true)};
 const key=e=>{if(e.key==='Escape'){stop();e.stopPropagation()}};
