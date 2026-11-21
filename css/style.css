@@ -194,3 +194,4 @@ body:not(.host) #tb #sb,body:not(.host) #side{display:none!important}body.host #
 html,html *{cursor:default !important}
 #scb{cursor:default}
 .sdl{width:260px;left:240px;top:80px;z-index:60}.sdl .sb{display:flex;flex-direction:column;gap:6px;padding:12px}.sdl .sb button{padding:6px 10px;background:#e1e1e1;color:#000;border:1px solid #adadad;border-radius:0;font:13px system-ui,sans-serif;text-align:left}.sdl .sb button:hover{background:#cfe4fa;border-color:#0078d7}.sdl .sb hr{border:0;border-top:1px solid #b0b0b0;margin:2px 0}
+.sdl .sl{display:flex;flex-direction:column;gap:6px}
