@@ -9,6 +9,7 @@ const rows=()=>{const w=WIN.STUP&&WIN.STUP.el;return w?[...w.querySelectorAll('t
 const firstRow=cls=>rows().find(t=>t.classList.contains(cls))||rows()[0];
 const csCell=()=>{const t=firstRow('un');return t?rectOf(t.querySelector('td[data-c="C/S"]')):null};
 const rowRect=()=>rectOf(firstRow('as'));
+const rowRect0=()=>rectOf(rows()[0]);
 const smr=()=>{const c=cv.getBoundingClientRect(),g=$('grb').getBoundingClientRect(),t=Math.max(g.bottom,c.top);return{left:c.left+8,top:t+8,right:c.right-8,bottom:c.bottom-8,width:c.width-16,height:c.bottom-t-16}};
 const STEPS=[
  {t:'Welcome to ESAAsim',x:'ESAAsim is a replica of how EuroScope works. It lets you familiarise yourself with the workflows and tools before you start practical training with a mentor.'},
@@ -34,6 +35,7 @@ const STEPS=[
  {t:'Remarks',r:col('RMK'),x:'A free text remark. It is also shown in the radar label.'},
  {t:'Estimated off-block time',r:col('EOBT'),x:'The estimated off-block time (HHMM): when the aircraft expects to leave the stand. The list is sorted by it.'},
  {t:'Assuming an aircraft',r:col('C/S'),x:'Aircraft that have not been assumed are shown in grey or dark green. You assume an aircraft only when it calls up on frequency.'},
+ {t:'Aircraft calling',r:rowRect0,audio:'audio/sim01-01-lot84r-request.mp3',x:'Listen: LOT84R calls up on frequency.<div class="tut-q">LOT84R: &ldquo;Ground, good evening, Lot eight four romeo, stand one niner, information Yankee onboard, request clearance to Warsaw.&rdquo;</div><div class="tut-pg"><i></i></div>'},
  {t:'Assume an aircraft',r:csCell,at:()=>win('STUP'),until:()=>planes.some(p=>p.own),x:'Try it yourself: left-click the callsign in the strip and choose assume in the small menu that opens.'},
  {t:'Assumed',r:rowRect,x:'The strip is now white. A white strip means that you have assumed the aircraft; grey strips belong to aircraft you have not assumed.'},
  {t:'Simulation clock',r:()=>rectOf($('simc')),x:'The simulation clock. It is controlled by the tutorial, so you cannot change it for now. The simulation is paused.'},
@@ -46,7 +48,14 @@ const STEPS=[
  {t:'Giving instructions',r:()=>rectOf($('sb')),x:'The M button opens the manual control menu. Select an aircraft (on the map or in a list), then use the state buttons, Clearance, Taxi to (a holding point or stand), Hold short, Continue and Takeoff. The Taxi route mode lets you click out a route on the taxiways. In the lists, right-click a callsign for Hold short and Taxi to assigned stand.'},
  {t:'A typical departure',x:'1. Select the aircraft and read the clearance (CLR in the STUP list).  2. Set the state: FRQ, then S/U (start-up) and S/P (push-back) as you approve them.  3. Taxi it to the holding point (Taxi to): state TXO.  4. Line up (xLU), then take-off (xTO).  5. Hand the aircraft off with Trans in the tag menu. Arrivals: after landing they appear in TAXIIN (TXI); taxi them to the stand and set PRK. Watch for conflicts: the alert triangle in the menu bar turns red.'},
  {t:'You are ready',x:'Press 1× and start working. You can open this tour again any time from the gear menu (Settings > Tutorial).'}];
-let i=-1,ring,card,dim,tm=null;
+let i=-1,ring,card,dim,tm=null,aud=null;
+const stopAud=()=>{if(aud){aud.onended=aud.onerror=aud.ontimeupdate=null;aud.pause();aud=null}};
+const playAud=n=>{stopAud();const a=aud=new Audio(s_url(STEPS[n].audio));const pg=card.querySelector('.tut-pg i'),unlock=()=>{card.querySelectorAll('[data-a=next],[data-a=back]').forEach(b=>b.disabled=false)};
+ a.ontimeupdate=()=>{if(pg&&a.duration)pg.style.width=Math.min(100,a.currentTime/a.duration*100)+'%'};
+ a.onended=()=>{if(aud===a&&i===n){aud=null;i++;render()}};
+ a.onerror=()=>{unlock()};
+ const pr=a.play();if(pr&&pr.catch)pr.catch(unlock)};
+const s_url=u=>u;
 const place=()=>{if(i<0)return;const s=STEPS[i];if(s.until&&s.until()){i++;render();return}const r=s.r&&s.r();
  if(r){const pad=4;ring.style.cssText=`display:block;left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`}else ring.style.display='none';
  dim.style.display=r?'none':'block';
@@ -62,8 +71,9 @@ const place=()=>{if(i<0)return;const s=STEPS[i];if(s.until&&s.until()){i++;rende
  card.style.left=x+'px';card.style.top=y+'px'};
 const render=()=>{const s=STEPS[i],last=i===STEPS.length-1;if(s.sim!=null)setSim(s.sim);
  card.innerHTML=`<div class="tut-h"><b>${s.t}</b><span class="tut-n">${i+1} / ${STEPS.length}</span></div><div class="tut-x">${s.x}</div><div class="tut-b"><button data-a="skip">${last?'':'Skip tutorial'}</button><span></span><button data-a="back"${i?'':' disabled'}>Back</button><button data-a="next" class="pri">${last?'Finish':'Next'}</button></div>`;
- card.querySelector('[data-a=skip]').style.visibility=last?'hidden':'';place()};
-const stop=()=>{document.body.classList.remove('tut');i=-1;clearInterval(tm);if(ring)ring.remove();if(card)card.remove();if(dim)dim.remove();ring=card=dim=null;document.removeEventListener('keydown',key,true)};
+ card.querySelector('[data-a=skip]').style.visibility=last?'hidden':'';
+ if(s.audio){card.querySelectorAll('[data-a=next],[data-a=back]').forEach(b=>b.disabled=true);playAud(i)}else stopAud();place()};
+const stop=()=>{stopAud();document.body.classList.remove('tut');i=-1;clearInterval(tm);if(ring)ring.remove();if(card)card.remove();if(dim)dim.remove();ring=card=dim=null;document.removeEventListener('keydown',key,true)};
 const key=e=>{if(e.key==='Escape'){stop();e.stopPropagation()}};
 window.startTutorial=()=>{stop();ring=document.createElement('div');ring.className='tut-ring';card=document.createElement('div');card.className='tut-card';dim=document.createElement('div');dim.className='tut-dim';document.body.append(dim,ring,card);
  card.onclick=e=>{const a=e.target.dataset.a;if(!a)return;if(a==='skip')stop();else if(a==='back'){i--;render()}else if(i>=STEPS.length-1)stop();else{i++;render()}};

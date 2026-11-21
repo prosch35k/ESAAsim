@@ -213,3 +213,6 @@ body:not(.host):not(.student) #side.open{display:block!important}
 #ocb{display:none!important}
 /* the sim clock is controlled by the tutorial while it runs */
 body.tut #sbs{pointer-events:none;opacity:.55}
+.tut-q{margin-top:10px;padding-left:10px;border-left:2px solid #6a6a72;color:#e6e6e2;font-style:italic}
+.tut-pg{height:3px;background:#4a4a52;margin-top:12px}.tut-pg i{display:block;height:100%;width:0;background:#ffd400}
+.tut-b button:disabled{opacity:.4}
