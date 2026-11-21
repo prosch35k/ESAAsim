@@ -11,6 +11,8 @@ const csCell=()=>{const t=firstRow('un');return t?rectOf(t.querySelector('td[dat
 const rowRect=()=>rectOf(firstRow('as'));
 const rowRect0=()=>rectOf(rows()[0]);
 const adesCell=()=>{const t=firstRow('un')||rows()[0];return t?rectOf(t.querySelector('td[data-c="ADES"]')):null};
+const clrCell=()=>{const t=firstRow('un')||rows()[0];return t?rectOf(t.querySelector('td[data-c="CLR"]')):null};
+const clEl=()=>document.getElementById('cl'),clRect=()=>rectOf(clEl());
 const fplEl=()=>document.querySelector('.fpl'),fplRect=()=>rectOf(fplEl());
 const fld=n=>()=>{const d=fplEl();if(!d)return null;const l=[...d.querySelectorAll('label')].find(x=>!x.closest('span')&&x.textContent.trim()===n);if(!l)return null;const u=union(rectOf(l),rectOf(l.nextElementSibling));return u&&{left:u.left-2,top:u.top-2,right:u.right+2,bottom:u.bottom+2,width:u.width+4,height:u.height+4}};
 const fq=sel=>()=>{const d=fplEl();return d?rectOf(d.querySelector(sel)):null};
@@ -59,6 +61,9 @@ const STEPS=[
  fp('Waypoints',fq('.wp'),'The waypoints of the route, with the airway, a comment and the estimated time over each waypoint (ETA). The Comment column checks, for example, that the filed route follows the airways in the correct direction. However, it does not tell how logical the route actually is.'),
  fp('Remarks',fld('Remarks'),'The remarks of the flight plan, for example the flight rules marker and anything else the pilot has filed.'),
  {t:'Close the dialog',r:fplRect,at:fplRect,gate:1,until:()=>!fplEl(),x:'The flight plan is correct. Close the dialog by clicking Cancel.'},
+ {t:'Open the clearance',r:clrCell,at:()=>win('STUP'),gate:1,until:()=>!!clEl(),x:'The flight plan is correct. Now click the CLR column of the aircraft to open the DEP CLEARANCE dialog.'},
+ {t:'DEP CLEARANCE',r:clRect,at:clRect,gate:1,until:()=>!clEl(),x:'Opening the dialog fills in the CFL and the ASSR for the aircraft. Close the dialog by clicking Cancel.'},
+ {t:'Flight plan checked',r:()=>union(col('CFL')(),col('ASSR')()),x:'The CFL and the ASSR are now filled in. When they are filled in, it is an indicator that the flight plan has been checked.'},
  {t:'Aircraft calling',r:rowRect0,audio:'audio/sim01/01-LOT84R.mp3',x:'Listen: LOT84R calls up on frequency.<div class="tut-q">LOT84R: &ldquo;Ground, good evening, Lot eight four romeo, stand one niner, information Yankee onboard, request clearance to Warsaw.&rdquo;</div><div class="tut-pg"><i></i></div>'},
  {t:'Assume an aircraft',r:csCell,at:()=>win('STUP'),until:()=>planes.some(p=>p.own),x:'Try it yourself: left-click the callsign in the strip and choose assume in the small menu that opens.'},
  {t:'Assumed',r:rowRect,x:'The strip is now white. A white strip means that you have assumed the aircraft; grey strips belong to aircraft you have not assumed.'},
@@ -88,7 +93,7 @@ const place=()=>{if(i<0)return;const s=STEPS[i];if(s.until&&s.until()){i++;rende
  else{const pr=(s.at&&s.at())||r,lx=Math.min(Math.max(8,r.left),vw-cw-8),opts=s.at&&pr?[[pr.right+g,pr.top],[lx,pr.bottom+g]]:[[lx,r.bottom+g],[lx,r.top-ch-g],[r.right+g,r.top],[r.left-cw-g,r.top]];const ok=opts.find(([a,b])=>a>=8&&b>=8&&a+cw<=vw-8&&b+ch<=vh-8);[x,y]=ok||[vw-cw-16,vh-ch-16]}
  x=Math.max(8,Math.min(x,vw-cw-8));y=Math.max(8,Math.min(y,vh-ch-8));
  /* an open menu (assume menu, state menu, ...) is never covered: the card snaps to its right side, or goes below/above it when there is no room */
- for(const m of document.querySelectorAll('.ap,.tm,#pm')){const q=m.getBoundingClientRect();if(!q.width)continue;
+ for(const m of document.querySelectorAll('.ap,.tm,#pm,#cl')){const q=m.getBoundingClientRect();if(!q.width)continue;
   if(q.right+g+cw<=vw-8){x=q.right+g;y=Math.max(8,Math.min(q.top,vh-ch-8))}
   else if(x<q.right+6&&x+cw>q.left-6&&y<q.bottom+6&&y+ch>q.top-6){if(q.bottom+g+ch<=vh-8)y=q.bottom+g;else if(q.top-g-ch>=8)y=q.top-g-ch;else x=Math.max(8,q.left-g-cw)}
   break}
