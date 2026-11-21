@@ -92,7 +92,7 @@ const playAud=n=>{stopAud();const a=aud=new Audio(s_url(STEPS[n].audio));const p
  const pr=a.play();if(pr&&pr.catch)pr.catch(unlock)};
 const s_url=u=>u;
 const place=()=>{if(i<0)return;const s=STEPS[i];if(s.until&&s.until()){i++;render();return}const r=s.r&&s.r();
- if(r){const pad=4;ring.style.cssText=`display:block;left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`}else ring.style.display='none';
+ if(r){const pad=4;ring.style.cssText=`display:block;left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`;let z=150,e=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);while(e&&e!==document.body){const q=+getComputedStyle(e).zIndex;if(q>=z&&q<480)z=q+1;e=e.parentElement}ring.style.zIndex=z}else ring.style.display='none';
  dim.style.display=r?'none':'block';
  const cw=card.offsetWidth,ch=card.offsetHeight,vw=innerWidth,vh=innerHeight,g=14;let x,y;
  if(!r){x=(vw-cw)/2;y=(vh-ch)/2}
