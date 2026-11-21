@@ -209,3 +209,5 @@ html,html *{cursor:default !important}
 body:not(.host):not(.student) #simc{display:flex!important}
 body:not(.host):not(.student) #tb #sb{display:flex!important}
 body:not(.host):not(.student) #side.open{display:block!important}
+/* controller list button is hidden: ESGG_TWR and ESGG_E_APP go online when a scenario is loaded */
+#ocb{display:none!important}

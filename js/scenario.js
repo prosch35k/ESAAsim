@@ -14,6 +14,6 @@
   $('map').appendChild(el);fill();live();$('sdx').onclick=close;
   el.querySelector('.sb').onclick=ev=>{const x=ev.target.closest('button');if(!x)return;
    if(x.dataset.f){sbf.click();close();return}
-   importSweatbox(window.SCENARIOS[x.dataset.s]);close();if(x.dataset.s==='ESGG S1 SIM01'&&window.startTutorial)startTutorial()};
+   importSweatbox(window.SCENARIOS[x.dataset.s]);CTRL.forEach(q=>q.on=true);list();close();if(x.dataset.s==='ESGG S1 SIM01'&&window.startTutorial)startTutorial()};
   const th=el.querySelector('.th');let dr=null;th.onpointerdown=ev=>{if(ev.target.closest('span'))return;th.setPointerCapture(ev.pointerId);dr=[ev.clientX-el.offsetLeft,ev.clientY-el.offsetTop]};th.onpointermove=ev=>{if(dr){el.style.left=Math.max(0,ev.clientX-dr[0])+'px';el.style.top=Math.max(0,ev.clientY-dr[1])+'px'}};th.onpointerup=()=>{dr=null}};
  addEventListener('pointerdown',ev=>{if(el&&!ev.target.closest('.sdl,#scb'))close()})}
